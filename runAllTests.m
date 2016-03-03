@@ -8,7 +8,11 @@ import matlab.unittest.plugins.TAPPlugin;
 import matlab.unittest.plugins.ToFile;
 
 try
-    %suite = TestSuite.fromPackage('tests','IncludingSubpackages',true);
+    % Remove any previous TAP file, this avoids errors on jenkins
+    if exist('testResults.tap','file')
+        delete('testResults.tap')
+    end    
+    
     % Run all Tests from folder tests
     suite = TestSuite.fromFolder('tests');
     % Create a typical runner with text output

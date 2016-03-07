@@ -78,7 +78,7 @@ fprintf('Accuracy custom nn: %d matlab knn(1): %d\n',accuracy,accuracyMatlab);
 
 %% Test with KNearest Neighbor
 imgTestIdx = 1; % With 99 predicted right
-K = 7;
+K = 8;
 classifier = KNearestNeighbor();
 X_train = double(cell2mat(table_cifar_10_train.X));
 Y_train = double(table_cifar_10_train.Y);
@@ -105,7 +105,7 @@ fprintf('Using matlab knn(k=7): desc:%s(%d)\n',predictedDesc,maxscore_matlab);
 countCorrect = 0;
 countCorrectMatlab = 0;
 for idxTest=1:500    
-    [maxscore, ~, ~] = classifier.predict(X_test(idxTest,:),1,K);    
+    [maxscore, ~, ~] = classifier.predict(X_test(idxTest,:),2,K);    
     maxscore_matlab = predict(Mdl,X_test(idxTest,:));
     if (Y_test(idxTest) == maxscore)
         countCorrect = countCorrect + 1;
@@ -117,6 +117,10 @@ end
 accuracy = (countCorrect)/500;
 accuracyMatlab = (countCorrectMatlab)/500;
 fprintf('Accuracy custom knn(7): %d matlab knn(7): %d\n',accuracy,accuracyMatlab);
+
+%% Cross validation
+num_folds = 5;
+k_choices = [1, 3, 5, 8, 10, 12, 15, 20, 50, 100];
 
 
 

@@ -74,10 +74,10 @@ classdef PartitionDataSet < handle
             for idxGroup=1:numK
                 if (stIndex+numItemsGroup) < obj.numObservations
                     obj.groupData_K_X{idxGroup} = obj.original_train_X(stIndex:stIndex+numItemsGroup-1,:);
-                    obj.groupData_K_Y{idxGroup} = obj.original_train_X(stIndex:stIndex+numItemsGroup-1,:);
+                    obj.groupData_K_Y{idxGroup} = obj.original_train_Y(stIndex:stIndex+numItemsGroup-1,:);
                 else
                     obj.groupData_K_X{idxGroup} = obj.original_train_X(stIndex:end,:);
-                    obj.groupData_K_Y{idxGroup} = obj.original_train_X(stIndex:end,:);
+                    obj.groupData_K_Y{idxGroup} = obj.original_train_Y(stIndex:end,:);
                 end
                 stIndex = 1 + (idxGroup*numItemsGroup);
             end            
@@ -123,18 +123,22 @@ classdef PartitionDataSet < handle
                     validation_index = numPart;
                     % Select all the others groups excluding the current
                     % fold
-                    trainning_indexes = find(groups ~= validation_index);
+                    trainning_indexes = find(groups ~= validation_index);                    
                     
                     % Return the validation set
                     val_X = obj.groupData_K_X{validation_index};
                     val_Y = obj.groupData_K_Y{validation_index};
                     
                     % Return the trainning set
+                    trainning_cell_groups_X = cell(length(trainning_indexes));
+                    trainning_cell_groups_Y = cell(length(trainning_indexes));
                     for idxGroup=1:length(trainning_indexes)
-                       group_idx = trainning_indexes(idxGroup);
-                       train_X = obj.groupData_K_X{group_idx};
-                       train_Y = obj.groupData_K_Y{group_idx};
+                       group_idx = trainning_indexes(idxGroup);        
+                       trainning_cell_groups_X{idxGroup} = obj.groupData_K_X{group_idx};
+                       trainning_cell_groups_Y{idxGroup} = obj.groupData_K_Y{group_idx};
                     end
+                    train_X = cell2mat(trainning_cell_groups_X);
+                    train_Y = cell2mat(trainning_cell_groups_Y);
                     
                 end
                 if obj.typeOfPartitioning == 2

@@ -21,10 +21,21 @@ validation = cell(result{2});
 training_from_python = cellfun(@double,training)';
 validation_from_python = cellfun(@double,validation)';
 
+%% Test 3: Compare sizes
+someDataset = [1:1:30]';
+someDatasetX = [someDataset someDataset];
+someDatasetY = someDataset;
+someDataSetY_Python = py.list(someDatasetY');
+kPart = cvpartition(someDatasetY,'k',5);
+kPart.disp;
+instPart = PartitionDataSet(someDatasetX,someDatasetY);
+instPart.doKPartitioning(5,0);
+assert (kPart.NumObservations == instPart.getNumObservations);
+assert (kPart.NumTestSets == instPart.getNumTestSets);
+assert (kPart.TrainSize(1) == instPart.getTrainSize);
+assert (kPart.TestSize(1) == instPart.getTestSize);
 
-%% Test 3: K(5) partitioning
-% Check if has python support
-rng(1);
+%% Test 4: K(5) partitioning
 someDataset = [1:1:30]';
 someDatasetX = [someDataset someDataset];
 someDatasetY = someDataset;

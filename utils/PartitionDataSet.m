@@ -12,12 +12,13 @@ classdef PartitionDataSet < handle
         original_train_Y
         numTestSets
         numObservations
+        testSize
+        trainSize
         partitioned_train_X
         partitioned_train_Y
         partitioned_val_X
-        partitioned_val_Y
-        groupData_K_X
-        groupData_K_Y
+        partitioned_val_Y        
+        index_transform;
     end
     
     methods ( Access = 'private')
@@ -38,14 +39,12 @@ classdef PartitionDataSet < handle
             obj.partitioned_train_X = [];
             obj.partitioned_train_Y = [];
             obj.partitioned_val_X = [];
-            obj.partitioned_val_Y = [];
-            obj.groupData_K_X = {};
-            obj.groupData_K_Y = {};
+            obj.partitioned_val_Y = [];            
         end
         
         % Do K partitioning
-        % In k-fold cross-validation, the original sample is randomly 
-        % partitioned into k equal sized subsamples. Of the k subsamples, 
+        % In k-fold partitioning, the original samples are divided
+        % into k equal sized subsamples. Of the k subsamples, 
         % a single subsample is retained as the validation data for testing
         % the model, and the remaining k − 1 subsamples are used as 
         % training data.
@@ -65,22 +64,12 @@ classdef PartitionDataSet < handle
             end
             
             % Calculate train/validation sizes            
-            testSize = ceil(obj.numObservations/numK);
-            trainSize = obj.numObservations - testSize;
+            obj.testSize = ceil(obj.numObservations/numK);
+            obj.trainSize = obj.numObservations - obj.testSize;
             
-            % Create 5 groups
-            numItemsGroup = testSize;            
-            stIndex = 1;
-            for idxGroup=1:numK
-                if (stIndex+numItemsGroup) < obj.numObservations
-                    obj.groupData_K_X{idxGroup} = obj.original_train_X(stIndex:stIndex+numItemsGroup-1,:);
-                    obj.groupData_K_Y{idxGroup} = obj.original_train_Y(stIndex:stIndex+numItemsGroup-1,:);
-                else
-                    obj.groupData_K_X{idxGroup} = obj.original_train_X(stIndex:end,:);
-                    obj.groupData_K_Y{idxGroup} = obj.original_train_Y(stIndex:end,:);
-                end
-                stIndex = 1 + (idxGroup*numItemsGroup);
-            end            
+            % Calculate a transform that will be used to decide which
+            % samples will populate each group
+            obj.index_transform = 1 + mod((1:obj.numObservations)',numK);                        
         end
         
         % Do old partitioning just separating some part of the data for
@@ -91,11 +80,12 @@ classdef PartitionDataSet < handle
             if (doShuffle)
                 obj.ShuffleData();
             end
-            testSize = floor((valPercentage/100) * obj.numObservations);
-            obj.partitioned_train_X = obj.original_train_X(1:end-testSize,:);
-            obj.partitioned_train_Y = obj.original_train_Y(1:end-testSize,:);
-            obj.partitioned_val_X = obj.original_train_X(obj.numObservations-testSize+1:end,:);
-            obj.partitioned_val_Y = obj.original_train_Y(obj.numObservations-testSize+1:end,:);
+            obj.testSize = floor((valPercentage/100) * obj.numObservations);
+            obj.trainSize = obj.numObservations - obj.testSize;
+            obj.partitioned_train_X = obj.original_train_X(1:end-obj.testSize,:);
+            obj.partitioned_train_Y = obj.original_train_Y(1:end-obj.testSize,:);
+            obj.partitioned_val_X = obj.original_train_X(obj.numObservations-obj.testSize+1:end,:);
+            obj.partitioned_val_Y = obj.original_train_Y(obj.numObservations-obj.testSize+1:end,:);
         end
         
         function num = getNumTestSets(obj)
@@ -106,6 +96,14 @@ classdef PartitionDataSet < handle
             num = obj.numObservations;
         end
         
+        function num = getTestSize(obj)
+            num = obj.testSize;
+        end
+        
+        function num = getTrainSize(obj)
+            num = obj.trainSize;
+        end
+        
         function [train_X, train_Y, val_X, val_Y] = getDataset(obj,numPart)
             train_X = [];
             train_Y = [];
@@ -113,32 +111,19 @@ classdef PartitionDataSet < handle
             val_Y = [];
             if ~isempty( obj.typeOfPartitioning )
                 if obj.typeOfPartitioning == 1
-                    % K Partitioning
-                    K = obj.numTestSets;
-                    % Now we have K groups (ex:5) and we want the dataset
-                    % for the first fold, so on this case the validation
-                    % set will be the first group and the trainning set all
-                    % the others
-                    groups = [1:1:K];
-                    validation_index = numPart;
-                    % Select all the others groups excluding the current
-                    % fold
-                    trainning_indexes = find(groups ~= validation_index);                    
+                    % K Partitioning                    
                     
-                    % Return the validation set
-                    val_X = obj.groupData_K_X{validation_index};
-                    val_Y = obj.groupData_K_Y{validation_index};
+                    % Calculate the indexes for a particular fold
+                    train_index_mask = obj.index_transform ~= numPart; 
+                    val_index_mask = obj.index_transform == numPart;                                         
+                    
+                    % Return the validation set                    
+                    val_X = obj.original_train_X(val_index_mask,:);
+                    val_Y = obj.original_train_Y(val_index_mask);
                     
                     % Return the trainning set
-                    trainning_cell_groups_X = cell(length(trainning_indexes));
-                    trainning_cell_groups_Y = cell(length(trainning_indexes));
-                    for idxGroup=1:length(trainning_indexes)
-                       group_idx = trainning_indexes(idxGroup);        
-                       trainning_cell_groups_X{idxGroup} = obj.groupData_K_X{group_idx};
-                       trainning_cell_groups_Y{idxGroup} = obj.groupData_K_Y{group_idx};
-                    end
-                    train_X = cell2mat(trainning_cell_groups_X);
-                    train_Y = cell2mat(trainning_cell_groups_Y);
+                    train_X = obj.original_train_X(train_index_mask,:);                    
+                    train_Y = obj.original_train_Y(train_index_mask);
                     
                 end
                 if obj.typeOfPartitioning == 2
@@ -152,7 +137,6 @@ classdef PartitionDataSet < handle
                 end
             end
         end
-    end
-    
+    end    
 end
 

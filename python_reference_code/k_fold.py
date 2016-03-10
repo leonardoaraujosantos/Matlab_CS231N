@@ -1,3 +1,6 @@
+import random
+import numpy as np
+
 # Reference
 # http://code.activestate.com/recipes/521906-k-fold-cross-validation-partition/
 # http://stats.stackexchange.com/questions/95797/how-to-split-the-dataset-for-cross-validation-learning-curve-and-final-evaluat
@@ -27,3 +30,15 @@ def test_k_fold(X,K):
 # X = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
 # for training, validation in k_fold_cross_validation(X, K=5):
 #     for x in X: assert (x in training) ^ (x in validation), x
+
+def k_fold_partition(X, K, num_folds = 5):
+    X_train_folds = []
+    X_train_folds = np.array_split(X, num_folds)
+    for j in range(num_folds):
+        X_train_new = []
+        for j in range(num_folds):
+            if i != j:
+                X_train_new.extend(X_train_folds[j])
+        X_train_new = np.array(X_train_new)
+        
+    return X_train_new

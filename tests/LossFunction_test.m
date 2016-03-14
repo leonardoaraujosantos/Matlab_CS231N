@@ -1,4 +1,21 @@
+%% Loss Function 
+% The loss function quantifies our unhappiness with predictions on the 
+% training set
+% A loss function or cost function is a function that maps an event or 
+% values of one or more variables onto a real number intuitively 
+% representing some "cost" associated with the event. 
+% An optimization problem seeks to minimize a loss function.
+% 
+% <</home/leo/work/Matlab_CS231N/docs/imgs/LossFuncPlot.png>>
+%
+%
+% $L =  { \frac{1}{N} \sum_i L_i } + { \lambda R(W) }\\$
+%
+% More info at:
+% http://cs231n.github.io/linear-classify/#loss
+
 %% Test 1: Test SoftMax
+% $L_i = -\log(\frac{e^{f_{y_i}}}{ \sum_j e^{f_j} })$
 % 
 % <</home/leo/work/Matlab_CS231N/docs/imgs/SVM_vs_Softmax.png>>
 %
@@ -23,6 +40,7 @@ fprintf('Error is %d\n',error);
 assert (error < 0.001);
 
 %% Test 2: Test SVM (hinge loss)
+% $L_i = \sum_{j\neq y_i} \max(0, s_j - s_{y_i} + \Delta)$
 % 
 % <</home/leo/work/Matlab_CS231N/docs/imgs/SVM_vs_Softmax.png>>
 %

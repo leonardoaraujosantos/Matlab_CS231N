@@ -5,6 +5,7 @@ classdef SoftMaxLoss < BaseLossFunction
     % Unlike the SVM which computes uncalibrated and not easy to interpret
     % scores for all classes, the Softmax classifier allows us to compute
     % "probabilities" for all labels.
+    % https://github.com/kyunghyuncho/deepmat/blob/master/softmax.m
     methods
         % Here the smalles value will be zero (Perfect, no loss) and the
         % biggest value is 1 (100%)

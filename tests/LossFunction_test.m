@@ -21,6 +21,8 @@
 %
 % For more information on publish tags, refer to
 % http://uk.mathworks.com/help/matlab/matlab_prog/marking-up-matlab-comments-for-publishing.html
+% Also for generating latex you can use this command:
+% http://uk.mathworks.com/help/symbolic/latex.html
 scores = [-2.85, 0.86, 0.28];
 % Correct class should be 3
 idx_correct = 3;

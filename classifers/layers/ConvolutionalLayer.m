@@ -14,6 +14,7 @@ classdef ConvolutionalLayer < BaseLayer
         numFilters
         stepStride
         numPad
+        activationType
     end
     
     methods (Access = 'public')
@@ -24,6 +25,7 @@ classdef ConvolutionalLayer < BaseLayer
             obj.numFilters = pFilters;
             obj.stepStride = pStride;
             obj.numPad = pPad;
+            obj.activationType = pActType;
             
             switch pActType
                 case ActivationType.Sigmoid
@@ -71,6 +73,13 @@ classdef ConvolutionalLayer < BaseLayer
         
         function [actFunc] = getActivation(obj)
             actFunc = obj.activationObject;
+        end
+         
+        function [descText] = getDescription(obj)
+            [~, names] = enumeration('ActivationType');            
+            descText = sprintf('CONV ksize=%d num_filters=%d stride=%d num_pad=%d Activation=%s\n',...
+                obj.kernelSize,obj.numFilters,obj.stepStride,...
+                obj.numPad,names{obj.activationType});
         end
     end
 end

@@ -1,4 +1,4 @@
-classdef PoolingLayerLayer < BaseLayer
+classdef PoolingLayer < BaseLayer
     %FULLYCONNECTEDLAYER Define the pooling layer
     % For more information refer here:
     % http://cs231n.github.io/convolutional-networks/
@@ -14,7 +14,7 @@ classdef PoolingLayerLayer < BaseLayer
     end
     
     methods (Access = 'public')
-        function obj = PoolingLayerLayer(pKernelSize, pStride, pPoolType)
+        function obj = PoolingLayer(pKernelSize, pStride, pPoolType)
             % Initialize type
             obj.typeLayer = LayerType.Pooling;
             obj.kernelSize = pKernelSize;
@@ -48,6 +48,13 @@ classdef PoolingLayerLayer < BaseLayer
         
         function [numN] = getPoolingType(obj)
             numN = obj.poolingType;
+        end
+        
+        function [descText] = getDescription(obj)
+            [~, names] = enumeration('PoolingType');            
+            descText = sprintf('POOL ksize=%d stride=%d Type=%s\n',...
+                obj.kernelSize,...
+                obj.stepStride,names{obj.poolingType});
         end
     end
 end

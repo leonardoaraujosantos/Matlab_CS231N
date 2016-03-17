@@ -11,6 +11,7 @@ classdef FullyConnectedLayer < BaseLayer
     properties (Access = 'private')        
         numberNeurons
         activationObject
+        activationType
     end
     
     methods (Access = 'public')
@@ -18,6 +19,7 @@ classdef FullyConnectedLayer < BaseLayer
             % Initialize type
             obj.typeLayer = LayerType.FullyConnected;
             obj.numberNeurons = pNumNeurons;
+            obj.activationType = pActType;
             
             switch pActType
                 case ActivationType.Sigmoid
@@ -54,7 +56,11 @@ classdef FullyConnectedLayer < BaseLayer
         function [actFunc] = getActivation(obj)
             actFunc = obj.activationObject;
         end
-    end
-    
+        
+        function [descText] = getDescription(obj)
+            [~, names] = enumeration('ActivationType');
+            descText = sprintf('FC num_neurons=%d Activation=%s\n',obj.numberNeurons,names{obj.activationType});
+        end
+    end    
 end
 

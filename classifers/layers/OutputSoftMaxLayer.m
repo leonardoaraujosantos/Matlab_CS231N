@@ -37,6 +37,10 @@ classdef OutputSoftMaxLayer < BaseLayer
         function [loss] = getLossFunction(obj)
             loss = obj.lossFunction;
         end
+        
+        function [descText] = getDescription(obj)
+            descText = sprintf('OUTPUT_SOFTMAX num_classes=%d\n',obj.numClasses);
+        end
     end    
 end
 

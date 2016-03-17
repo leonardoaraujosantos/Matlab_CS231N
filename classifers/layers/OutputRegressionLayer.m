@@ -36,6 +36,10 @@ classdef OutputRegressionLayer < BaseLayer
         function [numN] = getNumberofNeurons(obj)
             numN = obj.numberNeurons;
         end
+        
+        function [descText] = getDescription(obj)            
+            descText = sprintf('REGRESSION num_neurons=%d Activation=%s\n',obj.numberNeurons);
+        end
     end    
 end
 

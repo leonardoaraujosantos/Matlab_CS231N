@@ -6,6 +6,7 @@ classdef OutputSVMLayer < BaseLayer
     
     properties (Access = 'private')        
         numClasses
+        svmDelta
         lossFunction
     end
         
@@ -15,6 +16,7 @@ classdef OutputSVMLayer < BaseLayer
             obj.typeLayer = LayerType.OutputSVM;
             obj.numClasses = pNumClasses;     
             obj.lossFunction = SVMLoss(svmDelta);
+            obj.svmDelta = svmDelta;
         end
                
         function [result] = feedForward(obj, inputs)
@@ -36,6 +38,10 @@ classdef OutputSVMLayer < BaseLayer
         
         function [loss] = getLossFunction(obj)
             loss = obj.lossFunction;
+        end
+        
+        function [descText] = getDescription(obj)
+            descText = sprintf('OUTPUT_SVM num_classes=%d SVM_delta=%d\n',obj.numClasses, obj.svmDelta);
         end
     end    
 end

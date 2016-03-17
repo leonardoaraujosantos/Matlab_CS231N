@@ -32,7 +32,10 @@ classdef (Abstract) BaseLayer < handle
         [result] = getData(obj);
         
         % Return the layer type
-        [type] = getType(obj);        
+        [type] = getType(obj); 
+        
+        % Get text description
+        [descText] = getDescription(obj);
     end
     
 end

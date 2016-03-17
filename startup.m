@@ -8,6 +8,7 @@ addpath(genpath(fullfile(curdir, 'tests')));
 addpath(genpath(fullfile(curdir, 'math_utils')));
 addpath(genpath(fullfile(curdir, 'assignements')));
 addpath(genpath(fullfile(curdir, 'classifers')));
+addpath(genpath(fullfile(curdir, 'solvers')));
 
 % Add python folder
 addpath(genpath(fullfile(curdir, 'python_reference_code')));

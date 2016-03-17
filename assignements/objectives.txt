@@ -1,0 +1,27 @@
+Assignement 1 objectives:
+1) Understand the basic Image Classification pipeline and the data-driven approach (train/predict stages)
+2) Understand the train/val/test splits and the use of validation data for hyperparameter tuning.
+3) Develop proficiency in writing efficient vectorized code with numpy
+4) Implement and apply a k-Nearest Neighbor (kNN) classifier
+5) Implement and apply a Multiclass Support Vector Machine (SVM) classifier
+6) Implement and apply a Softmax classifier
+7) Implement and apply a Two layer neural network classifier
+8) Understand the differences and tradeoffs between these classifiers
+9) Get a basic understanding of performance improvements from using higher-level representations than raw pixels (e.g. color histograms, Histogram of Gradient (HOG) features)
+
+Assignement 2 objectives:
+1) Understand Neural Networks and how they are arranged in layered architectures
+2) Understand and be able to implement (vectorized) backpropagation
+3) Implement various update rules used to optimize Neural Networks
+4) Implement batch normalization for training deep networks
+5) Implement dropout to regularize networks
+6) Effectively cross-validate and find the best hyperparameters for Neural Network architecture
+7) Understand the architecture of Convolutional Neural Networks and train gain experience with training these models on data
+
+Assignement 3 objectives:
+1) Understand the architecture of recurrent neural networks (RNNs) and how they operate on sequences by sharing weights over time
+2) Understand the difference between vanilla RNNs and Long-Short Term Memory (LSTM) RNNs
+3) Understand how to sample from an RNN at test-time
+4) Understand how to combine convolutional neural nets and recurrent nets to implement an image captioning system
+5) Understand how a trained convolutional network can be used to compute gradients with respect to the input image
+6) Implement and different applications of image gradients, including saliency maps, fooling images, class visualizations, feature inversion, and DeepDream.

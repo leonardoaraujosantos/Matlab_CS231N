@@ -1,23 +1,29 @@
-classdef FullyConnectedLayer < BaseLayer
-    %FULLYCONNECTEDLAYER Define the fully connected layer
+classdef ConvolutionalLayer < BaseLayer
+    %FULLYCONNECTEDLAYER Define the convolutional layer
     %   Actually this is the normal hidden layer on Neural Networks
     % More information:
     % http://www.slideshare.net/deview/251-implementing-deep-learning-using-cu-dnn
     
     properties
-        typeLayer        
+        typeLayer
     end
     
-    properties (Access = 'private')        
-        numberNeurons
+    properties (Access = 'private')
         activationObject
+        kernelSize
+        numFilters
+        stepStride
+        numPad
     end
     
     methods (Access = 'public')
-        function obj = FullyConnectedLayer(pNumNeurons, pActType)
+        function obj = ConvolutionalLayer(pKernelSize, pFilters, pStride, pPad, pActType)
             % Initialize type
-            obj.typeLayer = LayerType.FullyConnected;
-            obj.numberNeurons = pNumNeurons;
+            obj.typeLayer = LayerType.Convolutional;
+            obj.kernelSize = pKernelSize;
+            obj.numFilters = pFilters;
+            obj.stepStride = pStride;
+            obj.numPad = pPad;
             
             switch pActType
                 case ActivationType.Sigmoid
@@ -47,14 +53,25 @@ classdef FullyConnectedLayer < BaseLayer
             type = obj.typeLayer;
         end
         
-        function [numN] = getNumberofNeurons(obj)
-            numN = obj.numberNeurons;
+        function [numN] = getKernelSize(obj)
+            numN = obj.kernelSize;
+        end
+        
+        function [numN] = getNumberOfFilters(obj)
+            numN = obj.numFilters;
+        end
+        
+        function [numN] = getStride(obj)
+            numN = obj.stepStride;
+        end
+        
+        function [numN] = getPad(obj)
+            numN = obj.numPad;
         end
         
         function [actFunc] = getActivation(obj)
             actFunc = obj.activationObject;
         end
     end
-    
 end
 

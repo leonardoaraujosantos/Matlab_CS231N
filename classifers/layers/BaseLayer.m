@@ -11,9 +11,27 @@ classdef (Abstract) BaseLayer < handle
     end
     
     methods(Abstract, Access = public)
-        [result] = forward(obj);
-        [gradient] = backward(obj);
+        [result] = feedForward(obj, inputs);
+        
+        % For the output layer
+        % 1. Calculates the difference between output value and target value
+        % 2. Get the derivative (slope) of the activation function in 
+        %    order to determine how much the weights need to change
+        % 3. update the weights for every node based on the learning rate 
+        %    and activation function derivative
+        
+        %  For the hidden layer
+        % 1. Calculate the sum of the strength of each output link 
+        %    multiplied by how much the target node has to change
+        % 2. Get derivative to determine how much weights need to change
+        % 3. Change the weights based on learning rate and derivative
+        [gradient] = backPropagate(obj, targets);
+        
+        % Return any other data (ie: Activations) different from the normal
+        % feedForward result
         [result] = getData(obj);
+        
+        % Return the layer type
         [type] = getType(obj);        
     end
     

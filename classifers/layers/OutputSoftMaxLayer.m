@@ -17,11 +17,11 @@ classdef OutputSoftMaxLayer < BaseLayer
             obj.lossFunction = SoftMaxLoss();
         end
         
-        function [result] = forward(obj)
+        function [result] = feedForward(obj, inputs)
             result = [];
         end        
         
-        function [gradient] = backward(obj)
+        function [gradient] = backPropagate(obj, targets)
             gradient = [];
         end
         

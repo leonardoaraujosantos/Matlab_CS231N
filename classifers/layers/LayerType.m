@@ -5,7 +5,7 @@ classdef LayerType < uint32
       OutputSoftMax  (1)
       OutputSVM  (2)
       FullyConnected (3)
-      Regression (4)
+      OutputRegression (4)
       Pooling (5)
       Convolutional (6)
    end

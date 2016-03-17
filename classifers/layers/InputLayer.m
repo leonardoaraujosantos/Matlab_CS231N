@@ -26,12 +26,12 @@ classdef InputLayer < BaseLayer
         end
         
         % There is no need to forward the input layer (Use getData)
-        function [result] = forward(obj)
+        function [result] = feedForward(obj, inputs)
             result = [];
         end
         
         % There is no need to backpropagate the input layer
-        function [gradient] = backward(obj)
+        function [gradient] = backPropagate(obj, targets)
             gradient = [];
         end
         

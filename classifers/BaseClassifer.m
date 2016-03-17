@@ -1,12 +1,8 @@
 classdef (Abstract) BaseClassifer < handle
-    % Base class for all classifiers    
-    
-    properties (Abstract)
-        internal_model
-    end
+    % Base class for all classifiers            
     
     methods(Abstract, Access = public)
-        [maxscore, scores, timeElapsed] = predict;
+        [maxscore, scores, timeElapsed] = predict(obj);
         
         % Video tutorials about gradient-descent, mini-batch
         % https://www.youtube.com/watch?v=GvHmwBc9N30
@@ -15,7 +11,7 @@ classdef (Abstract) BaseClassifer < handle
         % https://class.coursera.org/ml-003/lecture/106
         % Andrew Ng quote....
         % It's not about having the better algorithm, is who has more data
-        [timeElapsed] = train;
+        [timeElapsed] = train(obj);
     end
     
 end

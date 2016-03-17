@@ -2,8 +2,7 @@ classdef (Sealed) NearestNeighbor < BaseClassifer
     %NEARESTNEIGHBOR Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties
-        internal_model;
+    properties        
         X_train;
         Y_train;
     end
@@ -15,8 +14,7 @@ classdef (Sealed) NearestNeighbor < BaseClassifer
     methods (Access = 'public')
         function obj = NearestNeighbor()
             % Nothing is learned on this classifer we just dump all
-            % trainning data inside
-            obj.internal_model = [];
+            % trainning data inside            
         end
         
         function [timeElapsed] = train(obj, X_vec, Y_vec)

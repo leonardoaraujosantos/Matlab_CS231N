@@ -8,7 +8,7 @@ Y = [ 0; 1; 1; 1];
 % Create the DNN strucutre 
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',1,'cols',2,'depth',1);
-layers <= struct('type',LayerType.FullyConnected,'numNeurons',10,'ActivationType',ActivationType.Relu);
+layers <= struct('type',LayerType.FullyConnected,'numNeurons',4,'ActivationType',ActivationType.Relu);
 layers <= struct('type',LayerType.OutputSoftMax,'numClasses',2);
 layers.showStructure();
 nn = DeepNeuralNetwork(layers);

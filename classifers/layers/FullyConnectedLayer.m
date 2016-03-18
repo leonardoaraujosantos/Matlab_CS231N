@@ -12,6 +12,8 @@ classdef FullyConnectedLayer < BaseLayer
         numberNeurons
         activationObject
         activationType
+        weightsMatrix
+        biasMatrix
     end
     
     methods (Access = 'public')
@@ -20,6 +22,15 @@ classdef FullyConnectedLayer < BaseLayer
             obj.typeLayer = LayerType.FullyConnected;
             obj.numberNeurons = pNumNeurons;
             obj.activationType = pActType;
+            
+            % We have one bias unit per neuron
+            obj.biasMatrix = single(ones(pNumNeurons,1));
+            
+            % The number of weights per/layer depends on the number of
+            % neurons on the previous layer (NumNeuronsL1 * NumNeuronsL2)
+            % But the number of weights per/neron on the layer is exactly
+            % the number of neurons on the previous layer
+            obj.weightsMatrix = [];
             
             switch pActType
                 case ActivationType.Sigmoid

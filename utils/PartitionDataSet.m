@@ -5,7 +5,7 @@ classdef PartitionDataSet < handle
     % https://en.wikipedia.org/wiki/Cross-validation_(statistics)
     % http://stackoverflow.com/questions/12630293/matlab-10-fold-cross-validation-without-using-existing-functions
     
-        
+    
     properties ( Access = 'private' )
         typeOfPartitioning
         original_train_X
@@ -17,7 +17,7 @@ classdef PartitionDataSet < handle
         partitioned_train_X
         partitioned_train_Y
         partitioned_val_X
-        partitioned_val_Y        
+        partitioned_val_Y
         index_transform;
     end
     
@@ -25,7 +25,14 @@ classdef PartitionDataSet < handle
         function ShuffleData(obj)
             ind = randperm(obj.numObservations);
             obj.original_train_X = obj.original_train_X(ind,:);
-            obj.original_train_Y = obj.original_train_Y(ind,:);            
+            obj.original_train_Y = obj.original_train_Y(ind,:);
+        end
+    end
+    
+    methods(Static)
+        % Static method used just to shuffle data
+        function [shuffledIndex] = getShuffledIndex(numObservations)
+            shuffledIndex = randperm(numObservations);
         end
     end
     
@@ -39,22 +46,22 @@ classdef PartitionDataSet < handle
             obj.partitioned_train_X = [];
             obj.partitioned_train_Y = [];
             obj.partitioned_val_X = [];
-            obj.partitioned_val_Y = [];            
+            obj.partitioned_val_Y = [];
         end
         
         % Do K partitioning
         % In k-fold partitioning, the original samples are divided
-        % into k equal sized subsamples. Of the k subsamples, 
+        % into k equal sized subsamples. Of the k subsamples,
         % a single subsample is retained as the validation data for testing
-        % the model, and the remaining k − 1 subsamples are used as 
+        % the model, and the remaining k − 1 subsamples are used as
         % training data.
-        % The cross-validation process is then repeated k times 
-        % (the folds), with each of the k subsamples used exactly once as 
-        % the validation data. The k results from the folds can then be 
-        % averaged (or otherwise combined) to produce a single estimation. 
-        % The advantage of this method over repeated random sub-sampling 
-        % is that all observations are used for both training and 
-        % validation, and each observation is used for 
+        % The cross-validation process is then repeated k times
+        % (the folds), with each of the k subsamples used exactly once as
+        % the validation data. The k results from the folds can then be
+        % averaged (or otherwise combined) to produce a single estimation.
+        % The advantage of this method over repeated random sub-sampling
+        % is that all observations are used for both training and
+        % validation, and each observation is used for
         % validation exactly once.
         function doKPartitioning(obj, numK, doShuffle)
             obj.typeOfPartitioning = 1;
@@ -63,13 +70,13 @@ classdef PartitionDataSet < handle
                 obj.ShuffleData();
             end
             
-            % Calculate train/validation sizes            
+            % Calculate train/validation sizes
             obj.testSize = ceil(obj.numObservations/numK);
             obj.trainSize = obj.numObservations - obj.testSize;
             
             % Calculate a transform that will be used to decide which
             % samples will populate each group
-            obj.index_transform = 1 + mod((1:obj.numObservations)',numK);                        
+            obj.index_transform = 1 + mod((1:obj.numObservations)',numK);
         end
         
         % Do old partitioning just separating some part of the data for
@@ -111,18 +118,18 @@ classdef PartitionDataSet < handle
             val_Y = [];
             if ~isempty( obj.typeOfPartitioning )
                 if obj.typeOfPartitioning == 1
-                    % K Partitioning                    
+                    % K Partitioning
                     
                     % Calculate the indexes for a particular fold
-                    train_index_mask = obj.index_transform ~= numPart; 
-                    val_index_mask = obj.index_transform == numPart;                                         
+                    train_index_mask = obj.index_transform ~= numPart;
+                    val_index_mask = obj.index_transform == numPart;
                     
-                    % Return the validation set                    
+                    % Return the validation set
                     val_X = obj.original_train_X(val_index_mask,:);
                     val_Y = obj.original_train_Y(val_index_mask);
                     
                     % Return the trainning set
-                    train_X = obj.original_train_X(train_index_mask,:);                    
+                    train_X = obj.original_train_X(train_index_mask,:);
                     train_Y = obj.original_train_Y(train_index_mask);
                     
                 end
@@ -137,6 +144,6 @@ classdef PartitionDataSet < handle
                 end
             end
         end
-    end    
+    end
 end
 

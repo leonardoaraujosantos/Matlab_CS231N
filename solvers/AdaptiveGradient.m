@@ -10,12 +10,22 @@ classdef AdaptiveGradient < BaseSolver
         batch_size % Number of samples from the training set on mini-batch
     end
     
-    methods(Abstract, Access = public)
+    methods
+        function obj = AdaptiveGradient(learningRate, batchSize,epochs)
+            obj.typeSolver = SolverType.AdaptiveGradient;
+            obj.base_lr = learningRate;
+            obj.batch_size = batchSize; % Minibatch of batchSize > 1 
+            obj.epochs = epochs;
+        end
+        
         function [weights, timeElapsed] = optimize(obj,model)
             tic;
             timeElapsed = toc;
         end
-        [type] = getType(obj);        
+        
+        function [type] = getType(obj)
+           type = obj.typeSolver; 
+        end
     end
 end
 

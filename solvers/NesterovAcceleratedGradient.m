@@ -11,6 +11,21 @@ classdef NesterovAcceleratedGradient < BaseSolver
     end
     
     methods
+        function obj = NesterovAcceleratedGradient(learningRate, batchSize,epochs)
+            obj.typeSolver = SolverType.NesterovAcceleratedGradient;
+            obj.base_lr = learningRate;
+            obj.batch_size = batchSize; % Minibatch of batchSize > 1 
+            obj.epochs = epochs;
+        end
+        
+        function [weights, timeElapsed] = optimize(obj,model)
+            tic;
+            timeElapsed = toc;
+        end
+        
+        function [type] = getType(obj)
+           type = obj.typeSolver; 
+        end
     end    
 end
 

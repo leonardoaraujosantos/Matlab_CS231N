@@ -1,5 +1,9 @@
 classdef GradientDescent < BaseSolver
-    % Implementation of simple gradient descent (batch)
+    % Implementation of simple Gradient descent (batch)    
+    % https://en.wikipedia.org/wiki/Gradient_descent
+    %
+    % The Gradient descent will pass on all training samples before update
+    % the weights
     properties
         typeSolver
         base_lr    % Learning rate used when training starts
@@ -10,6 +14,20 @@ classdef GradientDescent < BaseSolver
     end
     
     methods
+        function obj = GradientDescent(learningRate,epochs)
+            obj.typeSolver = SolverType.GradientDescent;
+            obj.base_lr = learningRate;
+            obj.epochs = epochs;
+        end
+        
+        function [weights, timeElapsed] = optimize(obj,model)
+           weights = 0;
+           timeElapsed = 0;
+        end
+        
+        function [type] = getType(obj)
+           type = obj.typeSolver; 
+        end
     end
 end
 

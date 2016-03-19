@@ -6,6 +6,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
     % https://www.coursera.org/learn/machine-learning/home/week/4  (5,6,7)
     % https://class.coursera.org/neuralnets-2012-001
     % https://www.youtube.com/channel/UCPk8m_r6fkUSYmvgCBwq-sw
+    % https://en.wikipedia.org/wiki/Backpropagation
     %
     % Some concepts:
     %
@@ -18,6 +19,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
     % Optimizers(GD,SGD,ADA,etc...): Will be used inside the
     % backpropagation to update the weights of the neurons based on the
     % gradient found on the backpropagation.
+    
     
     properties
         layers

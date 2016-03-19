@@ -1,5 +1,10 @@
 classdef StochasticGradientDescent < BaseSolver
-    % Implementation of SGD
+    % Implementation of simple Stochastic Gradient Descent (online)    
+    % https://en.wikipedia.org/wiki/Stochastic_gradient_descent
+    % http://research.microsoft.com/pubs/192769/tricks-2012.pdf
+    %
+    % Use SGD when the size of the dataset is big
+    % The SGD will update the weights at every sample on the dataset
     properties
         typeSolver
         base_lr    % Learning rate used when training starts
@@ -10,6 +15,21 @@ classdef StochasticGradientDescent < BaseSolver
     end
     
     methods
+        function obj = StochasticGradientDescent(learningRate, batchSize,epochs)
+            obj.typeSolver = SolverType.StochasticGradientDescent;
+            obj.base_lr = learningRate;
+            obj.batch_size = batchSize; % Minibatch of batchSize > 1 
+            obj.epochs = epochs;
+        end
+        
+        function [weights, timeElapsed] = optimize(obj,model)
+           weights = 0;
+           timeElapsed = 0;
+        end
+        
+        function [type] = getType(obj)
+           type = obj.typeSolver; 
+        end
     end
 end
 

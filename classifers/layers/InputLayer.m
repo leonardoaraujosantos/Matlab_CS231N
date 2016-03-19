@@ -5,7 +5,8 @@ classdef InputLayer < BaseLayer
     % http://www.slideshare.net/deview/251-implementing-deep-learning-using-cu-dnn
     
     properties 
-        typeLayer        
+        typeLayer
+        weights
     end
     
     properties (Access = 'private')        

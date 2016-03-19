@@ -1,7 +1,8 @@
 classdef OutputSVMLayer < BaseLayer
     %FULLYCONNECTEDLAYER Define the output softmax layer        
     properties
-        typeLayer        
+        typeLayer
+        weights
     end
     
     properties (Access = 'private')        

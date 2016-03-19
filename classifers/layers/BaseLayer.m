@@ -8,6 +8,7 @@ classdef (Abstract) BaseLayer < handle
     
     properties (Abstract)
         typeLayer
+        weights
     end
     
     methods(Abstract, Access = public)

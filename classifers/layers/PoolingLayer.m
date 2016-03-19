@@ -5,6 +5,7 @@ classdef PoolingLayer < BaseLayer
     
     properties
         typeLayer
+        weights
     end
     
     properties (Access = 'private')

@@ -6,7 +6,8 @@ classdef OutputRegressionLayer < BaseLayer
     end
     
     properties (Access = 'private')        
-        numberNeurons        
+        numberNeurons  
+        weights
     end
         
     methods (Access = 'public')

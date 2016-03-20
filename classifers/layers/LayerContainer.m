@@ -51,8 +51,12 @@ classdef LayerContainer < BaseLayerContainer
             obj.numLayers = obj.numLayers - 1;
         end
         
-        function getData(obj,index)
-            
+        function layer = getLayer(obj,index)
+            layer = obj.layersList{index};
+        end
+        
+        function numLayers = getNumLayers(obj)
+            numLayers = obj.numLayers;
         end
         
         function layerList = getLayersList(obj)

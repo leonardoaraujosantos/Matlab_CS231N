@@ -48,7 +48,7 @@ classdef ConvolutionalLayer < BaseLayer
             gradient = 0;
         end
         
-        function [result] = getData(obj)
+        function [result] = getActivations(obj)
             result = 0;
         end
         

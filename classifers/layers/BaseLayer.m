@@ -9,6 +9,7 @@ classdef (Abstract) BaseLayer < handle
     properties (Abstract)
         typeLayer
         weights
+        activations
     end
     
     methods(Abstract, Access = public)
@@ -30,13 +31,16 @@ classdef (Abstract) BaseLayer < handle
         
         % Return any other data (ie: Activations) different from the normal
         % feedForward result
-        [result] = getData(obj);
+        [result] = getActivations(obj);
         
         % Return the layer type
         [type] = getType(obj); 
         
         % Get text description
         [descText] = getDescription(obj);
+        
+        % Get number of neurons
+        [numNeurons] = getNumNeurons(obj);
     end
     
 end

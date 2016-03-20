@@ -31,11 +31,24 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
         function [timeElapsed] = backPropagate(obj, featues, targets)
             timeElapsed = 0;
             %% Do the forward propagation of the DNN
-            obj.feedForward();
+            %obj.feedForward();
         end
         
-        function [scores] = feedForward(obj, inputs)
+        function [scores] = feedForward(obj)
             scores = 0;
+            for idx=1:obj.layers.getNumLayers
+                currLayer = obj.layers.getLayer(idx);
+                % If we have the input layer th
+                activations = currLayer.getActivations;
+                weights = currLayer.weights;
+                % Get next layer if available
+                if (idx+1) <= obj.layers.getNumLayers
+                    nextLayer = obj.layers.getLayer(idx+1);
+                    
+                    % Calculate activations (Vectorized)
+                    nextLayer.activations = nextLayer.getActivation.forward_prop(weights' * activations);
+                end
+            end
         end
     end
     
@@ -43,6 +56,17 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
         function obj = DeepNeuralNetwork(layers, solver)
             obj.layers = layers;
             obj.solver = solver;
+            
+            % Initialize randomicaly all the weights
+            % Symmetry breaking (Coursera Machine learning course)
+            INIT_EPISLON = 1;
+            for idx=1:layers.getNumLayers
+                currLayer = layers.getLayer(idx);
+                if (idx+1) <= layers.getNumLayers
+                    nextLayer = layers.getLayer(idx+1);
+                    currLayer.weights = rand(currLayer.getNumNeurons,nextLayer.getNumNeurons + 1) * (2*INIT_EPISLON) - INIT_EPISLON;
+                end
+            end
         end
         
         function [timeElapsed] = train(obj, X_vec, Y_vec)
@@ -68,13 +92,18 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 end
                 % Run the back propagation (Update weights)
                 obj.backPropagate(batchFeatures, batchLabels);
-            end                                    
+            end
             timeElapsed = toc;
         end
         
         function [maxscore, scores, timeElapsed] = predict(obj, X_vec)
-            tic;            
-            scores = obj.feedForward(X_vec);
+            tic;
+            % Set X_vec on input layer
+            firstLayer = obj.layers.getLayer(1);
+            if firstLayer.getType == LayerType.Input
+                firstLayer.setActivations(X_vec);
+            end            
+            scores = obj.feedForward();
             [~, maxscore] = max(scores);
             timeElapsed = toc;
         end

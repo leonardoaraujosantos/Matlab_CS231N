@@ -7,6 +7,7 @@ classdef FullyConnectedLayer < BaseLayer
     properties
         typeLayer 
         weights
+        activations
     end
     
     properties (Access = 'private')        
@@ -45,6 +46,11 @@ classdef FullyConnectedLayer < BaseLayer
             end
         end
         
+        % Get number of neurons
+        function [numNeurons] = getNumNeurons(obj)
+            numNeurons = obj.numberNeurons;
+        end
+        
         function [result] = feedForward(obj, inputs)
             result = 0;
         end
@@ -53,8 +59,8 @@ classdef FullyConnectedLayer < BaseLayer
             gradient = 0;
         end
         
-        function [result] = getData(obj)
-            result = 0;
+        function [result] = getActivations(obj)
+            result = obj.activations;
         end
         
         function [type] = getType(obj)

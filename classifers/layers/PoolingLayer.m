@@ -23,6 +23,11 @@ classdef PoolingLayer < BaseLayer
             obj.poolingType = pPoolType;                        
         end
         
+        % Get number of neurons
+        function [numNeurons] = getNumNeurons(obj)
+            numNeurons = 0;
+        end
+        
         function [result] = feedForward(obj, inputs)
             result = 0;
         end
@@ -31,8 +36,8 @@ classdef PoolingLayer < BaseLayer
             gradient = 0;
         end
         
-        function [result] = getData(obj)
-            result = 0;
+        function [result] = getActivations(obj)
+            result = obj.activations;
         end
         
         function [type] = getType(obj)

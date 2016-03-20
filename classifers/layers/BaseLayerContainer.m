@@ -7,7 +7,7 @@ classdef (Abstract) BaseLayerContainer < handle
     methods(Abstract, Access = public)
         pushLayer(obj,metaDataLayer);
         removeLayer(obj,index);
-        getData(obj,index);
+        getLayer(obj,index);
         showStructure(obj);
     end
     

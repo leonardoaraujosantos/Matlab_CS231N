@@ -3,6 +3,7 @@ classdef OutputSVMLayer < BaseLayer
     properties
         typeLayer
         weights
+        activations
     end
     
     properties (Access = 'private')        
@@ -19,6 +20,11 @@ classdef OutputSVMLayer < BaseLayer
             obj.lossFunction = SVMLoss(svmDelta);
             obj.svmDelta = svmDelta;
         end
+        
+        % Get number of neurons
+        function [numNeurons] = getNumNeurons(obj)
+            numNeurons = obj.numClasses;
+        end
                
         function [result] = feedForward(obj, inputs)
             result = [];
@@ -29,8 +35,8 @@ classdef OutputSVMLayer < BaseLayer
         end
         
         % This will return the scores
-        function [result] = getData(obj)
-            result = [];
+        function [result] = getActivations(obj)
+            result = obj.activations;
         end                
         
         function [type] = getType(obj)

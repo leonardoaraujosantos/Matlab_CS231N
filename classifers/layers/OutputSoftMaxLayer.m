@@ -3,6 +3,7 @@ classdef OutputSoftMaxLayer < BaseLayer
     properties
         typeLayer
         weights
+        activations
     end
     
     properties (Access = 'private')        
@@ -18,6 +19,11 @@ classdef OutputSoftMaxLayer < BaseLayer
             obj.lossFunction = SoftMaxLoss();
         end
         
+        % Get number of neurons
+        function [numNeurons] = getNumNeurons(obj)
+            numNeurons = obj.numClasses;
+        end
+        
         function [result] = feedForward(obj, inputs)
             result = [];
         end        
@@ -27,8 +33,8 @@ classdef OutputSoftMaxLayer < BaseLayer
         end
         
         % This will return the scores
-        function [result] = getData(obj)
-            result = [];
+        function [result] = getActivations(obj)
+            result = obj.activations;
         end                
         
         function [type] = getType(obj)

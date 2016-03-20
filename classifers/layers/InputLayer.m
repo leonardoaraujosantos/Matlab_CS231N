@@ -7,13 +7,13 @@ classdef InputLayer < BaseLayer
     properties 
         typeLayer
         weights
+        activations
     end
     
     properties (Access = 'private')        
         numRows
         numCols
-        depthInput
-        currData
+        depthInput        
     end
     
     methods (Access = 'public')
@@ -22,8 +22,14 @@ classdef InputLayer < BaseLayer
             obj.typeLayer = LayerType.Input;
             obj.numRows = pRows;
             obj.numCols = pCols;
-            obj.depthInput = pDepth;
-            obj.currData = [];
+            obj.depthInput = pDepth;            
+            % The activations on the input layer are actually the data
+            obj.activations = [];
+        end
+        
+        % Get number of neurons
+        function [numNeurons] = getNumNeurons(obj)
+            numNeurons = obj.numRows * obj.numCols * obj.depthInput;
         end
         
         % There is no need to forward the input layer (Use getData)
@@ -37,13 +43,13 @@ classdef InputLayer < BaseLayer
         end
         
         % Get the current data set on the constructor
-        function [result] = getData(obj)
-            result = obj.currData;
+        function [result] = getActivations(obj)
+            result = obj.activations;
         end
         
         % Get the current data set on the constructor
-        function setData(obj, pData)            
-            obj.currData = pData;
+        function setActivations(obj, pData)            
+            obj.activations = pData';
         end
         
         function [type] = getType(obj)

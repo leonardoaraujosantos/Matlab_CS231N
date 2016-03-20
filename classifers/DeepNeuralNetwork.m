@@ -18,9 +18,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
     %   below.(Use chain rule)
     % Optimizers(GD,SGD,ADA,etc...): Will be used inside the
     % backpropagation to update the weights of the neurons based on the
-    % gradient found on the backpropagation.
-    
-    
+    % gradient found on the backpropagation.        
     properties
         layers
         solver
@@ -31,7 +29,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
         function [timeElapsed] = backPropagate(obj, featues, targets)
             timeElapsed = 0;
             %% Do the forward propagation of the DNN
-            %obj.feedForward();
+            obj.feedForward();
         end
         
         function [scores] = feedForward(obj)
@@ -67,7 +65,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 currLayer = layers.getLayer(idx);
                 if (idx+1) <= layers.getNumLayers
                     nextLayer = layers.getLayer(idx+1);
-                    currLayer.weights = rand(currLayer.getNumNeurons,nextLayer.getNumNeurons + 1) * (2*INIT_EPISLON) - INIT_EPISLON;
+                    currLayer.weights = rand(currLayer.getNumNeurons+1,nextLayer.getNumNeurons) * (2*INIT_EPISLON) - INIT_EPISLON;
                 end
             end
         end
@@ -110,7 +108,6 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             [~, maxscore] = max(scores);
             timeElapsed = toc;
         end
-    end
-    
+    end    
 end
 

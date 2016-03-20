@@ -50,7 +50,7 @@ classdef InputLayer < BaseLayer
         % Get the current data set on the constructor
         function setActivations(obj, pData)  
             % Input X is a row vector
-            obj.activations = pData';
+            obj.activations = pData;
         end
         
         function [type] = getType(obj)

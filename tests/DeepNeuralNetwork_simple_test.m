@@ -1,4 +1,9 @@
 %% Deep neural networks creation and simple tests (No training yet)
+% We calculate the weigh matrix of a particular layer by taking the number
+% of neurons of the next layer times the number of neurons of the current
+% layer + 1
+% Ex layer_1(2 neurons) layer_2(4 neurons) so the weight_1_2 (Weight from
+% layer 1 that maps to layer 2) will have the format 4x3
 
 %% Test 1: Simple Perceptron AND
 % Create the DNN strucutre and train with Gradient Descent
@@ -19,7 +24,9 @@ solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRat
 
 nn = DeepNeuralNetwork(layers,solver);
 % Training part is not to be tested yet so we put the weights manually...
-layers.getLayer(1).weights = [-30; 20; 20];
+% First layer input has 2 neurons, and the output (1 neuron) so we're going
+% 1x(2+1) [1 3] matrix
+layers.getLayer(1).weights = [-30 20 20];
 
 Xt = [0 0; 0 1; 1 0; 1 1];
 [maxscore, scores, predictTime] = nn.predict(Xt(1,:));
@@ -47,7 +54,9 @@ solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRat
 
 nn = DeepNeuralNetwork(layers,solver);
 % Training part is not to be tested yet so we put the weights manually...
-layers.getLayer(1).weights = [-10; 20; 20];
+% First layer input has 2 neurons, and the output (1 neuron) so we're going
+% 1x(2+1) [1 3] matrix
+layers.getLayer(1).weights = [-10 20 20];
 
 Xt = [0 0; 0 1; 1 0; 1 1];
 [maxscore, scores, predictTime] = nn.predict(Xt(1,:));
@@ -77,8 +86,12 @@ solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRat
 
 nn = DeepNeuralNetwork(layers,solver);
 % Training part is not to be tested yet so we put the weights manually...
-layers.getLayer(1).weights = [-30 10; 20 -20; 20 -20];
-layers.getLayer(2).weights = [-10; 20; 20];
+% Input layer has 2 neurons and the hidden layer more 2, so the 
+% weight matrix will be 2x3 [2 3]
+layers.getLayer(1).weights = [-30 20 20; 10 -20 -20]; 
+% Second(hidden) layer has 2 neurons and the third(output) 1 neuron, so the
+% weight matrix that will map layer 2 to 3 will have the format 1x3
+layers.getLayer(2).weights = [-10 20 20];
 
 Xt = [0 0; 0 1; 1 0; 1 1];
 [maxscore, scores, predictTime] = nn.predict(Xt(1,:));

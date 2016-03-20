@@ -7,6 +7,7 @@ classdef ConvolutionalLayer < BaseLayer
     properties
         typeLayer
         weights
+        activations
     end
     
     properties (Access = 'private')
@@ -74,6 +75,11 @@ classdef ConvolutionalLayer < BaseLayer
         
         function [actFunc] = getActivation(obj)
             actFunc = obj.activationObject;
+        end
+        
+        % Get number of neurons
+        function [numNeurons] = getNumNeurons(obj)
+            numNeurons = [];
         end
          
         function [descText] = getDescription(obj)

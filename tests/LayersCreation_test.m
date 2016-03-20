@@ -20,7 +20,7 @@
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',1,'cols',3,'depth',1);
 layers <= struct('type',LayerType.FullyConnected,'numNeurons',10,'ActivationType',ActivationType.Relu);
-layers <= struct('type',LayerType.OutputSoftMax,'numClasses',10);
+layers <= struct('type',LayerType.Output,'numClasses',10,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();
 
 %% Test 2: MLP layers creation
@@ -29,7 +29,7 @@ layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',1,'cols',3,'depth',1);
 layers <= struct('type',LayerType.FullyConnected,'numNeurons',10,'ActivationType',ActivationType.Relu);
 layers <= struct('type',LayerType.FullyConnected,'numNeurons',10,'ActivationType',ActivationType.Relu);
-layers <= struct('type',LayerType.OutputSoftMax,'numClasses',10);
+layers <= struct('type',LayerType.Output,'numClasses',10,'ActivationType',ActivationType.Relu);
 layers.showStructure();
 
 %% Test 3: Autoencoder layers creation
@@ -55,5 +55,5 @@ layers <= struct('type',LayerType.Pooling,'kSize',2,'stride',2,'poolType',Poolin
 layers <= struct('type',LayerType.Convolutional,'kSize',3,'numFilters',128,'stride',1,'pad',1,'ActivationType',ActivationType.Relu);
 layers <= struct('type',LayerType.Pooling,'kSize',2,'stride',2,'poolType',PoolingType.MaxPooling);
 layers <= struct('type',LayerType.FullyConnected,'numNeurons',1024,'ActivationType',ActivationType.Relu);
-layers <= struct('type',LayerType.OutputSoftMax,'numClasses',10);
+layers <= struct('type',LayerType.Output,'numClasses',10,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();

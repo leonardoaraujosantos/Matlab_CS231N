@@ -18,12 +18,9 @@ classdef LayerContainer < BaseLayerContainer
                 case LayerType.Input
                     % Rows, Cols, Depth
                     layerInst = InputLayer(metaDataLayer.rows,metaDataLayer.cols,metaDataLayer.depth);                
-                case LayerType.OutputSoftMax
+                case LayerType.Output
                     % Number of classes
-                    layerInst = OutputSoftMaxLayer(metaDataLayer.numClasses);
-                case LayerType.OutputSVM
-                    % Number of classes, delta
-                    layerInst = OutputSVMLayer(metaDataLayer.numClasses,metaDataLayer.delta);
+                    layerInst = OutputLayer(metaDataLayer.numClasses,metaDataLayer.ActivationType);                
                 case LayerType.FullyConnected
                     % Number of neurons, Activation type
                     layerInst = FullyConnectedLayer(metaDataLayer.numNeurons,metaDataLayer.ActivationType);

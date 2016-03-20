@@ -51,8 +51,13 @@ classdef FullyConnectedLayer < BaseLayer
             numNeurons = obj.numberNeurons;
         end
         
-        function [result] = feedForward(obj, inputs)
-            result = 0;
+        function [result] = feedForward(obj, activations, theta)
+            % theta are the weights of the previous layer
+            % Include the bias (1)
+            activations = [1; activations];
+            % The multiplication gives the same result of the dot product
+            % but faster (=~ 2x)
+            result = obj.activationObject.forward_prop(theta' * activations);           
         end
         
         function [gradient] = backPropagate(obj, targets)

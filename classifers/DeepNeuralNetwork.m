@@ -46,9 +46,12 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                     nextLayer = obj.layers.getLayer(idx+1);
                     
                     % Calculate activations (Vectorized)
-                    nextLayer.activations = nextLayer.getActivation.forward_prop(weights' * activations);
+                    nextLayer.activations = nextLayer.feedForward(activations,weights);
                 end
             end
+            
+            % Scores will be the activation of the last layer
+            scores = obj.layers.getLayer(obj.layers.getNumLayers).activations;
         end
     end
     

@@ -43,9 +43,10 @@ classdef OutputLayer < BaseLayer
             % The multiplication gives the same result of the dot product
             % but faster (=~ 2x)
             result = obj.activationObject.forward_prop(activations * theta');           
+            obj.activations = result;
         end
         
-        function [gradient] = backPropagate(obj, targets)
+        function [gradient] = backPropagate(obj)
             gradient = [];
         end
         

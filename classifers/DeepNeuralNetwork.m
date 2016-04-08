@@ -18,18 +18,43 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
     %   below.(Use chain rule)
     % Optimizers(GD,SGD,ADA,etc...): Will be used inside the
     % backpropagation to update the weights of the neurons based on the
-    % gradient found on the backpropagation.        
+    % gradient found on the backpropagation.
     properties
         layers
         solver
     end
     
     methods (Access = 'private')
-        % Find the gradient of every layer
-        function [timeElapsed] = backPropagate(obj, featues, targets)
-            timeElapsed = 0;
+        % Find the partial derivative of the cost function related to every
+        % parameter on the network (Vectorized form)
+        function [deltas] = backPropagate(obj, feature, target)                        
             %% Do the forward propagation of the DNN
+            % Set the input layer to the new X vector (or features)
+            firstLayer = obj.layers.getLayer(1);
+            if firstLayer.getType == LayerType.Input
+                firstLayer.setActivations(feature);
+            end
             obj.feedForward();
+            
+            %% Backpropagation algorithm
+            % Reverse iterate on the Neural network layers (Don't including
+            % first input layer)
+            smallDelta = zeros(obj.layers.getNumLayers,1);
+            for idxLayer=obj.layers.getNumLayers:-1:2
+                curLayer = obj.layers.getLayer(idxLayer);
+                
+                % Calculate offset between expected output and the current
+                % output
+                if curLayer.getType == LayerType.Output
+                    % Calculate difference for output layer
+                    smallDelta(idxLayer) = curLayer.getActivations - target;
+                else
+                    % Calculate difference for hidden layer
+                    smallDelta(idxLayer) = ((curLayer.weights)' * smallDelta(idxLayer+1)) .* curLayer.backPropagate();
+                end
+            end
+            % TODO delta is not that simple
+            deltas = smallDelta;
         end
         
         function [scores] = feedForward(obj)
@@ -66,6 +91,8 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 if (idx+1) <= layers.getNumLayers
                     nextLayer = layers.getLayer(idx+1);
                     currLayer.weights = rand(currLayer.getNumNeurons+1,nextLayer.getNumNeurons) * (2*INIT_EPISLON) - INIT_EPISLON;
+                    % Weights are a column vector
+                    currLayer.weights = currLayer.weights';
                 end
             end
         end
@@ -91,8 +118,20 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                     batchFeatures = X_vec(initialIndex:end,:);
                     batchLabels = Y_vec(initialIndex:end,:);
                 end
-                % Run the back propagation (Update weights)
-                obj.backPropagate(batchFeatures, batchLabels);
+                sizeBatch = size(batchFeatures,1);
+                for idxTrain=1:sizeBatch                    
+                    % Select sample from dataset
+                    sampleFeatures = batchFeatures(idxTrain,:);
+                    sampleTarget = batchLabels(idxTrain,:);
+                    
+                    % Run the back propagation to get the partial
+                    % derivatives of the cost function related to every
+                    % parameter on the neural network
+                    deltas = obj.backPropagate(sampleFeatures, sampleTarget);
+                    
+                    % Update the weights on the minima (hopefully global
+                    % minima) direction
+                end
             end
             timeElapsed = toc;
         end
@@ -103,11 +142,11 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             firstLayer = obj.layers.getLayer(1);
             if firstLayer.getType == LayerType.Input
                 firstLayer.setActivations(X_vec);
-            end            
+            end
             scores = obj.feedForward();
             [~, maxscore] = max(scores);
             timeElapsed = toc;
         end
-    end    
+    end
 end
 

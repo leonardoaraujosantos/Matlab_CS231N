@@ -27,7 +27,7 @@ classdef (Abstract) BaseLayer < handle
         %    multiplied by how much the target node has to change
         % 2. Get derivative to determine how much weights need to change
         % 3. Change the weights based on learning rate and derivative
-        [gradient] = backPropagate(obj, targets);
+        [gradient] = backPropagate(obj);
         
         % Return any other data (ie: Activations) different from the normal
         % feedForward result

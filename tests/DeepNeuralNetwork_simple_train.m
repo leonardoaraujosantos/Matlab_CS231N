@@ -16,12 +16,20 @@ layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
 layers <= struct('type',LayerType.FullyConnected,'numNeurons',2,'ActivationType',ActivationType.Sigmoid);
 layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.011, 'numEpochs', 30));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.001, 'numEpochs', 500));
 
 nn = DeepNeuralNetwork(layers,solver);
+fprintf('Initial weights for layer 1\n');
+disp(nn.layers.getLayer(1).weights);
+fprintf('Initial weights for layer 2\n');
+disp(nn.layers.getLayer(2).weights);
 
 % Train the neural network with the given solver (Type gradient descent)
 nn.train(X, Y);
+fprintf('Trained weights for layer 1\n');
+disp(nn.layers.getLayer(1).weights);
+fprintf('Trained weights for layer 2\n');
+disp(nn.layers.getLayer(2).weights);
 
 Xt = [0 0; 0 1; 1 0; 1 1];
 [maxscore, scores, predictTime] = nn.predict(Xt(1,:));

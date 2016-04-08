@@ -65,7 +65,7 @@ classdef FullyConnectedLayer < BaseLayer
         end
         
         function [gradient] = backPropagate(obj)
-            gradient = obj.activationObject.back_prop(obj.z);
+            gradient = obj.activationObject.back_prop([ones(size(obj.z, 1), 1) obj.z]);
         end
         
         function [result] = getActivations(obj)

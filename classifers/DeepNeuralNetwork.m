@@ -27,7 +27,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
     methods (Access = 'private')
         % Find the partial derivative of the cost function related to every
         % parameter on the network (Vectorized form)
-        function [deltas] = backPropagate(obj, feature, target)                        
+        function [deltas] = backPropagate(obj, feature, target)
             %% Do the forward propagation of the DNN
             % Set the input layer to the new X vector (or features)
             firstLayer = obj.layers.getLayer(1);
@@ -39,7 +39,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             %% Backpropagation algorithm
             % Reverse iterate on the Neural network layers (Don't including
             % first input layer)
-            smallDelta = zeros(obj.layers.getNumLayers,1);
+            smallDelta = cell(obj.layers.getNumLayers,1);
             for idxLayer=obj.layers.getNumLayers:-1:2
                 curLayer = obj.layers.getLayer(idxLayer);
                 
@@ -47,14 +47,18 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 % output
                 if curLayer.getType == LayerType.Output
                     % Calculate difference for output layer
-                    smallDelta(idxLayer) = curLayer.getActivations - target;
+                    smallDelta{idxLayer} = curLayer.getActivations - target;
                 else
                     % Calculate difference for hidden layer
-                    smallDelta(idxLayer) = ((curLayer.weights)' * smallDelta(idxLayer+1)) .* curLayer.backPropagate();
+                    smallDelta{idxLayer} = ((curLayer.weights)' * smallDelta{idxLayer+1}) .* curLayer.backPropagate()';
                 end
             end
-            % TODO delta is not that simple
-            deltas = smallDelta;
+            % Calculate the complete Deltas TODO delta is not that simple
+            deltas = cell(obj.layers.getNumLayers,1);
+            for idxLayer=1:obj.layers.getNumLayers-1
+                curLayer = obj.layers.getLayer(idxLayer);
+                deltas{idxLayer} = smallDelta{idxLayer+1}' * [1 curLayer.activations]';
+            end
         end
         
         function [scores] = feedForward(obj)
@@ -119,7 +123,9 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                     batchLabels = Y_vec(initialIndex:end,:);
                 end
                 sizeBatch = size(batchFeatures,1);
-                for idxTrain=1:sizeBatch                    
+                
+                % Iterate on the whole training
+                for idxTrain=1:sizeBatch
                     % Select sample from dataset
                     sampleFeatures = batchFeatures(idxTrain,:);
                     sampleTarget = batchLabels(idxTrain,:);
@@ -131,6 +137,10 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                     
                     % Update the weights on the minima (hopefully global
                     % minima) direction
+                    for idxLayer=1:obj.layers.getNumLayers-1
+                        curLayer = obj.layers.getLayer(idxLayer); 
+                        curLayer.weights = curLayer.weights - (obj.solver.base_lr * deltas{idxLayer})';                        
+                    end
                 end
             end
             timeElapsed = toc;

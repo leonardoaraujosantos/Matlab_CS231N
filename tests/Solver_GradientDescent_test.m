@@ -47,6 +47,8 @@ hold off
 %
 % http://www.mathworks.com/help/matlab/matlab_prog/anonymous-functions.html?refresh=true
 %
+% http://www.mathworks.com/help/symbolic/generate-matlab-functions.html
+%
 f_derivative = matlabFunction(deriv_f_x);
 
 %% Using gradient descent solver

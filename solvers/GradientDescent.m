@@ -20,9 +20,8 @@ classdef GradientDescent < BaseSolver
             obj.epochs = epochs;
         end
         
-        function [weights, timeElapsed] = optimize(obj,model)
-           weights = 0;
-           timeElapsed = 0;
+        function [weights] = optimize(obj,pastWeights, delta)           
+           weights = pastWeights - obj.base_lr * delta;
         end
         
         function [type] = getType(obj)

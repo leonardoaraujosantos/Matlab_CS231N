@@ -39,6 +39,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             %% Backpropagation algorithm
             % Reverse iterate on the Neural network layers (Don't including
             % first input layer)
+            % https://page.mi.fu-berlin.de/rojas/neural/chapter/K7.pdf
             smallDelta = cell(obj.layers.getNumLayers,1);
             for idxLayer=obj.layers.getNumLayers:-1:2
                 curLayer = obj.layers.getLayer(idxLayer);

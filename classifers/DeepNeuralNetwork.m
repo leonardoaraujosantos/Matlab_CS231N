@@ -48,7 +48,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 % output
                 if curLayer.getType == LayerType.Output
                     % Calculate difference for output layer
-                    smallDelta{idxLayer} = curLayer.getActivations - target;
+                    smallDelta{idxLayer} = curLayer.getActivations .* (1-curLayer.getActivations) .* (target - curLayer.getActivations);                    
                 else
                     % Calculate difference for hidden layer
                     smallDelta{idxLayer} = ((curLayer.weights)' * smallDelta{idxLayer+1}) .* curLayer.backPropagate()';
@@ -57,6 +57,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             end                        
             
             % Calculate the complete Deltas TODO delta is not that simple            
+            deltas = cell(obj.layers.getNumLayers-1,1);
             for idxLayer=1:obj.layers.getNumLayers-1
                 curLayer = obj.layers.getLayer(idxLayer);
                 deltas{idxLayer} = prevDelta{idxLayer} + (smallDelta{idxLayer+1} * [1 curLayer.activations]')';

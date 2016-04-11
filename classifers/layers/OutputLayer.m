@@ -4,6 +4,7 @@ classdef OutputLayer < BaseLayer
         typeLayer
         weights
         activations
+        z
     end
     
     properties (Access = 'private')        
@@ -42,12 +43,13 @@ classdef OutputLayer < BaseLayer
             activations = [ones(sizeRows, 1) activations];            
             % The multiplication gives the same result of the dot product
             % but faster (=~ 2x)
-            result = obj.activationObject.forward_prop(activations * theta');           
+            obj.z = activations * theta';
+            result = obj.activationObject.forward_prop(obj.z);           
             obj.activations = result;
         end
         
         function [gradient] = backPropagate(obj)
-            gradient = [];
+            gradient = obj.activationObject.back_prop([ones(size(obj.z, 1), 1) obj.z]);            
         end
         
         % This will return the scores

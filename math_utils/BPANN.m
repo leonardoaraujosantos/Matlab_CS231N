@@ -115,12 +115,14 @@ function [weightCell, biasCell] = BackPropagate(rate, in, realOutput, sampleTarg
     delta = cell(1, layerCount);
     D_weight = cell(1, layerCount);
     D_bias = cell(1, layerCount);
+    
     %---From Output layer, it has different formula
     output = layerOutputCells{layerCount};
     delta{layerCount} = output .* (1-output) .* (sampleTarget - output);
     preoutput = layerOutputCells{layerCount-1};
     D_weight{layerCount} = rate .* preoutput' * delta{layerCount};
     D_bias{layerCount} = rate .* delta{layerCount};
+    
     %---Back propagate for Hidden layers
     for layerIndex = layerCount-1:-1:1
         output = layerOutputCells{layerIndex};

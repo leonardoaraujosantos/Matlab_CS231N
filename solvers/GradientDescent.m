@@ -1,6 +1,7 @@
 classdef GradientDescent < BaseSolver
-    % Implementation of simple Gradient descent (batch)    
+    % Implementation of simple Gradient descent (batch)
     % https://en.wikipedia.org/wiki/Gradient_descent
+    % http://www.cs.bham.ac.uk/~jxb/NN/l8.pdf
     % https://www.cs.toronto.edu/~hinton/csc2515/notes/lec6tutorial.pdf
     %
     % The Gradient descent will pass on all training samples before update
@@ -12,8 +13,6 @@ classdef GradientDescent < BaseSolver
         stepsize   % Defines the number of iterations before update the lr
         epochs     % Number of times that we will iterate over the training
         batch_size % Number of samples from the training set on mini-batch
-        momentum   % Avoid get stuck on a local minima
-        weightsPrevious % Previous weight
     end
     
     methods
@@ -21,17 +20,16 @@ classdef GradientDescent < BaseSolver
             obj.typeSolver = SolverType.GradientDescent;
             obj.base_lr = learningRate;
             obj.epochs = epochs;
-            obj.weightsPrevious = 0;
-            obj.momentum = 0;
         end
         
-        function [weights] = optimize(obj,pastWeights, delta)           
-           weights = (obj.momentum*obj.weightsPrevious) + (1-obj.momentum)*(pastWeights - (obj.base_lr * delta));
-           obj.weightsPrevious = weights;           
+        function [weights] = optimize(obj,pastWeights, delta)
+            % On the normal gradient descent the delta will be the sum of
+            % all deltas on the training (Batch gradint descent)
+            weights = pastWeights - (obj.base_lr * delta);
         end
         
         function [type] = getType(obj)
-           type = obj.typeSolver; 
+            type = obj.typeSolver;
         end
     end
 end

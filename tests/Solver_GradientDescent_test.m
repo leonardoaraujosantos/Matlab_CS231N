@@ -58,7 +58,7 @@ x_new = 0.5; % The algorithm starts at x=1
 % If we start from x=-1 we will stuck on a local minima (=~0)
 
 % Create solver of type Gradient descent
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.01, 'numEpochs', 30));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.01, 'numEpochs', 500));
 
 % Optimize
 x_new_vec = zeros(1,solver.epochs);
@@ -81,7 +81,7 @@ fprintf('Local minimum found at %d and should be %d error=%d\n',...
 comet(axisPlot,x_new_vec,y_new_vec);
 hold off
 
-%% Test 2: Simple function minimization 
+%% Test 2: Get stuck on local minima
 % $f(x) = x^4-3x^3+2$
 %
 % ${\frac{df(x)}{dx}\ = 4x^3-9x^2}$
@@ -121,14 +121,12 @@ axisPlot = gca; % current axes
 f_derivative = matlabFunction(deriv_f_x);
 
 %% Using gradient descent solver
-% Starting at x=-1 Don't start with zero, on this case we can stuck on a
+% Starting at x=-2 Don't start with zero, on this case we can stuck on a
 % local minima at x=0
-x_new = 0.5;
-% If we start from x=-1 we will stuck on a local minima (=~0)
+x_new = -2;
 
 % Create solver of type Gradient descent
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.01, 'numEpochs', 30));
-solver.momentum = -0.3;
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.01, 'numEpochs', 500));
 
 % Optimize
 x_new_vec = zeros(1,solver.epochs);

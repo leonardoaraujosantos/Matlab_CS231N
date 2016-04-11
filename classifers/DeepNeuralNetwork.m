@@ -27,7 +27,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
     methods (Access = 'private')
         % Find the partial derivative of the cost function related to every
         % parameter on the network (Vectorized form)
-        function [deltas] = backPropagate(obj, feature, target)
+        function [deltas] = backPropagate(obj, feature, target, prevDelta)
             %% Do the forward propagation of the DNN
             % Set the input layer to the new X vector (or features)
             firstLayer = obj.layers.getLayer(1);
@@ -52,13 +52,14 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 else
                     % Calculate difference for hidden layer
                     smallDelta{idxLayer} = ((curLayer.weights)' * smallDelta{idxLayer+1}) .* curLayer.backPropagate()';
+                    smallDelta{idxLayer} = smallDelta{idxLayer}';
                 end
-            end
-            % Calculate the complete Deltas TODO delta is not that simple
-            deltas = cell(obj.layers.getNumLayers,1);
+            end                        
+            
+            % Calculate the complete Deltas TODO delta is not that simple            
             for idxLayer=1:obj.layers.getNumLayers-1
                 curLayer = obj.layers.getLayer(idxLayer);
-                deltas{idxLayer} = smallDelta{idxLayer+1}' * [1 curLayer.activations]';
+                deltas{idxLayer} = prevDelta{idxLayer} + (smallDelta{idxLayer+1} * [1 curLayer.activations]')';
             end
         end
         
@@ -90,7 +91,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             
             % Initialize randomicaly all the weights
             % Symmetry breaking (Coursera Machine learning course)
-            INIT_EPISLON = 1;
+            INIT_EPISLON = 0.1;
             for idx=1:layers.getNumLayers
                 currLayer = layers.getLayer(idx);
                 if (idx+1) <= layers.getNumLayers
@@ -104,6 +105,15 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
         
         function [timeElapsed] = train(obj, X_vec, Y_vec)
             tic;
+            
+            % Initialize deltas, the deltas matrix has the same size/format
+            %  of the weight matrix of the neural network
+            deltas = cell(obj.layers.getNumLayers-1,1);
+            for idxLayer=1:obj.layers.getNumLayers-1
+                curLayer = obj.layers.getLayer(idxLayer);
+                deltas{idxLayer} = zeros(size(curLayer.weights));                
+            end
+            
             % Shuffle the dataset
             ind = PartitionDataSet.getShuffledIndex(size(Y_vec,1));
             X_vec = X_vec(ind,:);
@@ -134,14 +144,19 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                     % Run the back propagation to get the partial
                     % derivatives of the cost function related to every
                     % parameter on the neural network
-                    deltas = obj.backPropagate(sampleFeatures, sampleTarget);
-                    
-                    % Update the weights on the minima (hopefully global
+                    deltas = obj.backPropagate(sampleFeatures, sampleTarget, deltas);                                        
+                end
+                % On Gradient Descent(Batch descent) the updates of the are
+                % weights is made after iterating on the whole training 
+                % set, on Stochastic Gradient Descent (online training) we
+                % change the weights after every training example, on the
+                % mini-batch we update the weights after some training
+                % samples....
+                % Update the weights on the minima (hopefully global
                     % minima) direction
-                    for idxLayer=1:obj.layers.getNumLayers-1
-                        curLayer = obj.layers.getLayer(idxLayer); 
-                        curLayer.weights = curLayer.weights - (obj.solver.base_lr * deltas{idxLayer})';                        
-                    end
+                for idxLayer=1:obj.layers.getNumLayers-1
+                    curLayer = obj.layers.getLayer(idxLayer); 
+                    curLayer.weights = obj.solver.optimize(curLayer.weights,deltas{idxLayer});                    
                 end
             end
             timeElapsed = toc;

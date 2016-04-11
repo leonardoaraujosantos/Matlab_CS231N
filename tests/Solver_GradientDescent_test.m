@@ -27,7 +27,7 @@ f_x = x^4-3*x^3+2;
 pretty(f_x);
 
 % Calculate derivative d(f(x))/dx
-deriv_f_x = diff(f,x);
+deriv_f_x = diff(f_x,x);
 pretty(deriv_f_x);
 
 % Look for critical points (Solve derivative equal to zero)
@@ -95,7 +95,7 @@ f_x = x^4-3*x^3+2;
 pretty(f_x);
 
 % Calculate derivative d(f(x))/dx
-deriv_f_x = diff(f,x);
+deriv_f_x = diff(f_x,x);
 pretty(deriv_f_x);
 
 % Look for critical points (Solve derivative equal to zero)

@@ -1,21 +1,22 @@
-%% Nice XOR example on matlab based on this tutorial
+%% Nice XOR example on matlab based on this tutorial (Vectorized)
 % http://matlabgeeks.com/tips-tutorials/neural-networks-a-multilayer-perceptron-in-matlab/
 % http://www.holehouse.org/mlclass/09_Neural_Networks_Learning.html
 % https://github.com/rasmusbergpalm/DeepLearnToolbox
+% http://ufldl.stanford.edu/wiki/index.php/Neural_Network_Vectorization
+% https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
 % We have here a 3 layer network (1-Input, 2-Hidden, 3-Output)
 
 % Sigmoid and dSigmoid functions
 sigmoid = @(x) 1.0 ./ ( 1.0 + exp(-x) );
 dsigmoid = @(x) sigmoid(x) .* ( 1 - sigmoid(x) );
 
-num_layers = 3;
 % XOR input for x1 and x2
 X = [0 0; 0 1; 1 0; 1 1];
 % Desired output of XOR
 Y_train = [0;1;1;0];
 % Learning coefficient
-learnRate = 1; % Start to oscilate with 15
-regularization = 0.001;
+learnRate = 2; % Start to oscilate with 15
+regularization = 0.00;
 % Number of learning iterations
 epochs = 2000;
 % Calculate weights randomly using seed.
@@ -27,17 +28,15 @@ W2 = rand(1,3) * (2*INIT_EPISLON) - INIT_EPISLON;
 % dont get stuck on a local minima
 % Who is afraid of non convex loss-functions?
 % http://videolectures.net/eml07_lecun_wia/
-%W1 = rand(5,3) * (2*INIT_EPISLON) - INIT_EPISLON;
-%W2 = rand(1,6) * (2*INIT_EPISLON) - INIT_EPISLON;
+%W1 = rand(15,3) * (2*INIT_EPISLON) - INIT_EPISLON;
+%W2 = rand(1,16) * (2*INIT_EPISLON) - INIT_EPISLON;
 
 J_vec = zeros(1,epochs);
 CrossEntrInst = CrossEntropy();
 
 %% Training
 for i = 1:epochs
-    sizeTraining = length (X(:,1));
-    complete_delta_1 = 0;
-    complete_delta_2 = 0;
+    sizeTraining = length (X(:,1));    
     
     %% Forward pass
     % First Activation (Input-->Hidden)
@@ -69,14 +68,16 @@ for i = 1:epochs
     delta_hidden=delta_hidden(:,2:end);
     
     % Calculate complete delta for every weight (Testing....)
-    complete_delta_1 = complete_delta_1 + (delta_hidden'*A1);
-    complete_delta_2 = complete_delta_2 + (delta_output'*A2);
+    complete_delta_1 = (delta_hidden'*A1);
+    complete_delta_2 = (delta_output'*A2);
     
     % Computing the partial derivatives with regularization, here we're
     % avoiding regularizing the bias term by substituting the first col of
     % weights with zeros
-    D1 = ((1/sizeTraining) * complete_delta_1) + ((regularization/sizeTraining)* [zeros(size(W1, 1), 1) W1(:, 2:end)]);
-    D2 = ((1/sizeTraining) * complete_delta_2) + ((regularization/sizeTraining)* [zeros(size(W2, 1), 1) W2(:, 2:end)]);
+    p1 = ((regularization/sizeTraining)* [zeros(size(W1, 1), 1) W1(:, 2:end)]);
+    p2 = ((regularization/sizeTraining)* [zeros(size(W2, 1), 1) W1(2, 2:end)]);
+    D1 = (complete_delta_1 ./ sizeTraining) + p1;
+    D2 = (complete_delta_2 ./ sizeTraining) + p2;
     
     % Gradient descent Update after all training set deltas are calculated
     % Increment or decrement depending on delta_output sign
@@ -88,6 +89,7 @@ for i = 1:epochs
     
     % After all calculations on the epoch calculate the cost function
     % Calculate Cost function output
+    % Calculate p (used on regression)
     p = sum(sum(W1(:, 2:end).^2, 2))+sum(sum(W2(:, 2:end).^2, 2));
     % calculate J
     %J = sum(sum((-Y_train).*log(h) - (1-Y_train).*log(1-h), 2))/sizeTraining + regularization*p/(2*sizeTraining);
@@ -102,15 +104,8 @@ end
 fprintf('Outputs\n');
 disp(round(A3));
 
-%fprintf('\nW1\n');
-%disp(W1);
-
-%fprintf('\nW2\n');
-%disp(W2);
 
 %% Plot some information
-% Plot cost function vs epoch
-
 % Plot Prediction surface
 testInpx1 = [-1:0.1:1];
 testInpx2 = [-1:0.1:1];

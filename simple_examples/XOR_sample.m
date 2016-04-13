@@ -6,11 +6,13 @@
 %
 % http://www.holehouse.org/mlclass/09_Neural_Networks_Learning.html
 %
-% https://github.com/rasmusbergpalm/DeepLearnToolbox
+% http://github.com/rasmusbergpalm/DeepLearnToolbox
 %
 % http://ufldl.stanford.edu/wiki/index.php/Neural_Network_Vectorization
 %
-% https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
+% http://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
+% 
+% http://github.com/stephencwelch/Neural-Networks-Demystified
 %
 % We have here a 3 layer network (1-Input, 2-Hidden, 3-Output)
 
@@ -75,9 +77,11 @@ for i = 1:epochs
         %%% Backpropagation        
         % Find the partial derivative of the cost function related to all
         % weights on the neural network (on our case 9 weights)
+        %
         % http://www.youtube.com/watch?v=GlcnxUlrtek
         %
-        
+        % https://www.youtube.com/watch?v=5u0jaA3qAGk
+        %        
         % For output layer:
         % delta(wi) = xi*delta,
         % delta = (1-actual output)*(desired output - actual output)

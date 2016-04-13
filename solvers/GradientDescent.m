@@ -12,14 +12,16 @@ classdef GradientDescent < BaseSolver
         gamma      % Drop the learning rate at every step size
         stepsize   % Defines the number of iterations before update the lr
         epochs     % Number of times that we will iterate over the training
+        reg_L1      % L1 Regression
         batch_size % Number of samples from the training set on mini-batch
     end
     
     methods
-        function obj = GradientDescent(learningRate,epochs)
+        function obj = GradientDescent(learningRate,epochs, reg_L1)
             obj.typeSolver = SolverType.GradientDescent;
             obj.base_lr = learningRate;
             obj.epochs = epochs;
+            obj.reg_L1 = reg_L1;
         end
         
         function [weights] = optimize(obj,pastWeights, delta)

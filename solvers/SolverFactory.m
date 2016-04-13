@@ -5,7 +5,7 @@ classdef SolverFactory < handle
         function solver = get(metaDataSolver)
             switch metaDataSolver.type
                 case SolverType.GradientDescent
-                    solver = GradientDescent(metaDataSolver.learningRate, metaDataSolver.numEpochs);
+                    solver = GradientDescent(metaDataSolver.learningRate, metaDataSolver.numEpochs,metaDataSolver.RegularizationL1);
                 case SolverType.StochasticGradientDescent
                     solver = StochasticGradientDescent(metaDataSolver.learningRate, metaDataSolver.batchSize, metaDataSolver.numEpochs);
                 case SolverType.AdaptiveGradient

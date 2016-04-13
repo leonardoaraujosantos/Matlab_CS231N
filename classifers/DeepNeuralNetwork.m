@@ -22,6 +22,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
     properties
         layers
         solver
+        lossVector
     end
     
     methods (Access = 'private')
@@ -64,8 +65,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             deltas = cell(obj.layers.getNumLayers-1,1);
             for idxLayer=1:obj.layers.getNumLayers-1
                 curLayer = obj.layers.getLayer(idxLayer);
-                deltas{idxLayer} = prevDelta{idxLayer} + (smallDelta{idxLayer+1}' * [ones(sizeTraining, 1) curLayer.activations]);
-                deltas{idxLayer} = deltas{idxLayer}/sizeTraining;
+                deltas{idxLayer} = prevDelta{idxLayer} + (smallDelta{idxLayer+1}' * [ones(sizeTraining, 1) curLayer.activations]);                
             end
         end
         
@@ -102,9 +102,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 currLayer = layers.getLayer(idx);
                 if (idx+1) <= layers.getNumLayers
                     nextLayer = layers.getLayer(idx+1);
-                    currLayer.weights = rand(currLayer.getNumNeurons+1,nextLayer.getNumNeurons) * (2*INIT_EPISLON) - INIT_EPISLON;
-                    % Weights are a column vector
-                    %currLayer.weights = currLayer.weights';
+                    currLayer.weights = rand(nextLayer.getNumNeurons,currLayer.getNumNeurons+1) * (2*INIT_EPISLON) - INIT_EPISLON;                    
                 end
             end
         end
@@ -129,6 +127,10 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             miniBatchSize = obj.solver.batch_size;
             epochs = obj.solver.epochs;
             initialIndex = 1;
+            
+            % Initialize loss vector
+            obj.lossVector = zeros(1,epochs);
+            
             for idxEpoch=1:epochs
                 % Extract a chunk(if possible) from the training
                 if (initialIndex+miniBatchSize < size(X_vec,1))
@@ -141,17 +143,20 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 end
                 sizeBatch = size(batchFeatures,1);
                 
+                % Vectorized backpropagation
+                deltas = obj.backPropagate(batchFeatures, batchLabels, deltas);
+                
                 % Iterate on the whole training
-                for idxTrain=1:sizeBatch
-                    % Select sample from dataset
-                    sampleFeatures = batchFeatures(idxTrain,:);
-                    sampleTarget = batchLabels(idxTrain,:);
-                    
-                    % Run the back propagation to get the partial
-                    % derivatives of the cost function related to every
-                    % parameter on the neural network
-                    deltas = obj.backPropagate(sampleFeatures, sampleTarget, deltas);                                        
-                end
+%                 for idxTrain=1:sizeBatch
+%                     % Select sample from dataset
+%                     sampleFeatures = batchFeatures(idxTrain,:);
+%                     sampleTarget = batchLabels(idxTrain,:);
+%                     
+%                     % Run the back propagation to get the partial
+%                     % derivatives of the cost function related to every
+%                     % parameter on the neural network
+%                     deltas = obj.backPropagate(sampleFeatures, sampleTarget, deltas);                                        
+%                 end
                 % On Gradient Descent(Batch descent) the updates of the are
                 % weights is made after iterating on the whole training 
                 % set, on Stochastic Gradient Descent (online training) we
@@ -164,6 +169,12 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                     curLayer = obj.layers.getLayer(idxLayer); 
                     curLayer.weights = obj.solver.optimize(curLayer.weights,deltas{idxLayer});                    
                 end
+                
+                % After every epoch calculate the error function
+                Y_train = batchLabels;
+                %J = sum(sum((-Y_train).*log(h) - (1-Y_train).*log(1-h), 2))/sizeBatch + regularization*p/(2*sizeBatch);
+                %J = sum(sum((-Y_train).*log(h) - (1-Y_train).*log(1-h), 2))/sizeBatch;
+                %J_vec(idxEpoch) = J;
             end
             timeElapsed = toc;
         end

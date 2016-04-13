@@ -23,6 +23,10 @@ epochs = 2000;
 INIT_EPISLON = 0.8;
 W1 = rand(2,3) * (2*INIT_EPISLON) - INIT_EPISLON;
 W2 = rand(1,3) * (2*INIT_EPISLON) - INIT_EPISLON;
+% Override manually to debug both vectorized and non vectorized
+% implementation
+W1 = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
+W2 = [-0.1433   -0.4840   -0.6903];
 
 % More neurons means more local minimas, which means easier training if you
 % dont get stuck on a local minima

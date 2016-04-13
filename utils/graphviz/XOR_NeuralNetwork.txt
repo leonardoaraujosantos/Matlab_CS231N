@@ -1,0 +1,61 @@
+/* 
+	Tutorials
+	http://stackoverflow.com/questions/10438895/graphviz-outputs-a-mess
+	https://tgmstat.wordpress.com/2013/06/12/draw-neural-network-diagrams-graphviz/
+	https://github.com/gwding/draw_convnet
+*/
+digraph G {
+
+        rankdir=LR
+	splines=line
+	//splines=true;
+	//edge[weight=0.2];
+	//sep="+25,25";
+	overlap=scalexy;
+        
+	edge [fontsize=10]
+        node [fixedsize=false, label=""];
+
+        subgraph cluster_0 {
+		color=white;
+		node [style=solid,color=blue4, shape=circle];
+		x1 x2 b1;
+		b1 [label="B"];
+		x1 [label="X1"];
+		x2 [label="X2"];
+		label = "layer 1 (Input layer)";
+	}
+
+	subgraph cluster_1 {
+		color=white;
+		node [style=solid,color=red2, shape=circle];
+		a1 a2 b2;
+		b2 [label="B"];
+		a1 [label="a1"];
+		a2 [label="a2"];
+		label = "layer 2 (hidden layer)";
+	}
+
+	subgraph cluster_2 {
+		color=white;
+		node [style=solid,color=seagreen2, shape=circle];
+		O;
+		O [label="H(w)"];
+		label="layer 3 (output layer)";
+	}
+
+	// Bias
+	b1 -> a1 /*[ label="w1" ]*/;
+	b1 -> a2 /*[ label="w2" ]*/;
+	b2 -> O	/*[ label="w3" ]*/;
+
+	// Connections input -> hidden
+        x1 -> a1 /*[ label="w4" ]*/;
+        x1 -> a2 /*[ label="w5" ]*/;
+        x2 -> a1 /*[ label="w6" ]*/;
+        x2 -> a2 /*[ label="w7" ]*/;
+        
+	// Neurons to output
+        a1 -> O /*[ label="w8" ]*/;
+        a2 -> O /*[ label="w9" ]*/;
+}

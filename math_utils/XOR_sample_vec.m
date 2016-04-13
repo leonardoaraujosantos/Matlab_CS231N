@@ -31,6 +31,7 @@ W2 = rand(1,3) * (2*INIT_EPISLON) - INIT_EPISLON;
 %W2 = rand(1,6) * (2*INIT_EPISLON) - INIT_EPISLON;
 
 J_vec = zeros(1,epochs);
+CrossEntrInst = CrossEntropy();
 
 %% Training
 for i = 1:epochs
@@ -89,10 +90,11 @@ for i = 1:epochs
     % Calculate Cost function output
     p = sum(sum(W1(:, 2:end).^2, 2))+sum(sum(W2(:, 2:end).^2, 2));
     % calculate J
-    J = sum(sum((-Y_train).*log(h) - (1-Y_train).*log(1-h), 2))/sizeTraining + regularization*p/(2*sizeTraining);
+    %J = sum(sum((-Y_train).*log(h) - (1-Y_train).*log(1-h), 2))/sizeTraining + regularization*p/(2*sizeTraining);
+    J = CrossEntrInst.getLoss(h,Y_train) + regularization*p/(2*sizeTraining);
     J_vec(i) = J;
-    % Break if error is already low
-%     if J < 0.08        
+%     % Break if error is already low
+%     if J < 0.08
 %         break;
 %     end
 end

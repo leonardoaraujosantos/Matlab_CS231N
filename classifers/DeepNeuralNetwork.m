@@ -28,6 +28,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
         % Find the partial derivative of the cost function related to every
         % parameter on the network (Vectorized form)
         function [deltas] = backPropagate(obj, feature, target, prevDelta)
+            sizeTraining = length(feature(:,1));
             %% Do the forward propagation of the DNN
             % Set the input layer to the new X vector (or features)
             firstLayer = obj.layers.getLayer(1);
@@ -36,7 +37,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             end
             obj.feedForward();
             
-            %% Backpropagation algorithm
+            %% Now the reverse propagation
             % Reverse iterate on the Neural network layers (Don't including
             % first input layer)
             % https://page.mi.fu-berlin.de/rojas/neural/chapter/K7.pdf
@@ -48,19 +49,23 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 % output
                 if curLayer.getType == LayerType.Output
                     % Calculate difference for output layer
-                    smallDelta{idxLayer} = curLayer.getActivations .* (1-curLayer.getActivations) .* (target - curLayer.getActivations);                    
+                    smallDelta{idxLayer} = (curLayer.getActivations - target);                    
                 else
                     % Calculate difference for hidden layer
-                    smallDelta{idxLayer} = ((curLayer.weights)' * smallDelta{idxLayer+1}) .* curLayer.backPropagate()';
-                    smallDelta{idxLayer} = smallDelta{idxLayer}';
+                    smallDelta{idxLayer} = (smallDelta{idxLayer+1} * (curLayer.weights)) .* curLayer.backPropagate();
+                    % Take the bias 
+                    smallDeltaNoBias = smallDelta{idxLayer};
+                    smallDeltaNoBias = smallDeltaNoBias(:,2:end);
+                    smallDelta{idxLayer} = smallDeltaNoBias;
                 end
             end                        
             
-            % Calculate the complete Deltas TODO delta is not that simple            
+            % Calculate the complete Deltas
             deltas = cell(obj.layers.getNumLayers-1,1);
             for idxLayer=1:obj.layers.getNumLayers-1
                 curLayer = obj.layers.getLayer(idxLayer);
-                deltas{idxLayer} = prevDelta{idxLayer} + (smallDelta{idxLayer+1} * [1 curLayer.activations]')';
+                deltas{idxLayer} = prevDelta{idxLayer} + (smallDelta{idxLayer+1}' * [ones(sizeTraining, 1) curLayer.activations]);
+                deltas{idxLayer} = deltas{idxLayer}/sizeTraining;
             end
         end
         
@@ -92,14 +97,14 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             
             % Initialize randomicaly all the weights
             % Symmetry breaking (Coursera Machine learning course)
-            INIT_EPISLON = 0.1;
+            INIT_EPISLON = 0.8;
             for idx=1:layers.getNumLayers
                 currLayer = layers.getLayer(idx);
                 if (idx+1) <= layers.getNumLayers
                     nextLayer = layers.getLayer(idx+1);
                     currLayer.weights = rand(currLayer.getNumNeurons+1,nextLayer.getNumNeurons) * (2*INIT_EPISLON) - INIT_EPISLON;
                     % Weights are a column vector
-                    currLayer.weights = currLayer.weights';
+                    %currLayer.weights = currLayer.weights';
                 end
             end
         end

@@ -66,14 +66,18 @@ lossFunction = CrossEntropy();
 %
 % Here every weight row represent one neuron connection, ex weights(1,:)
 % means all connections of the first neuron
-rand('state',0);
+%
+% Put random number generator on state 0
+%rand('state',0);
+% Same thing but new syntax
+rng(0,'v5uniform');
 INIT_EPISLON = 0.8;
 % Override manually to debug both vectorized and non vectorized
 % implementation
-weights = [-0.7690 0.6881 -0.2164; ...
-    -0.0963 0.2379 -0.1385; ...
-    -0.1433 -0.4840 -0.6903];
-weights = rand(3,3) * (2*INIT_EPISLON) - INIT_EPISLON;
+weights = [ -0.7690 0.6881 -0.2164; ...
+            -0.0963 0.2379 -0.1385; ...
+            -0.1433 -0.4840 -0.6903];
+%weights = rand(3,3) * (2*INIT_EPISLON) - INIT_EPISLON;
 disp('Initital Weights');
 disp(weights);
 
@@ -223,7 +227,7 @@ for i = 1:epochs
         % delta = (1-actual output)*(desired output - actual output)
         %delta_out = (1-outNN(j))*(Y_train(j)-outNN(j)); % Other
         %delta_out = (outNN(j) - Y_train(j))* dsigmoid(outNN(j)); % Andrew Ng
-        delta_out = (outNN(j) - Y_train(j)); % Andrew Ng
+        delta_out = (outNN(j) - Y_train(j)) * dsigmoid(outNN(j)) ; % Andrew Ng
         
         % For Hidden layer (Observe that we are not calculating the bias)
         delta_a1 = (weights(3,2)*delta_out) * dsigmoid(Z_a1);
@@ -234,7 +238,7 @@ for i = 1:epochs
             if k == 1 % Bias cases
                 accDelta(1,k) = accDelta(1,k) + (bias*delta_a1);
                 accDelta(2,k) = accDelta(2,k) + (bias*delta_a2);
-                accDelta(3,k) = accDelta(3,k) + (delta_out);
+                accDelta(3,k) = accDelta(3,k) + (bias*delta_out);
             else % When k=2 or 3 input cases to neurons
                 % Update with learnRate * Activations * smallDelta
                 accDelta(1,k) = accDelta(1,k) + (X(j,1)*delta_a1);

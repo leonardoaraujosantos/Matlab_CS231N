@@ -10,23 +10,19 @@
 % other neurons connections plus 1 connection with the bias, you can
 % consider this as a 9 parmeter function
 
-%% Tutorials
-% http://matlabgeeks.com/tips-tutorials/neural-networks-a-multilayer-perceptron-in-matlab/
+%% Problem
+% The XOR problem that caused to AI winter simply asked a perceptron to
+% separate the blue and red classes, just to remeber a perceptron will look
+% for a line that separate the two classes (Try yourself to separate those
+% classes with a line)
 %
-% http://www.holehouse.org/mlclass/09_Neural_Networks_Learning.html
-%
-% http://github.com/rasmusbergpalm/DeepLearnToolbox
-%
-% http://ufldl.stanford.edu/wiki/index.php/Neural_Network_Vectorization
-%
-% http://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
-%
-% http://github.com/stephencwelch/Neural-Networks-Demystified
-%
-% http://outlace.com/Beginner-Tutorial-Backpropagation/
+% <</home/leo/work/Matlab_CS231N/docs/imgs/XorDecision.png>>
 %
 
 %% Define training dataset
+%
+% <</home/leo/work/Matlab_CS231N/docs/imgs/XorTable.png>>
+%
 % XOR input for x1 and x2
 X = [0 0; 0 1; 1 0; 1 1];
 % Desired output of XOR
@@ -55,6 +51,8 @@ smallStep = 0.0001;
 %
 % http://videolectures.net/eml07_lecun_wia/
 %
+% http://www.cs.nyu.edu/~yann/talks/lecun-20071207-nonconvex.pdf
+%
 input_layer_size = 2;
 hidden_layer_size = 2;
 output_layer_size = 1;
@@ -63,7 +61,17 @@ output_layer_size = 1;
 % On this case we will use the Cross entropy cost(or loss) function, the
 % idea of the loss function is to give a number to show how bad/good your
 % current set of parameters are. Here the definition of good means that our
-% ANN output matches the training dataset
+% ANN output matches the training dataset. There are a lot of loss/cost
+% functions out there but it seems that people are tending to use now more
+% Cross-Entropy
+%
+% http://jamesmccaffrey.wordpress.com/2013/11/05/why-you-should-use-cross-entropy-error-instead-of-classification-error-or-mean-squared-error-for-neural-network-classifier-training/
+%
+% $\mathcal{L}(X, Y) = -\frac{1}{n} \sum_{i=1}^n y^{(i)} \ln a(x^{(i)}) + \left(1 - y^{(i)}\right) \ln \left(1 - a(x^{(i)})\right)$
+%
+%
+% <include>CrossEntropy.m</include>
+%
 J_vec = zeros(1,epochs);
 lossFunction = CrossEntropy();
 
@@ -82,8 +90,10 @@ lossFunction = CrossEntropy();
 % Same thing but new syntax
 rng(0,'v5uniform');
 INIT_EPISLON = 0.8;
-W1 = rand(hidden_layer_size,input_layer_size+1) * (2*INIT_EPISLON) - INIT_EPISLON;
-W2 = rand(output_layer_size,hidden_layer_size+1) * (2*INIT_EPISLON) - INIT_EPISLON;
+W1 = rand(hidden_layer_size,input_layer_size+1) ...
+    * (2*INIT_EPISLON) - INIT_EPISLON;
+W2 = rand(output_layer_size,hidden_layer_size+1) ...
+    * (2*INIT_EPISLON) - INIT_EPISLON;
 % Override manually to debug both vectorized and non vectorized
 % implementation
 %W1 = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
@@ -128,7 +138,8 @@ for i = 1:epochs
         nW2 = reshape(ThetasLoss1((1 + (hidden_layer_size * ...
             (input_layer_size + 1))):end), output_layer_size, ...
             (hidden_layer_size + 1));
-        p_loss1 = sum(sum(nW1(:, 2:end).^2, 2))+sum(sum(nW2(:, 2:end).^2, 2));        
+        p_loss1 = sum(sum(nW1(:, 2:end).^2, 2))+ ...
+            sum(sum(nW2(:, 2:end).^2, 2));        
         
         % Forward prop
         A1 = [ones(sizeTraining, 1) X];
@@ -147,7 +158,8 @@ for i = 1:epochs
         nW2 = reshape(ThetasLoss2((1 + (hidden_layer_size * ...
             (input_layer_size + 1))):end), output_layer_size, ...
             (hidden_layer_size + 1));
-        p_loss2 = sum(sum(nW1(:, 2:end).^2, 2))+sum(sum(nW2(:, 2:end).^2, 2));        
+        p_loss2 = sum(sum(nW1(:, 2:end).^2, 2))+...
+            sum(sum(nW2(:, 2:end).^2, 2));        
         
         % Forward prop
         A1 = [ones(sizeTraining, 1) X];
@@ -159,8 +171,10 @@ for i = 1:epochs
         h2 = A3;
         
         % Calculate both losses...        
-        loss1 = lossFunction.getLoss(h1,Y_train) + regularization*p_loss1/(2*sizeTraining);
-        loss2 = lossFunction.getLoss(h2,Y_train) + regularization*p_loss2/(2*sizeTraining);
+        loss1 = lossFunction.getLoss(h1,Y_train) + ...
+            regularization*p_loss1/(2*sizeTraining);
+        loss2 = lossFunction.getLoss(h2,Y_train) + ...
+            regularization*p_loss2/(2*sizeTraining);
         
         % Compute Numerical Gradient
         numgrad(p) = (loss2 - loss1) / (2*smallStep);
@@ -175,14 +189,36 @@ for i = 1:epochs
     
     %%% Backpropagation
     % Find the partial derivative of the cost function related to all
-    % weights on the neural network (on our case 9 weights)
+    % weights on the neural network (on our case 9 weights).
+    % Backpropagation, at its core, simply consists of repeatedly applying 
+    % the chain rule through all of the possible paths in our network.     
+    % However, there are an exponential number of directed paths from the 
+    % input to the output. Backpropagation's real power arises in the form 
+    % of a dynamic programming algorithm, where we reuse intermediate 
+    % results to calculate the gradient.     
+    % We transmit intermediate errors backwards through a network, 
+    % thus leading to the name backpropagation. In fact, backpropagation is
+    % closely related to forward propagation, but instead of propagating 
+    % the inputs forward through the network, we propagate the 
+    % error backwards.    
+    %
+    % <</home/leo/work/Matlab_CS231N/docs/imgs/ChainRule_1.png>>
+    %
+    %
+    % <</home/leo/work/Matlab_CS231N/docs/imgs/BackpropagationAlgorithm.png>>            
+    %
+    %
+    % <</home/leo/work/Matlab_CS231N/docs/imgs/BackwardPropagation_Vectorized.png>>
+    %
     
     %%% Forward pass
     % Move from left(input) layer to the right (output), observe that every
-    % previous activation get a extra collumn of ones (Include Bias)
+    % previous activation get a extra collumn of ones (Include Bias)    
     %
-    % First Activation (Input-->Hidden)
-    A1 = [ones(sizeTraining, 1) X];
+    % <</home/leo/work/Matlab_CS231N/docs/imgs/forwardPropagation.png>>
+    %
+    % First Activation (Input-->Hidden)    
+    A1 = [ones(sizeTraining, 1) X]; % Add extra collumn to A1
     Z2 = A1 * W1';
     A2 = sigmoid(Z2);
     
@@ -197,6 +233,9 @@ for i = 1:epochs
     % on the last hidden layer before the input. Here we want to calculate
     % the error of every layer (desired - actual). The trap here is that
     % you calculate the output layer differenly than the input layers
+    %
+    % <</home/leo/work/Matlab_CS231N/docs/imgs/BackwardPropagation.png>>
+    %
     %
     % Output layer: (Why different tutorials have differ here?)    
     %delta_out_layer = A3.*(1-A3).*(A3-Y_train); % Other
@@ -219,8 +258,10 @@ for i = 1:epochs
     % Computing the partial derivatives with regularization, here we're
     % avoiding regularizing the bias term by substituting the first col of
     % weights with zeros
-    p1 = ((regularization/sizeTraining)* [zeros(size(W1, 1), 1) W1(:, 2:end)]);
-    p2 = ((regularization/sizeTraining)* [zeros(size(W2, 1), 1) W2(:, 2:end)]);
+    p1 = ((regularization/sizeTraining)* ...
+        [zeros(size(W1, 1), 1) W1(:, 2:end)]);
+    p2 = ((regularization/sizeTraining)* ...
+        [zeros(size(W2, 1), 1) W2(:, 2:end)]);
     D1 = (complete_delta_1 ./ sizeTraining) + p1;
     D2 = (complete_delta_2 ./ sizeTraining) + p2;
     
@@ -232,15 +273,33 @@ for i = 1:epochs
     errorBackPropD2 = sum(sum(abs(D2 - numDeltaW2)));
     % Stop if backpropagation error bigger than 0.0001
     if (errorBackPropD1 > 0.0001) || (errorBackPropD2 > 0.0001)
-        fprintf('Backpropagation error %d %d\n',errorBackPropD1,errorBackPropD2);
+        fprintf('Backpropagation error %d %d\n',...
+            errorBackPropD1,errorBackPropD2);
         pause;
     end
     
     %%% Weight Update
-    % Gradient descent Update after all training set deltas are calculated
-    % Increment or decrement depending on delta_output sign
-    % Stochastic Gradient descent Update at every new input....
-    % The stochastic gradient descent with luck converge faster ...
+    % Now we need to change the current set of weights with the negative
+    % of the directions found on the back-propagation multiplied by some
+    % factor (learning-rate). If we update the weight after backpropagating
+    % the whole training set, this is called batch gradient descent. But if
+    % we update the weight after backpropagating each sample on the
+    % training set this is called Stochastic Gradient descent, which tends
+    % to converge faster, but oscilate a little bit near the converging
+    % point.
+    %
+    % http://www.holehouse.org/mlclass/17_Large_Scale_Machine_Learning.html
+    %    
+    %
+    % <</home/leo/work/Matlab_CS231N/docs/imgs/GradientDescent_Alone.png>>    
+    %
+    % <</home/leo/work/Matlab_CS231N/docs/imgs/GradientDescent_And_StochasticGD.png>>
+    %
+    % The choice of the learning rate also affects the training performance
+    %
+    % <</home/leo/work/Matlab_CS231N/docs/imgs/ChoiceLearningRate.jpg>>    
+    %
+    
     % Increment or decrement depending on delta_output sign
     W1 = W1 - learnRate*(D1);
     W2 = W2 - learnRate*(D2);
@@ -256,7 +315,8 @@ for i = 1:epochs
     % Calculate p (Regularization term)
     p = sum(sum(W1(:, 2:end).^2, 2))+sum(sum(W2(:, 2:end).^2, 2));
     % calculate Loss(or cost)    
-    J = lossFunction.getLoss(h,Y_train) + regularization*p/(2*sizeTraining);
+    J = lossFunction.getLoss(h,Y_train) + ...
+        regularization*p/(2*sizeTraining);
     
     %%% Early stop
     % Stop if error is smaller than 0.01
@@ -270,8 +330,8 @@ end
 
 %% Plot some information
 % Plot Prediction surface and Cost vs epoch curve
-testInpx1 = [-1:0.1:1];
-testInpx2 = [-1:0.1:1];
+testInpx1 = [-0.5:0.1:1.5];
+testInpx2 = [-0.5:0.1:1.5];
 [X1, X2] = meshgrid(testInpx1, testInpx2);
 testOutRows = size(X1, 1);
 testOutCols = size(X1, 2);
@@ -301,9 +361,37 @@ for row = [1:testOutRows]
     end
 end
 figure(2);
-surf(X1, X2, testOut);
+hold on;
+plane = surf(X1, X2, testOut);
+alpha(plane,.5);
+plot3(0,0,0, '-o', 'MarkerSize',12, 'MarkerFaceColor','red');
+plot3(0,1,1, '-o', 'MarkerSize',12, 'MarkerFaceColor','blue');
+plot3(1,0,1, '-o', 'MarkerSize',12, 'MarkerFaceColor','blue');
+plot3(1,1,0, '-o', 'MarkerSize',12, 'MarkerFaceColor','red');
 title('Prediction surface');
+view(-17, 36);
+hold off;
 
 figure(1);
 plot(J_vec);
 title('Cost vs epochs');
+
+%% Some tutorials
+% http://matlabgeeks.com/tips-tutorials/neural-networks-a-multilayer-perceptron-in-matlab/
+%
+% http://www.holehouse.org/mlclass/09_Neural_Networks_Learning.html
+%
+% http://github.com/rasmusbergpalm/DeepLearnToolbox
+%
+% http://ufldl.stanford.edu/wiki/index.php/Neural_Network_Vectorization
+%
+% http://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
+%
+% http://github.com/stephencwelch/Neural-Networks-Demystified
+%
+% http://outlace.com/Beginner-Tutorial-Backpropagation/
+%
+% http://briandolhansky.com/blog/2013/9/27/artificial-neural-networks-backpropagation-part-4
+% 
+% http://playground.tensorflow.org/
+%

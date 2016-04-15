@@ -39,11 +39,15 @@ dsigmoid = @(x) sigmoid(x) .* ( 1 - sigmoid(x) );
 
 %% Initialization of meta parameters
 % Learning coefficient
-learnRate = 2; % Start to oscilate with 15
+learnRate = 0.1; % Start to oscilate with 15
 regularization = 0.00;
 % Number of learning iterations
-epochs = 2000;
+epochs = 6000;
 smallStep = 0.0001;
+% Minibatch = 4(train size) is Batch Gradient descent
+% Minibatch = 1 is Stochastic Gradient descent
+batchSize = 1; 
+sizeTraining = size(X,1);
 
 %% Cost function definition
 % On this case we will use the Cross entropy cost(or loss) function, the
@@ -83,152 +87,84 @@ W2 = rand(1,3) * (2*INIT_EPISLON) - INIT_EPISLON;
 %W2 = rand(1,16) * (2*INIT_EPISLON) - INIT_EPISLON;
 
 %% Training
-for i = 1:epochs
+initialIndex = 1;
+for i = 1:epochs                
+    numIterations = floor(sizeTraining / batchSize);
+    complete_delta_1 = 0;
+    complete_delta_2 = 0;
+    h_vec = zeros(sizeTraining,1);
     
-    %%% Numeric estimation
-    % Used to debug backpropagation, it will calculate numerically the
-    % partial derivative of the cost function related to every
-    % parameter, but much slower than backpropagation, just to have an
-    % idea every time you have to calculate the partial derivative
-    % related to one specific weight, you need to calculate the cost
-    % function to every item on the training twice (J1,J2), and to
-    % calculate the cost function you need to do foward propagation on
-    % the whole network and this must be done every time the gradient
-    % descent change the weight on the local minima direction
-    %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/GradientChecking.PNG>>
-    %
-    %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/GradientChecking2.png>>
-    %
-    %
-    % http://www.coursera.org/learn/machine-learning/lecture/Y3s6r/gradient-checking
-    %
-    Thetas = [W1(:) ; W2(:)];
-    numgrad = zeros(size(Thetas));
-    perturb = zeros(size(Thetas));
-    hidden_layer_size = 2;
-    input_layer_size = 2;
-    output_layer_size = 1;
-    for p = 1:numel(Thetas)
-        % Set perturbation vector
-        perturb(p) = smallStep;
-        ThetasLoss1 = Thetas - perturb;
-        ThetasLoss2 = Thetas + perturb;
+    % Shuffle the dataset
+    ind = PartitionDataSet.getShuffledIndex(size(Y_train,1));
+    X = X(ind,:);
+    Y_train = Y_train(ind,:);
+    
+    for idxIter = 1:numIterations                
+        % Extract a batch from the training
+        if (numIterations ~= 1)
+            batchFeatures = X(idxIter,:);
+            batchLabels = Y_train(idxIter,:);
+        else
+            batchFeatures = X;
+            batchLabels = Y_train;
+        end
+    
+        %%% Backpropagation
+        % Find the partial derivative of the cost function related to all
+        % weights on the neural network (on our case 9 weights)
         
-        % Loss 1
-        % Reshape Theta on the W1,W2 format
-        nW1 = reshape(ThetasLoss1(1:hidden_layer_size * ...
-            (input_layer_size + 1)), hidden_layer_size, ...
-            (input_layer_size + 1));
-        nW2 = reshape(ThetasLoss1((1 + (hidden_layer_size * ...
-            (input_layer_size + 1))):end), output_layer_size, ...
-            (hidden_layer_size + 1));
-        
-        % Forward prop
-        A1 = [ones(sizeTraining, 1) X];
-        Z2 = A1 * nW1';
+        %%% Forward pass
+        % First Activation (Input-->Hidden)
+        A1 = [ones(batchSize, 1) batchFeatures];
+        Z2 = A1 * W1';
         A2 = sigmoid(Z2);
-        A2 = [ones(sizeTraining, 1) A2];
-        Z3 = A2 * nW2';
+        
+        % Second Activation (Hidden-->Output)
+        A2=[ones(batchSize, 1) A2];
+        Z3 = A2 * W2';
         A3 = sigmoid(Z3);
-        h1 = A3;
+        h = A3;
+        if numIterations == 4
+            h_vec(idxIter) = h;
+        else
+            h_vec = h;
+        end
         
-        % Loss 2
-        % Reshape Theta on the W1,W2 format
-        nW1 = reshape(ThetasLoss2(1:hidden_layer_size * ...
-            (input_layer_size + 1)), hidden_layer_size, ...
-            (input_layer_size + 1));
-        nW2 = reshape(ThetasLoss2((1 + (hidden_layer_size * ...
-            (input_layer_size + 1))):end), output_layer_size, ...
-            (hidden_layer_size + 1));
-        % Forward prop
-        A1 = [ones(sizeTraining, 1) X];
-        Z2 = A1 * nW1';
-        A2 = sigmoid(Z2);
-        A2 = [ones(sizeTraining, 1) A2];
-        Z3 = A2 * nW2';
-        A3 = sigmoid(Z3);
-        h2 = A3;
+        %%% Backward pass
+        % For output layer: (Why different tutorials have differ here?)
+        % delta = (1-actual output)*(desired output - actual output)
+        %delta_out_layer = A3.*(1-A3).*(A3-Y_train); % Other
+        %delta_out_layer = (Y_train-A3); % Andrew Ng
+        delta_output = (A3-batchLabels); % Andrew Ng (Invert weight update signal)
         
-        % Calculate both losses...
-        loss1 = CrossEntrInst.getLoss(h1,Y_train);
-        loss2 = CrossEntrInst.getLoss(h2,Y_train);
+        % For Hidden layer
+        Z2=[ones(batchSize,1) Z2];
+        delta_hidden=delta_output*W2.*dsigmoid(Z2);
+        % Take out first column (bias column), to force the complete delta
+        % to have the same size of it's respective weight
+        delta_hidden=delta_hidden(:,2:end);
         
-        % Compute Numerical Gradient
-        numgrad(p) = (loss2 - loss1) / (2*smallStep);
-        perturb(p) = 0;
-    end
-    numDeltaW1 = reshape(numgrad(1:hidden_layer_size * ...
-        (input_layer_size + 1)), hidden_layer_size, ...
-        (input_layer_size + 1));
-    numDeltaW2 = reshape(numgrad((1 + (hidden_layer_size * ...
-        (input_layer_size + 1))):end), output_layer_size, ...
-        (hidden_layer_size + 1));
-    
-    %%% Backpropagation
-    % Find the partial derivative of the cost function related to all
-    % weights on the neural network (on our case 9 weights)
-    
-    %%% Forward pass
-    % First Activation (Input-->Hidden)
-    A1 = [ones(sizeTraining, 1) X];
-    Z2 = A1 * W1';
-    A2 = sigmoid(Z2);
-    
-    % Second Activation (Hidden-->Output)
-    A2=[ones(sizeTraining, 1) A2];
-    Z3 = A2 * W2';
-    A3 = sigmoid(Z3);
-    h = A3;
-    
-    %%% Backward pass
-    % For output layer: (Why different tutorials have differ here?)
-    % delta = (1-actual output)*(desired output - actual output)
-    %delta_out_layer = A3.*(1-A3).*(A3-Y_train); % Other
-    %delta_out_layer = (Y_train-A3); % Andrew Ng
-    delta_output = (A3-Y_train); % Andrew Ng (Invert weight update signal)
-    
-    % For Hidden layer
-    Z2=[ones(sizeTraining,1) Z2];
-    delta_hidden=delta_output*W2.*dsigmoid(Z2);
-    % Take out first column (bias column), to force the complete delta
-    % to have the same size of it's respective weight
-    delta_hidden=delta_hidden(:,2:end);
-    
-    % Calculate complete delta for every weight
-    complete_delta_1 = (delta_hidden'*A1);
-    complete_delta_2 = (delta_output'*A2);
-    
-    % Computing the partial derivatives with regularization, here we're
-    % avoiding regularizing the bias term by substituting the first col of
-    % weights with zeros
-    p1 = ((regularization/sizeTraining)* [zeros(size(W1, 1), 1) W1(:, 2:end)]);
-    p2 = ((regularization/sizeTraining)* [zeros(size(W2, 1), 1) W1(2, 2:end)]);
-    D1 = (complete_delta_1 ./ sizeTraining) + p1;
-    D2 = (complete_delta_2 ./ sizeTraining) + p2;
-    
-    %%% Check backpropagation
-    % Compare backpropagation partial derivatives with numerical gradients
-    % We should do this check just few times. This is because calculating
-    % the numeric gradient every time is heavy.
-    errorBackPropD1 = sum(sum(abs(D1 - numDeltaW1)));
-    errorBackPropD2 = sum(sum(abs(D2 - numDeltaW2)));
-    % Stop if backpropagation error bigger than 0.0001
-    if (errorBackPropD1 > 0.001) || (errorBackPropD2 > 0.001)
-        fprintf('Backpropagation error %d %d\n',errorBackPropD1,errorBackPropD2);
-        pause;
-    end
-    
-    %%% Weight Update
-    % Gradient descent Update after all training set deltas are calculated
-    % Increment or decrement depending on delta_output sign
-    % Stochastic Gradient descent Update at every new input....
-    % The stochastic gradient descent with luck converge faster ...
-    % Increment or decrement depending on delta_output sign
-    W1 = W1 - learnRate*(D1);
-    W2 = W2 - learnRate*(D2);
-    
+        % Calculate complete delta for every weight
+        complete_delta_1 = complete_delta_1 + (delta_hidden'*A1);
+        complete_delta_2 = complete_delta_2 + (delta_output'*A2);
+        
+        % Computing the partial derivatives with regularization, here we're
+        % avoiding regularizing the bias term by substituting the first col of
+        % weights with zeros
+        p1 = ((regularization/sizeTraining)* [zeros(size(W1, 1), 1) W1(:, 2:end)]);
+        p2 = ((regularization/sizeTraining)* [zeros(size(W2, 1), 1) W1(2, 2:end)]);
+        D1 = (complete_delta_1 ./ sizeTraining) + p1;
+        D2 = (complete_delta_2 ./ sizeTraining) + p2;
+
+        %%% Weight Update
+        % Gradient descent Update after all training set deltas are calculated
+        % Increment or decrement depending on delta_output sign
+        % Stochastic Gradient descent Update at every new input....
+        % The stochastic gradient descent with luck converge faster ...
+        % Increment or decrement depending on delta_output sign
+        W1 = W1 - learnRate*(D1);
+        W2 = W2 - learnRate*(D2);                
+    end            
     %%% Calculate cost
     % After all calculations on the epoch calculate the cost function
     % Calculate Cost function output
@@ -236,16 +172,13 @@ for i = 1:epochs
     p = sum(sum(W1(:, 2:end).^2, 2))+sum(sum(W2(:, 2:end).^2, 2));
     % calculate J
     %J = sum(sum((-Y_train).*log(h) - (1-Y_train).*log(1-h), 2))/sizeTraining + regularization*p/(2*sizeTraining);
-    J = CrossEntrInst.getLoss(h,Y_train) + regularization*p/(2*sizeTraining);
+    J = lossFunction.getLoss(h_vec,Y_train) + regularization*p/(2*sizeTraining);
     J_vec(i) = J;
     %     % Break if error is already low
     %     if J < 0.08
     %         break;
     %     end
 end
-
-fprintf('Outputs\n');
-disp(round(A3));
 
 %% Plot some information
 % Plot Prediction surface and Cost vs epoch curve
@@ -269,6 +202,10 @@ for row = [1:testOutRows]
         Z3 = A2 * W2';
         A3 = sigmoid(Z3);
         testOut(row, col) = A3;
+        
+        if isequal(test,[0 0]) || isequal(test,[0 1]) || isequal(test,[1 0]) || isequal(test,[1 1])
+           fprintf('%d XOR %d ==> %d\n',test(1),test(2),round(A3));            
+        end
     end
 end
 figure(2);

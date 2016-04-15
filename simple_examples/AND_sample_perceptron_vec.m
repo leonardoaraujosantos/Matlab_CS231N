@@ -1,4 +1,4 @@
-%% Vectorized XOR example
+%% Vectorized AND example
 % Implement a simple Neural network to handle the XOR problem with a 3
 % layer perceptron (MLP) with 2 neurons on the input, 2 on the hidden layer
 % and 1 on the output, we also use bias.
@@ -29,8 +29,8 @@
 %
 % XOR input for x1 and x2
 X = [0 0; 0 1; 1 0; 1 1];
-% Desired output of XOR
-Y_train = [0;1;1;0];
+% Desired output of AND
+Y_train = [0;0;0;1];
 sizeTraining = size(X,1);
 
 %% Define the sigmoid and dsigmoid
@@ -41,7 +41,7 @@ dsigmoid = @(x) sigmoid(x) .* ( 1 - sigmoid(x) );
 %% Initialization of meta parameters
 % Learning coefficient
 learnRate = 2; % Start to oscilate with 15
-regularization = 0.01;
+regularization = 0.05;
 % Number of learning iterations
 epochs = 2000;
 smallStep = 0.0001;
@@ -58,7 +58,7 @@ smallStep = 0.0001;
 % http://www.cs.nyu.edu/~yann/talks/lecun-20071207-nonconvex.pdf
 %
 input_layer_size = 2;
-hidden_layer_size = 2;
+hidden_layer_size = 1;
 output_layer_size = 1;
 
 %% Cost function definition
@@ -369,9 +369,9 @@ hold on;
 plane = surf(X1, X2, testOut);
 alpha(plane,.5);
 plot3(0,0,0, '-o', 'MarkerSize',12, 'MarkerFaceColor','red');
-plot3(0,1,1, '-o', 'MarkerSize',12, 'MarkerFaceColor','blue');
-plot3(1,0,1, '-o', 'MarkerSize',12, 'MarkerFaceColor','blue');
-plot3(1,1,0, '-o', 'MarkerSize',12, 'MarkerFaceColor','red');
+plot3(0,1,0, '-o', 'MarkerSize',12, 'MarkerFaceColor','red');
+plot3(1,0,0, '-o', 'MarkerSize',12, 'MarkerFaceColor','red');
+plot3(1,1,1, '-o', 'MarkerSize',12, 'MarkerFaceColor','blue');
 title('Prediction surface');
 view(-29, 52);
 hold off;

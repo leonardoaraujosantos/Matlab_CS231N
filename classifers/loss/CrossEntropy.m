@@ -1,6 +1,7 @@
 classdef CrossEntropy < BaseLossFunction
     % CrossEntropy Loss implementation class        
     % https://en.wikipedia.org/wiki/Cross_entropy
+    % http://stats.stackexchange.com/questions/167787/cross-entropy-cost-function-in-neural-network
     methods
         % Here the smalles value will be zero (Perfect, no loss) and the
         % biggest value is 1 (100%)

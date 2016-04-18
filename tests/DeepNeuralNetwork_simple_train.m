@@ -9,17 +9,24 @@
 %
 % MLP train for XOR
 X = [0 0; 0 1; 1 0; 1 1];
-Y = [ 0; 1; 1; 0];
+Y = [ 0; 1; 1; 0;];
+
+% Reset random number generator state
+rng(0,'v5uniform');
 
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
 layers <= struct('type',LayerType.FullyConnected,'numNeurons',2,'ActivationType',ActivationType.Sigmoid);
 layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',1, 'numEpochs', 2000, 'RegularizationL1',0.001));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',2, 'numEpochs', 2000, 'RegularizationL1',0.01));
 % Force a batch size
 solver.batch_size = 4;
-nn = DeepNeuralNetwork(layers,solver);
+% Get a loss function object to be used on the training
+lossFunction = CrossEntropy();
+nn = DeepNeuralNetwork(layers,solver,lossFunction);
+%nn.layers.getLayer(1).weights = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
+%nn.layers.getLayer(2).weights = [-0.1433   -0.4840   -0.6903];
 
 % Train the neural network with the given solver (Type gradient descent)
 nn.train(X, Y);
@@ -39,8 +46,8 @@ fprintf('%d XOR %d = %d\n',Xt(3,1), Xt(3,2), round(scores));
 fprintf('%d XOR %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
 
 % Plot Prediction surface
-testInpx1 = [-1:0.1:1];
-testInpx2 = [-1:0.1:1];
+testInpx1 = [-0.5:0.1:1.5];
+testInpx2 = [-0.5:0.1:1.5];
 [X1, X2] = meshgrid(testInpx1, testInpx2);
 testOutRows = size(X1, 1);
 testOutCols = size(X1, 2);
@@ -56,4 +63,7 @@ end
 figure(2);
 surf(X1, X2, testOut);
 title('Prediction surface');
+figure(1);
+plot(nn.lossVector);
+title('Cost vs epochs');
 

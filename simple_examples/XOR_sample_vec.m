@@ -142,8 +142,8 @@ for i = 1:epochs
         nW2 = reshape(ThetasLoss1((1 + (hidden_layer_size * ...
             (input_layer_size + 1))):end), output_layer_size, ...
             (hidden_layer_size + 1));
-        p_loss1 = sum(sum(nW1(:, 2:end).^2, 2))+ ...
-            sum(sum(nW2(:, 2:end).^2, 2));        
+        p_loss1 = sum(sum(nW1(:, 2:end).^2))+ ...
+            sum(sum(nW2(:, 2:end).^2));        
         
         % Forward prop
         A1 = [ones(sizeTraining, 1) X];
@@ -162,8 +162,8 @@ for i = 1:epochs
         nW2 = reshape(ThetasLoss2((1 + (hidden_layer_size * ...
             (input_layer_size + 1))):end), output_layer_size, ...
             (hidden_layer_size + 1));
-        p_loss2 = sum(sum(nW1(:, 2:end).^2, 2))+...
-            sum(sum(nW2(:, 2:end).^2, 2));        
+        p_loss2 = sum(sum(nW1(:, 2:end).^2))+...
+            sum(sum(nW2(:, 2:end).^2));        
         
         % Forward prop
         A1 = [ones(sizeTraining, 1) X];
@@ -176,9 +176,9 @@ for i = 1:epochs
         
         % Calculate both losses...        
         loss1 = lossFunction.getLoss(h1,Y_train) + ...
-            regularization*p_loss1/(2*sizeTraining);
+            (regularization/(2*sizeTraining)).*p_loss1;
         loss2 = lossFunction.getLoss(h2,Y_train) + ...
-            regularization*p_loss2/(2*sizeTraining);
+            (regularization/(2*sizeTraining)).*p_loss2;        
         
         % Compute Numerical Gradient
         numgrad(p) = (loss2 - loss1) / (2*smallStep);
@@ -261,7 +261,7 @@ for i = 1:epochs
     
     % Computing the partial derivatives with regularization, here we're
     % avoiding regularizing the bias term by substituting the first col of
-    % weights with zeros
+    % weights with zeros and taking the first collumn of W
     p1 = ((regularization/sizeTraining)* ...
         [zeros(size(W1, 1), 1) W1(:, 2:end)]);
     p2 = ((regularization/sizeTraining)* ...
@@ -317,10 +317,11 @@ for i = 1:epochs
     % get bigger values during training
     %
     % Calculate p (Regularization term)
-    p = sum(sum(W1(:, 2:end).^2, 2))+sum(sum(W2(:, 2:end).^2, 2));
+    p = sum(sum(W1(:, 2:end).^2))+sum(sum(W2(:, 2:end).^2));
     % calculate Loss(or cost)    
     J = lossFunction.getLoss(h,Y_train) + ...
-        regularization*p/(2*sizeTraining);
+        (regularization/(2*sizeTraining)).*p;
+    
     
     %%% Early stop
     % Stop if error is smaller than 0.01

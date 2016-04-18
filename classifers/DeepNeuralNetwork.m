@@ -22,7 +22,8 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
     properties
         layers
         solver
-        lossVector
+        lossVector   
+        trainingLossFunction
     end
     
     methods (Access = 'private')
@@ -65,7 +66,8 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             deltas = cell(obj.layers.getNumLayers-1,1);
             for idxLayer=1:obj.layers.getNumLayers-1
                 curLayer = obj.layers.getLayer(idxLayer);
-                deltas{idxLayer} = prevDelta{idxLayer} + (smallDelta{idxLayer+1}' * [ones(sizeTraining, 1) curLayer.activations]);                
+                %deltas{idxLayer} = prevDelta{idxLayer} + (smallDelta{idxLayer+1}' * [ones(sizeTraining, 1) curLayer.activations]);                
+                deltas{idxLayer} = (smallDelta{idxLayer+1}' * [ones(sizeTraining, 1) curLayer.activations]);                
             end
         end
         
@@ -91,9 +93,10 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
     end
     
     methods (Access = 'public')
-        function obj = DeepNeuralNetwork(layers, solver)
+        function obj = DeepNeuralNetwork(layers, solver, lossFunction)
             obj.layers = layers;
             obj.solver = solver;
+            obj.trainingLossFunction = lossFunction;
             
             % Initialize randomicaly all the weights
             % Symmetry breaking (Coursera Machine learning course)
@@ -120,8 +123,8 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             
             % Shuffle the dataset
             ind = PartitionDataSet.getShuffledIndex(size(Y_vec,1));
-            X_vec = X_vec(ind,:);
-            Y_vec = Y_vec(ind,:);
+            %X_vec = X_vec(ind,:);
+            %Y_vec = Y_vec(ind,:);
             
             % If needed extract a mini-batch
             miniBatchSize = obj.solver.batch_size;
@@ -134,29 +137,18 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             for idxEpoch=1:epochs
                 % Extract a chunk(if possible) from the training
                 if (initialIndex+miniBatchSize < size(X_vec,1))
-                    batchFeatures = X_vec(initialIndex:initialIndex+miniBatchSize,:);
-                    batchLabels = Y_vec(initialIndex:initialIndex+miniBatchSize,:);
+                    batchFeatures = X_vec(initialIndex:initialIndex+miniBatchSize-1,:);
+                    batchLabels = Y_vec(initialIndex:initialIndex+miniBatchSize-1,:);
                     initialIndex = initialIndex + miniBatchSize;
                 else
+                    % Get the rest
                     batchFeatures = X_vec(initialIndex:end,:);
-                    batchLabels = Y_vec(initialIndex:end,:);
+                    batchLabels = Y_vec(initialIndex:end,:);                    
                 end
-                sizeBatch = size(batchFeatures,1);
-                
+                                
                 % Vectorized backpropagation
                 deltas = obj.backPropagate(batchFeatures, batchLabels, deltas);
                 
-                % Iterate on the whole training
-%                 for idxTrain=1:sizeBatch
-%                     % Select sample from dataset
-%                     sampleFeatures = batchFeatures(idxTrain,:);
-%                     sampleTarget = batchLabels(idxTrain,:);
-%                     
-%                     % Run the back propagation to get the partial
-%                     % derivatives of the cost function related to every
-%                     % parameter on the neural network
-%                     deltas = obj.backPropagate(sampleFeatures, sampleTarget, deltas);                                        
-%                 end
                 % On Gradient Descent(Batch descent) the updates of the are
                 % weights is made after iterating on the whole training 
                 % set, on Stochastic Gradient Descent (online training) we
@@ -165,16 +157,17 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 % samples....
                 % Update the weights on the minima (hopefully global
                     % minima) direction
+                numItemsBatch = size(batchFeatures,1);
                 for idxLayer=1:obj.layers.getNumLayers-1
                     curLayer = obj.layers.getLayer(idxLayer); 
-                    curLayer.weights = obj.solver.optimize(curLayer.weights,deltas{idxLayer});                    
+                    curLayer.weights = obj.solver.optimize(curLayer.weights,deltas{idxLayer}./numItemsBatch);                    
                 end
                 
                 % After every epoch calculate the error function
-                Y_train = batchLabels;
-                %J = sum(sum((-Y_train).*log(h) - (1-Y_train).*log(1-h), 2))/sizeBatch + regularization*p/(2*sizeBatch);
-                %J = sum(sum((-Y_train).*log(h) - (1-Y_train).*log(1-h), 2))/sizeBatch;
-                %J_vec(idxEpoch) = J;
+                lastLayer = obj.layers.getLayer(obj.layers.getNumLayers);
+                h = lastLayer.activations;
+                J = obj.trainingLossFunction.getLoss(h,batchLabels);
+                obj.lossVector(idxEpoch) = J;                
             end
             timeElapsed = toc;
         end

@@ -1,3 +1,5 @@
+% Vanilla implementation (Non-vectorized convolution)
+% http://stackoverflow.com/questions/14864315/alternative-to-conv2-in-matlab
 function B = convolve2d(A, k)
 [r c] = size(A);
 [m n] = size(k);

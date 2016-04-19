@@ -18,7 +18,7 @@
 %
 % ${\frac{df(x)}{dx}\ = 4x^3-9x^2}$
 %
-%% Use matlab symbolic engine to get the derivatives
+%%% Use matlab symbolic engine to get the derivatives
 % http://www.mathworks.com/help/symbolic/find-asymptotes-critical-and-inflection-points.html
 % Define symbol x
 syms x;
@@ -42,7 +42,7 @@ plot(double(crit_pts), double(subs(f_x,crit_pts)),'ro');
 text(0,5,'Local minima');
 text(2.3,-4,'Global minima');
 axisPlot = gca; % current axes
-%% Generate anonymous matlab function from symbolic expression
+%%% Generate anonymous matlab function from symbolic expression
 % Doing by hand: f_derivative = @(x) 4*x.^3 - 9*x.^2;
 %
 % http://www.mathworks.com/help/matlab/matlab_prog/anonymous-functions.html?refresh=true
@@ -52,7 +52,7 @@ axisPlot = gca; % current axes
 f_derivative = matlabFunction(deriv_f_x);
 f_x_numeric = matlabFunction(f_x);
 
-%% Using gradient descent solver
+%%% Using gradient descent solver
 % Starting at x=1 (Don't start with zero)
 x_new = 0.5; % The algorithm starts at x=1
 % If we start from x=-1 we will stuck on a local minima (=~0)
@@ -86,7 +86,7 @@ hold off
 %
 % ${\frac{df(x)}{dx}\ = 4x^3-9x^2}$
 %
-%% Use matlab symbolic engine to get the derivatives
+%%% Use matlab symbolic engine to get the derivatives
 % http://www.mathworks.com/help/symbolic/find-asymptotes-critical-and-inflection-points.html
 % Define symbol x
 syms x;
@@ -111,7 +111,7 @@ text(0,5,'Local minima');
 text(2.3,-4,'Global minima');
 axisPlot = gca; % current axes
 
-%% Generate anonymous matlab function from symbolic expression
+%%% Generate anonymous matlab function from symbolic expression
 % Doing by hand: f_derivative = @(x) 4*x.^3 - 9*x.^2;
 %
 % http://www.mathworks.com/help/matlab/matlab_prog/anonymous-functions.html?refresh=true
@@ -120,7 +120,7 @@ axisPlot = gca; % current axes
 %
 f_derivative = matlabFunction(deriv_f_x);
 
-%% Using gradient descent solver
+%%% Using gradient descent solver
 % Starting at x=-2 Don't start with zero, on this case we can stuck on a
 % local minima at x=0
 x_new = -2;

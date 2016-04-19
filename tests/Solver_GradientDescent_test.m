@@ -119,6 +119,7 @@ axisPlot = gca; % current axes
 % http://www.mathworks.com/help/symbolic/generate-matlab-functions.html
 %
 f_derivative = matlabFunction(deriv_f_x);
+f_x_numeric = matlabFunction(f_x);
 
 %%% Using gradient descent solver
 % Starting at x=-2 Don't start with zero, on this case we can stuck on a

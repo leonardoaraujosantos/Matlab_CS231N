@@ -58,7 +58,7 @@ x_new = 0.5; % The algorithm starts at x=1
 % If we start from x=-1 we will stuck on a local minima (=~0)
 
 % Create solver of type Gradient descent
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.01, 'numEpochs', 500));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.01, 'numEpochs', 500, 'RegularizationL1',0.00));
 
 % Optimize
 x_new_vec = zeros(1,solver.epochs);
@@ -126,7 +126,7 @@ f_derivative = matlabFunction(deriv_f_x);
 x_new = -2;
 
 % Create solver of type Gradient descent
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.01, 'numEpochs', 500));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.01, 'numEpochs', 500, 'RegularizationL1',0.00));
 
 % Optimize
 x_new_vec = zeros(1,solver.epochs);

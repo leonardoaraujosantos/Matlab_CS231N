@@ -20,7 +20,7 @@ layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
 layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.011, 'numEpochs', 30));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.011, 'numEpochs', 30, 'RegularizationL1',0.00));
 
 nn = DeepNeuralNetwork(layers,solver);
 % Training part is not to be tested yet so we put the weights manually...
@@ -50,7 +50,7 @@ layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
 layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.011, 'numEpochs', 30));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.011, 'numEpochs', 30, 'RegularizationL1',0.00));
 
 nn = DeepNeuralNetwork(layers,solver);
 % Training part is not to be tested yet so we put the weights manually...
@@ -82,7 +82,7 @@ layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
 layers <= struct('type',LayerType.FullyConnected,'numNeurons',2,'ActivationType',ActivationType.Sigmoid);
 layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.011, 'numEpochs', 30));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.011, 'numEpochs', 30, 'RegularizationL1',0.00));
 
 nn = DeepNeuralNetwork(layers,solver);
 % Training part is not to be tested yet so we put the weights manually...

@@ -93,10 +93,12 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
     end
     
     methods (Access = 'public')
-        function obj = DeepNeuralNetwork(layers, solver, lossFunction)
+        function obj = DeepNeuralNetwork(layers, solver, varargin)
             obj.layers = layers;
             obj.solver = solver;
-            obj.trainingLossFunction = lossFunction;
+            if nargin > 2
+                obj.trainingLossFunction = varargin{1};
+            end
             
             % Initialize randomicaly all the weights
             % Symmetry breaking (Coursera Machine learning course)
@@ -108,7 +110,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                     currLayer.weights = rand(nextLayer.getNumNeurons,currLayer.getNumNeurons+1) * (2*INIT_EPISLON) - INIT_EPISLON;
                 end
             end
-        end
+        end                
         
         function [timeElapsed] = train(obj, X_vec, Y_vec)
             tic;

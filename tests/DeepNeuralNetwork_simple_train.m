@@ -9,7 +9,7 @@
 %
 % MLP train for XOR
 X = [0 0; 0 1; 1 0; 1 1];
-Y = [ 0; 1; 1; 0;];
+Y = [ 0; 1; 1; 0];
 
 % Reset random number generator state
 rng(0,'v5uniform');
@@ -19,7 +19,7 @@ layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
 layers <= struct('type',LayerType.FullyConnected,'numNeurons',2,'ActivationType',ActivationType.Sigmoid);
 layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',2, 'numEpochs', 2000, 'RegularizationL1',0.01));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.6, 'numEpochs', 2000, 'RegularizationL1',0.01));
 % Force a batch size
 solver.batch_size = 4;
 % Get a loss function object to be used on the training

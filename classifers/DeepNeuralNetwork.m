@@ -22,7 +22,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
     properties
         layers
         solver
-        lossVector   
+        lossVector
         trainingLossFunction
     end
     
@@ -30,7 +30,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
         % Find the partial derivative of the cost function related to every
         % parameter on the network (Vectorized form)
         function [deltas] = backPropagate(obj, feature, target, prevDelta)
-            sizeTraining = length(feature(:,1));
+            sizeTraining = length(feature(:,1));            
             %% Do the forward propagation of the DNN
             % Set the input layer to the new X vector (or features)
             firstLayer = obj.layers.getLayer(1);
@@ -51,23 +51,23 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 % output
                 if curLayer.getType == LayerType.Output
                     % Calculate difference for output layer
-                    smallDelta{idxLayer} = (curLayer.getActivations - target);                    
+                    smallDelta{idxLayer} = (curLayer.getActivations - target);
                 else
                     % Calculate difference for hidden layer
                     smallDelta{idxLayer} = (smallDelta{idxLayer+1} * (curLayer.weights)) .* curLayer.backPropagate();
-                    % Take the bias 
+                    % Take the bias
                     smallDeltaNoBias = smallDelta{idxLayer};
                     smallDeltaNoBias = smallDeltaNoBias(:,2:end);
                     smallDelta{idxLayer} = smallDeltaNoBias;
                 end
-            end                        
+            end
             
             % Calculate the complete Deltas
             deltas = cell(obj.layers.getNumLayers-1,1);
             for idxLayer=1:obj.layers.getNumLayers-1
                 curLayer = obj.layers.getLayer(idxLayer);
-                %deltas{idxLayer} = prevDelta{idxLayer} + (smallDelta{idxLayer+1}' * [ones(sizeTraining, 1) curLayer.activations]);                
-                deltas{idxLayer} = (smallDelta{idxLayer+1}' * [ones(sizeTraining, 1) curLayer.activations]);                
+                %deltas{idxLayer} = prevDelta{idxLayer} + (smallDelta{idxLayer+1}' * [ones(sizeTraining, 1) curLayer.activations]);
+                deltas{idxLayer} = (smallDelta{idxLayer+1}' * [ones(sizeTraining, 1) curLayer.activations]);
             end
         end
         
@@ -105,7 +105,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 currLayer = layers.getLayer(idx);
                 if (idx+1) <= layers.getNumLayers
                     nextLayer = layers.getLayer(idx+1);
-                    currLayer.weights = rand(nextLayer.getNumNeurons,currLayer.getNumNeurons+1) * (2*INIT_EPISLON) - INIT_EPISLON;                    
+                    currLayer.weights = rand(nextLayer.getNumNeurons,currLayer.getNumNeurons+1) * (2*INIT_EPISLON) - INIT_EPISLON;
                 end
             end
         end
@@ -118,13 +118,13 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             deltas = cell(obj.layers.getNumLayers-1,1);
             for idxLayer=1:obj.layers.getNumLayers-1
                 curLayer = obj.layers.getLayer(idxLayer);
-                deltas{idxLayer} = zeros(size(curLayer.weights));                
+                deltas{idxLayer} = zeros(size(curLayer.weights));
             end
             
             % Shuffle the dataset
             ind = PartitionDataSet.getShuffledIndex(size(Y_vec,1));
-            %X_vec = X_vec(ind,:);
-            %Y_vec = Y_vec(ind,:);
+            X_vec = X_vec(ind,:);
+            Y_vec = Y_vec(ind,:);
             
             % If needed extract a mini-batch
             miniBatchSize = obj.solver.batch_size;
@@ -134,40 +134,47 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             % Initialize loss vector
             obj.lossVector = zeros(1,epochs);
             
+            iterationsToCompleteTraining = size(X_vec,1)/miniBatchSize;
+            iterCounter=1;
+            
             for idxEpoch=1:epochs
-                % Extract a chunk(if possible) from the training
-                if (initialIndex+miniBatchSize < size(X_vec,1))
-                    batchFeatures = X_vec(initialIndex:initialIndex+miniBatchSize-1,:);
-                    batchLabels = Y_vec(initialIndex:initialIndex+miniBatchSize-1,:);
-                    initialIndex = initialIndex + miniBatchSize;
-                else
-                    % Get the rest
-                    batchFeatures = X_vec(initialIndex:end,:);
-                    batchLabels = Y_vec(initialIndex:end,:);                    
-                end
-                                
-                % Vectorized backpropagation
-                deltas = obj.backPropagate(batchFeatures, batchLabels, deltas);
-                
-                % On Gradient Descent(Batch descent) the updates of the are
-                % weights is made after iterating on the whole training 
-                % set, on Stochastic Gradient Descent (online training) we
-                % change the weights after every training example, on the
-                % mini-batch we update the weights after some training
-                % samples....
-                % Update the weights on the minima (hopefully global
+                initialIndex = 1;
+                for idxIter=1:iterationsToCompleteTraining
+                    % Extract a chunk(if possible) from the training
+                    if (initialIndex+miniBatchSize < size(X_vec,1))
+                        batchFeatures = X_vec(initialIndex:initialIndex+miniBatchSize-1,:);
+                        batchLabels = Y_vec(initialIndex:initialIndex+miniBatchSize-1,:);
+                        initialIndex = initialIndex + miniBatchSize;
+                    else
+                        % Get the rest
+                        batchFeatures = X_vec(initialIndex:end,:);
+                        batchLabels = Y_vec(initialIndex:end,:);
+                    end
+                    
+                    % Vectorized backpropagation
+                    deltas = obj.backPropagate(batchFeatures, batchLabels, deltas);
+                    
+                    % On Gradient Descent(Batch descent) the updates of the are
+                    % weights is made after iterating on the whole training
+                    % set, on Stochastic Gradient Descent (online training) we
+                    % change the weights after every training example, on the
+                    % mini-batch we update the weights after some training
+                    % samples....
+                    % Update the weights on the minima (hopefully global
                     % minima) direction
-                numItemsBatch = size(batchFeatures,1);
-                for idxLayer=1:obj.layers.getNumLayers-1
-                    curLayer = obj.layers.getLayer(idxLayer); 
-                    curLayer.weights = obj.solver.optimize(curLayer.weights,deltas{idxLayer}./numItemsBatch);                    
+                    numItemsBatch = size(batchFeatures,1);                    
+                    for idxLayer=1:obj.layers.getNumLayers-1
+                        curLayer = obj.layers.getLayer(idxLayer);
+                        curLayer.weights = obj.solver.optimize(curLayer.weights,deltas{idxLayer}./numItemsBatch);
+                    end
+                    
+                    % After every epoch calculate the error function
+                    lastLayer = obj.layers.getLayer(obj.layers.getNumLayers);
+                    h = lastLayer.activations;
+                    J = obj.trainingLossFunction.getLoss(h,batchLabels);
+                    obj.lossVector(iterCounter) = J;
+                    iterCounter = iterCounter + 1;
                 end
-                
-                % After every epoch calculate the error function
-                lastLayer = obj.layers.getLayer(obj.layers.getNumLayers);
-                h = lastLayer.activations;
-                J = obj.trainingLossFunction.getLoss(h,batchLabels);
-                obj.lossVector(idxEpoch) = J;                
             end
             timeElapsed = toc;
         end

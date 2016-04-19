@@ -19,7 +19,7 @@ layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
 layers <= struct('type',LayerType.FullyConnected,'numNeurons',2,'ActivationType',ActivationType.Sigmoid);
 layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.6, 'numEpochs', 2000, 'RegularizationL1',0.01));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',2, 'numEpochs', 2000, 'RegularizationL1',0.01));
 % Force a batch size
 solver.batch_size = 4;
 % Get a loss function object to be used on the training
@@ -29,7 +29,8 @@ nn = DeepNeuralNetwork(layers,solver,lossFunction);
 %nn.layers.getLayer(2).weights = [-0.1433   -0.4840   -0.6903];
 
 % Train the neural network with the given solver (Type gradient descent)
-nn.train(X, Y);
+timeTrain = nn.train(X, Y);
+fprintf('Time to train %2.1d seconds\n',timeTrain);
 
 % Weights for XNOR (Comment this, if you train automatically)
 %layers.getLayer(1).weights = [-30 20 20; 10 -20 -20]; 

@@ -73,3 +73,41 @@ subplot(1,2,2);
 d_outFunc = ReluActivation.back_prop(X);
 plot(X,d_outFunc);
 title('Backprop Relu');
+
+%% Test 4: Test Sigmod with symbolic version
+% $f(x) = \frac{1}{(1+e^{x})}$
+% 
+% <include>SigmoidActivation.m</include>
+%
+
+% Define and calculate the derivatives of the sigmoid
+syms x
+f_x = 1/(1+exp(-x));
+d_f_x = diff(f_x,x);
+% Convert to a anonymous matlab function
+f_x_mat = matlabFunction(f_x);
+d_f_x_mat = matlabFunction(d_f_x);
+
+X = -10:0.1:10;
+outFunc = SigmoidActivation.forward_prop(X);
+hFig = figure(1);
+set(hFig, 'Position', [0 0 800 500])
+subplot(2,2,1);
+plot(X,outFunc);
+title('Sigmoid');
+xlabel('X');
+ylim([0 1]);
+subplot(2,2,2);
+d_outFunc = SigmoidActivation.back_prop(X);
+plot(X,d_outFunc);
+title('Backprop Sigmoid');
+
+subplot(2,2,3);
+plot(X,f_x_mat(X));
+title('Sigmoid symbolic');
+xlabel('X');
+ylim([0 1]);
+
+subplot(2,2,4);
+plot(X,d_f_x_mat(X));
+title('Symbolic derivative of Sigmoid');

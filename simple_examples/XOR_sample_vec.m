@@ -41,9 +41,9 @@ dsigmoid = @(x) sigmoid(x) .* ( 1 - sigmoid(x) );
 %% Initialization of meta parameters
 % Learning coefficient
 learnRate = 2; % Start to oscilate with 15
-regularization = 0.01;
+regularization = 0.00;
 % Number of learning iterations
-epochs = 2000;
+epochs = 1000;
 smallStep = 0.0001;
 
 %% Define neural network structure
@@ -100,8 +100,8 @@ W2 = rand(output_layer_size,hidden_layer_size+1) ...
     * (2*INIT_EPISLON) - INIT_EPISLON;
 % Override manually to debug both vectorized and non vectorized
 % implementation
-%W1 = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
-%W2 = [-0.1433   -0.4840   -0.6903];
+W1 = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
+W2 = [-0.1433   -0.4840   -0.6903];
 
 %% Training
 for i = 1:epochs
@@ -249,6 +249,7 @@ for i = 1:epochs
     % Hidden layer, same idea of adding collumn of ones to include bias
     Z2=[ones(sizeTraining,1) Z2];    
     % Observe that we use the delta of the next layer
+    % By the way dsigmoid(Z2) == A2 .* (1 - A2) (Could be slightly faster)
     delta_hidden=delta_output*W2.*dsigmoid(Z2);
     
     % Take out first column (bias column), to force the complete delta

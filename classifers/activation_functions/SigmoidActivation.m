@@ -6,12 +6,12 @@ classdef SigmoidActivation < BaseActivationFunction
     % https://github.com/batra-mlp-lab/divmbest/blob/575b29142eb87bc690dc9629ee35d7e35f3a1f9e/pascalseg/external_src/cpmc_release1/external_code/vlfeats/toolbox/special/vl_sigmoid.m
     methods(Static)
         function [result] = forward_prop(x)
-            result = single(1./(1+exp(-x)));
+            result = (1./(1+exp(-x)));
         end
         
         function [result] = back_prop(x)
             t = single(1./(1+exp(-x)));
-            result  = single(t .* (1 - t));
+            result  = (t .* (1 - t));
         end
     end
     

@@ -41,7 +41,7 @@ dsigmoid = @(x) sigmoid(x) .* ( 1 - sigmoid(x) );
 %% Initialization of meta parameters
 % Learning coefficient
 learnRate = 2; % Start to oscilate with 15
-regularization = 0.00;
+regularization = 0.0005;
 % Number of learning iterations
 epochs = 1000;
 smallStep = 0.0001;
@@ -241,16 +241,18 @@ for i = 1:epochs
     % <</home/leo/work/Matlab_CS231N/docs/imgs/BackwardPropagation.png>>
     %
     %
-    % Output layer: (Why different tutorials have differ here?)    
-    %delta_out_layer = A3.*(1-A3).*(A3-Y_train); % Other
-    %delta_out_layer = (Y_train-A3); % Andrew Ng
+    % Output layer: (Why different tutorials have differ here?)  
+    % Basically here is the derivative of the cost function related to the
+    % neural network output, so this part here depends a lot on the cost
+    % function that you choose    
     delta_output = (A3-Y_train); % Andrew Ng (Invert weight update signal)
     
     % Hidden layer, same idea of adding collumn of ones to include bias
     Z2=[ones(sizeTraining,1) Z2];    
     % Observe that we use the delta of the next layer
     % By the way dsigmoid(Z2) == A2 .* (1 - A2) (Could be slightly faster)
-    delta_hidden=delta_output*W2.*dsigmoid(Z2);
+    delta_hidden=(delta_output*W2).*dsigmoid(Z2);    
+    %delta_hidden=delta_output*W2.*(A2 .* (1 - A2));
     
     % Take out first column (bias column), to force the complete delta
     % to have the same size of it's respective weight
@@ -400,4 +402,20 @@ title('Cost vs epochs');
 % http://briandolhansky.com/blog/2013/9/27/artificial-neural-networks-backpropagation-part-4
 % 
 % http://playground.tensorflow.org/
+% 
+% http://caffe.berkeleyvision.org/tutorial/forward_backward.html
+%
+% http://caffe.berkeleyvision.org/tutorial/solver.html
+%
+% http://courses.cs.tau.ac.il/Caffe_workshop/Bootcamp/pdf_lectures/Lecture%203%20CNN%20-%20backpropagation.pdf
+%
+% http://www.vlfeat.org/matconvnet/matconvnet-manual.pdf
+%
+% https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
+%
+% http://math.stackexchange.com/questions/945871/derivative-of-softmax-loss-function
+%
+% http://learning.cs.toronto.edu/wp-content/uploads/2015/02/torch_tutorial.pdf
+%
+% http://hunch.net/~nyoml/torch7.pdf
 %

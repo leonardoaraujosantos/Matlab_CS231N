@@ -6,12 +6,12 @@ classdef TanhActivation < BaseActivationFunction
     % https://theclevermachine.wordpress.com/2014/09/08/derivation-derivatives-for-common-neural-network-activation-functions/
     methods(Static)
         function [result] = forward_prop(x)
-            result = single(tanh(-x));
+            result = (tanh(-x));
         end
         
         function [result] = back_prop(x)
             t = single(tanh(-x));
-            result  = single(1 - (t.*t));
+            result  = (1 - (t.*t));
         end
     end
     

@@ -8,11 +8,11 @@ classdef ReluActivation < BaseActivationFunction
     % https://github.com/gopaczewski/coursera-ml
     methods(Static)
         function [result] = forward_prop(x)
-            result = single(max(0,x));
+            result = max(0,x);
         end
         
         function [result] = back_prop(x)
-            result  = single(x > 0);
+            result  = (x > 0);
         end
     end
     

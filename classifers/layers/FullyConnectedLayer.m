@@ -42,6 +42,8 @@ classdef FullyConnectedLayer < BaseLayer
                     obj.activationObject = TanhActivation();
                 case ActivationType.Relu
                     obj.activationObject = ReluActivation();
+                case ActivationType.Linear
+                    obj.activationObject = LinearActivation();
                 otherwise
                     obj.activationObject = SigmoidActivation();
             end

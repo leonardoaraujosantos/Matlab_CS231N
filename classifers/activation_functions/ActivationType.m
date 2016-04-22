@@ -4,6 +4,7 @@ classdef ActivationType < uint32
       Sigmoid (1)
       Tanh  (2)
       Relu  (3)      
+      Linear  (4)      
    end
     
 end

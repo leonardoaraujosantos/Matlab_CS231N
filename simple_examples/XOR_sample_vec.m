@@ -3,7 +3,7 @@
 % layer perceptron (MLP) with 2 neurons on the input, 2 on the hidden layer
 % and 1 on the output, we also use bias.
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/XOR_NeuralNetwork.txt.png>>
+% <<../../docs/imgs/XOR_NeuralNetwork.txt.png>>
 %
 % Every neuron on this ANN is connected to 3 weights, 2 weights coming from
 % other neurons connections plus 1 connection with the bias, you can
@@ -11,7 +11,7 @@
 %
 % Just to remember how to calculate the neuron output
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/neural-net.png>>
+% <<../../docs/imgs/neural-net.png>>
 %
 
 %% Problem
@@ -20,12 +20,12 @@
 % for a line that separate the two classes (Try yourself to separate those
 % classes with a line)
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/XorDecision.png>>
+% <<../../docs/imgs/XorDecision.png>>
 %
 
 %% Define training dataset
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/XorTable.png>>
+% <<../../docs/imgs/XorTable.png>>
 %
 % XOR input for x1 and x2
 X = [0 0; 0 1; 1 0; 1 1];
@@ -100,8 +100,8 @@ W2 = rand(output_layer_size,hidden_layer_size+1) ...
     * (2*INIT_EPISLON) - INIT_EPISLON;
 % Override manually to debug both vectorized and non vectorized
 % implementation
-W1 = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
-W2 = [-0.1433   -0.4840   -0.6903];
+%W1 = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
+%W2 = [-0.1433   -0.4840   -0.6903];
 
 %% Training
 for i = 1:epochs
@@ -117,10 +117,10 @@ for i = 1:epochs
     % the whole network and this must be done every time the gradient
     % descent change the weight on the local minima direction
     %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/GradientChecking.PNG>>
+    % <<../../docs/imgs/GradientChecking.PNG>>
     %
     %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/GradientChecking2.png>>
+    % <<../../docs/imgs/GradientChecking2.png>>
     %
     %
     % http://www.coursera.org/learn/machine-learning/lecture/Y3s6r/gradient-checking
@@ -206,23 +206,32 @@ for i = 1:epochs
     % the inputs forward through the network, we propagate the 
     % error backwards.    
     %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/ChainRule_1.png>>
+    % <<../../docs/imgs/ChainRule_1.png>>
     %
     %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/BackpropagationAlgorithm.png>>            
+    % <<../../docs/imgs/BackpropagationAlgorithm.png>>            
     %
     %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/BackwardPropagation_Vectorized.png>>
+    % <<../../docs/imgs/BackwardPropagation_Vectorized.png>>
     %
     
     %%% Forward pass
     % Move from left(input) layer to the right (output), observe that every
     % previous activation get a extra collumn of ones (Include Bias)    
     %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/forwardPropagation.png>>
+    % <<../../docs/imgs/forwardPropagation.png>>
     %
     % First Activation (Input-->Hidden)    
-    A1 = [ones(sizeTraining, 1) X]; % Add extra collumn to A1
+    % Add extra collumn to A1
+    %%% Bias Trick
+    % This idea of adding a collumn of ones (or an extra row of ones, 
+    % depending on how you created your weights) is called Bias trick, the
+    % idea is that you can accelerate computation by doing just one 
+    % multiplication and represent the weight and bias on a single matrix W
+    %
+    % <<../../docs/imgs/BiasTrick.jpeg>>
+    %
+    A1 = [ones(sizeTraining, 1) X]; 
     Z2 = A1 * W1';
     A2 = sigmoid(Z2);
     
@@ -238,7 +247,7 @@ for i = 1:epochs
     % the error of every layer (desired - actual). The trap here is that
     % you calculate the output layer differenly than the input layers
     %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/BackwardPropagation.png>>
+    % <<../../docs/imgs/BackwardPropagation.png>>
     %
     %
     % Output layer: (Why different tutorials have differ here?)  
@@ -298,13 +307,13 @@ for i = 1:epochs
     % http://www.holehouse.org/mlclass/17_Large_Scale_Machine_Learning.html
     %    
     %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/GradientDescent_Alone.png>>    
+    % <<../../docs/imgs/GradientDescent_Alone.png>>    
     %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/GradientDescent_And_StochasticGD.png>>
+    % <<../../docs/imgs/GradientDescent_And_StochasticGD.png>>
     %
     % The choice of the learning rate also affects the training performance
     %
-    % <</home/leo/work/Matlab_CS231N/docs/imgs/ChoiceLearningRate.jpg>>    
+    % <<../../docs/imgs/ChoiceLearningRate.jpg>>    
     %
     
     % Increment or decrement depending on delta_output sign
@@ -411,7 +420,7 @@ title('Cost vs epochs');
 %
 % http://www.vlfeat.org/matconvnet/matconvnet-manual.pdf
 %
-% https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
+% http://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/
 %
 % http://math.stackexchange.com/questions/945871/derivative-of-softmax-loss-function
 %

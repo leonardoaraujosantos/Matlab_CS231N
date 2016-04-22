@@ -6,7 +6,7 @@
 % during the forward propagation of convolutional neural networks is 90% on
 % convolutions.
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/TimeConv.png>>
+% <<../../docs/imgs/TimeConv.png>>
 %
 % The advantage of this method is described here:
 %
@@ -34,10 +34,10 @@
 % multiplying a pixel and it's neighboring pixels by a matrix, and this
 % matrix keep sliding on the whole window.
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/animatedConv.gif>>
+% <<../../docs/imgs/animatedConv.gif>>
 %
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/kernel_convolution.jpg>>
+% <<../../docs/imgs/kernel_convolution.jpg>>
 %
 % When doing convolutions while you slide your kernel window, you will have
 % cases where the kernel window does not fit on the image, on this cases
@@ -52,7 +52,7 @@
 % matrices, one a kernel, and the other an image piece, convolution is the 
 % process of multiplying locationaly similar entries and summing
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/conv_full_same_valid.gif>>
+% <<../../docs/imgs/conv_full_same_valid.gif>>
 %
 % http://stackoverflow.com/questions/14864315/alternative-to-conv2-in-matlab
 %
@@ -66,7 +66,7 @@
 % implementation, with the vectorized implementation and the conv2 for
 % grayscale images and convn for color images
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/ConvAlgo.png>>
+% <<../../docs/imgs/ConvAlgo.png>>
 %
 % Code:
 %
@@ -78,9 +78,9 @@
 % The idea is to transform the input image into a set of collumn vectors
 % that will then be multiplied by the kernel
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/im2col_1.png>>
+% <<../../docs/imgs/im2col_1.png>>
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/im2col_3.png>>
+% <<../../docs/imgs/im2col_3.png>>
 %
 % Matlab does have a implementation for im2col, but it lacks of the
 % following capabilities that will be necessary later for implementing
@@ -111,7 +111,7 @@
 % To show the process we will do the operations needed to do a convolution
 % with matrix multiplication like the picture bellow
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/im2col2.jpg>>
+% <<../../docs/imgs/im2col2.jpg>>
 %
 
 % Defining the data
@@ -151,7 +151,7 @@ result_im2col_conv = reshape(W_col * X_col, size_valid_conv)
 %
 
 % Loading image
-imgCat = imread('/home/leo/work/Matlab_CS231N/docs/imgs/CatImg.png');
+imgCat = imread('datasets/imgs/CatImg.png');
 Gx = [-1 0 1; -2 0 2; -1 0 1];
 imshow(imgCat);
 
@@ -190,10 +190,10 @@ fprintf('Took %d seconds to complete(non-vec conv2)\n',timeSpent);
 % case were for instance, a single image will be convolved 512 times (ie
 % First layer of alexnet)
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/ConvFilters.png>>
+% <<../../docs/imgs/ConvFilters.png>>
 %
 %
-% <</home/leo/work/Matlab_CS231N/docs/imgs/ConvFilters_2.png>>
+% <<../../docs/imgs/ConvFilters_2.png>>
 %
 % Here C1 is the output of 512 convolutions of the same image with 512
 % different kernels, so we do just one im2col(slow) operations instead of
@@ -201,7 +201,7 @@ fprintf('Took %d seconds to complete(non-vec conv2)\n',timeSpent);
 %
 
 % Loading image
-imgCat = imread('/home/leo/work/Matlab_CS231N/docs/imgs/CatImg.png');
+imgCat = imread('datasets/imgs/CatImg.png');
 Gx = [-1 0 1; -2 0 2; -1 0 1];
 imshow(imgCat);
 
@@ -232,8 +232,7 @@ timeSpent = toc;
 result_im2col_conv = reshape(resConvIm2col, sizeResult);
 imshow(result_im2col_conv);
 diffTime = timeSpentNonVec / timeSpent;
-fprintf('Took %d seconds to complete 512 vectorized convs, speedup=%dx\n',timeSpent,round(diffTime));
-diffTime = timeSpentNonVec / timeSpent;
+fprintf('Took %d seconds to complete 512 vectorized convs grayscale, speedup=%dx\n',timeSpent,round(diffTime));
 
 %%
 %
@@ -242,8 +241,8 @@ diffTime = timeSpentNonVec / timeSpent;
 W = flipud(fliplr(Gx));
 W_col = W(:)';
 X_col = im2col(imgCat,size(W));
-gpuArray(W_col);
-gpuArray(X_col);
+gpuArray(single(W_col));
+gpuArray(single(X_col));
 tic;
 for idxConv=1:512
     resConvIm2col = W_col * X_col;
@@ -252,8 +251,7 @@ timeSpent = toc;
 result_im2col_conv = reshape(resConvIm2col, sizeResult);
 imshow(result_im2col_conv);
 diffTime = timeSpentNonVec / timeSpent;
-fprintf('Took %d seconds to complete 512 vectorized convs(GPU), speedup=%dx\n',timeSpent,round(diffTime));
-diffTime = timeSpentNonVec / timeSpent;
+fprintf('Took %d seconds to complete 512 vectorized convs(GPU) grayscale, speedup=%dx\n',timeSpent,round(diffTime));
 
 %% Handle colors
 % With color images, we need to apply the matrix multiplication for every
@@ -265,7 +263,7 @@ diffTime = timeSpentNonVec / timeSpent;
 % work (TODO: convolve3d)
 
 % Loading image
-imgCat = imread('/home/leo/work/Matlab_CS231N/docs/imgs/catColor.jpg');
+imgCat = imread('datasets/imgs/catColor.jpg');
 Gx = [-1 0 1; -2 0 2; -1 0 1];
 imshow(imgCat);
 
@@ -280,7 +278,7 @@ end
 timeSpentConvn = toc;
 sizeResult = size(imgResult);
 imshow(imgResult);
-fprintf('Took %d seconds to complete 512 (convn) color\n',timeSpentConvn);
+fprintf('Took %d seconds to complete 512 (convn CPU) color\n',timeSpentConvn);
 
 %%
 %
@@ -292,6 +290,12 @@ X_col_R = im2col(imgCat(:,:,1),size(W));
 X_col_G = im2col(imgCat(:,:,2),size(W));
 X_col_B = im2col(imgCat(:,:,3),size(W));
 resConvIm2col = zeros(size(imgCat));
+
+W_col = gpuArray(single(W(:)'));
+X_col_R = gpuArray(single(X_col_R));
+X_col_G = gpuArray(single(X_col_G));
+X_col_B = gpuArray(single(X_col_B));
+
 tic;
 for idxConv=1:512
     prod_R = W_col * X_col_R;
@@ -300,6 +304,7 @@ for idxConv=1:512
 end
 result_im2col_conv = reshape([prod_R prod_G prod_B], sizeResult);
 timeSpent = toc;
+result_im2col_conv = gather(result_im2col_conv);
 imshow(result_im2col_conv);
 diffTime = timeSpentConvn / timeSpent;
 fprintf('Took %d seconds to complete 512 vectorized convs(GPU) color, speedup=%dx\n',timeSpent,round(diffTime));

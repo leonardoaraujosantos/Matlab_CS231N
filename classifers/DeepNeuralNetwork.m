@@ -134,7 +134,11 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             initialIndex = 1;
             
             % Initialize loss vector
-            obj.lossVector = zeros(1,epochs);
+            if isa(X_vec,'gpuArray')
+                obj.lossVector = gpuArray(zeros(1,epochs));
+            else
+                obj.lossVector = zeros(1,epochs);
+            end
             
             iterationsToCompleteTraining = size(X_vec,1)/miniBatchSize;
             iterCounter=1;

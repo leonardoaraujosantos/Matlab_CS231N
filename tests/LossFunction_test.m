@@ -6,7 +6,7 @@
 % representing some "cost" associated with the event. 
 % An optimization problem seeks to minimize a loss function.
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/LossFuncPlot.png>>
+% <<../../docs/imgs/LossFuncPlot.png>>
 %
 %
 % $L =  { \frac{1}{N} \sum_i L_i } + { \lambda R(W) }\\$
@@ -17,7 +17,7 @@
 %% Test 1: Test Sigmoid
 % $L_i = -\log(\frac{e^{f_{y_i}}}{ \sum_j e^{f_j} })$
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/SVM_vs_Softmax.png>>
+% <<../../docs/imgs/SVM_vs_Softmax.png>>
 %
 % For more information on publish tags, refer to
 % http://uk.mathworks.com/help/matlab/matlab_prog/marking-up-matlab-comments-for-publishing.html
@@ -44,7 +44,7 @@ assert (error < 0.001);
 %% Test 2: Test Tanh
 % $L_i = \sum_{j\neq y_i} \max(0, s_j - s_{y_i} + \Delta)$
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/SVM_vs_Softmax.png>>
+% <<../../docs/imgs/SVM_vs_Softmax.png>>
 %
 scores = [-2.85, 0.86, 0.28];
 % Correct class should be 3
@@ -67,7 +67,7 @@ assert (error < 0.001);
 %% Test 2: Test Relu
 % $L_i = \sum_{j\neq y_i} \max(0, s_j - s_{y_i} + \Delta)$
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/SVM_vs_Softmax.png>>
+% <<../../docs/imgs/SVM_vs_Softmax.png>>
 %
 scores = [-2.85, 0.86, 0.28];
 % Correct class should be 3

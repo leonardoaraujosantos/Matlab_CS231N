@@ -5,12 +5,12 @@
 % First the neuron will do a dot product between the inputs and it's
 % weights, then this result is feed to a activation function
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/ArtificialNeuronZoom.jpg>>
+% <<../../docs/imgs/ArtificialNeuronZoom.jpg>>
 %
 % 
 % Complete table:
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/TableCompleteActivationFunctions.png>>
+% <<../../docs/imgs/TableCompleteActivationFunctions.png>>
 %
 % More info at:
 % https://en.wikipedia.org/wiki/Activation_function

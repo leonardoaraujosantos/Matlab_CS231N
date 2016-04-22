@@ -5,7 +5,7 @@
 % Example
 % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/Simple_XOR_Coursera.PNG>>
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
 %
 % MLP train for XOR
 X = [0 0; 0 1; 1 0; 1 1];
@@ -74,7 +74,7 @@ title('Cost vs epochs');
 % Example
 % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/Simple_XOR_Coursera.PNG>>
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
 %
 % MLP train for XOR
 X = [0 0; 0 1; 1 0; 1 1];
@@ -143,7 +143,7 @@ title('Cost vs epochs');
 % Example
 % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/Simple_XOR_Coursera.PNG>>
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
 %
 % MLP train for XOR
 X = [0 0; 0 1; 1 0; 1 1];
@@ -214,7 +214,7 @@ title('Cost vs epochs');
 % Example
 % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/Simple_XOR_Coursera.PNG>>
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
 %
 % MLP train for XOR
 X = [0 0; 0 1; 1 0; 1 1];

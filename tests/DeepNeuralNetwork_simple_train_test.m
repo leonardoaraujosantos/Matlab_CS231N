@@ -28,6 +28,8 @@ nn = DeepNeuralNetwork(layers,solver,lossFunction);
 %nn.layers.getLayer(1).weights = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
 %nn.layers.getLayer(2).weights = [-0.1433   -0.4840   -0.6903];
 
+fprintf('This neural network has %d parameters\n',nn.getNumParameters);
+
 % Train the neural network with the given solver (Type gradient descent)
 timeTrain = nn.train(X, Y);
 fprintf('Time to train %2.1d seconds\n',timeTrain);
@@ -96,6 +98,8 @@ lossFunction = CrossEntropy();
 nn = DeepNeuralNetwork(layers,solver,lossFunction);
 %nn.layers.getLayer(1).weights = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
 %nn.layers.getLayer(2).weights = [-0.1433   -0.4840   -0.6903];
+
+fprintf('This neural network has %d parameters\n',nn.getNumParameters);
 
 % Train the neural network with the given solver (Type gradient descent)
 timeTrain = nn.train(X, Y);
@@ -168,6 +172,8 @@ lossFunction = CrossEntropy();
 nn = DeepNeuralNetwork(layers,solver,lossFunction);
 %nn.layers.getLayer(1).weights = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
 %nn.layers.getLayer(2).weights = [-0.1433   -0.4840   -0.6903];
+
+fprintf('This neural network has %d parameters\n',nn.getNumParameters);
 
 % Train the neural network with the given solver (Type gradient descent)
 timeTrain = nn.train(X, Y);

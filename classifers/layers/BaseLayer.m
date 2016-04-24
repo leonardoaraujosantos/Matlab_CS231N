@@ -41,6 +41,9 @@ classdef (Abstract) BaseLayer < handle
         
         % Get number of neurons
         [numNeurons] = getNumNeurons(obj);
+        
+        % Get number of parameters
+        [numParameters] = getNumParameters(obj);
     end
     
 end

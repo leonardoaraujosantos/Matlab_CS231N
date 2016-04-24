@@ -57,6 +57,11 @@ classdef InputLayer < BaseLayer
             type = obj.typeLayer;
         end
         
+        % Get number of parameters
+        function [numParameters] = getNumParameters(obj)
+            numParameters = numel(obj.weights);
+        end
+        
         function [descText] = getDescription(obj)
             descText = sprintf('INPUT %dx%d depth=%d\n',obj.numRows, obj.numCols, obj.depthInput);
         end

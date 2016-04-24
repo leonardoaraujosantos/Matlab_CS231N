@@ -65,6 +65,11 @@ classdef OutputLayer < BaseLayer
             loss = obj.lossFunction;
         end
         
+        % Get number of parameters (No parameters on pooling layer)
+        function [numParameters] = getNumParameters(obj)
+            numParameters = numel(obj.weights);
+        end
+        
         function [descText] = getDescription(obj)
             [~, names] = enumeration('ActivationType');
             descText = sprintf('OUTPUT num_classes=%d Activation=%s\n',obj.numClasses,names{obj.activationType});

@@ -90,7 +90,6 @@
 %   and every receptive field location.
 % * The result must finally be reshaped back to its proper output dimension
 % 
-
 % The idea is to transform the input image into a set of collumn vectors
 % that will then be multiplied by the kernel(also transformed)
 %
@@ -108,7 +107,8 @@
 % * Does not allows padding
 % * Preserves the spatial layout of the local patches
 % * Don't support strides (needed if you have different types of conv
-% layers)
+% layers), one option would be to resample the matrix, but it would still
+% require more memory if you suport stride out of the box
 %
 % Some implementations examples (Python, C++, Cuda, Matlab)
 %%
@@ -121,6 +121,8 @@
 % * http://github.com/samehkhamis/pydeeplearn/blob/master/pydeeplearn/image/image.pyx
 % * http://github.com/fmassa/torch-nn/blob/master/ConvLua/im2col.c
 % * http://github.com/yjxiong/im2col
+% * http://sunshineatnoon.github.io/Using.Computation.Graph.to.Understand.and.Implement.Backpropagation/
+% * https://github.com/bicepjai/cs231n_2016_solutions/blob/master/assignment2/cs231n/im2col.py
 % 
 
 
@@ -206,7 +208,6 @@ fprintf('Took %d seconds to complete (im2col)\n',timeSpent);
 % Convolving with vanilla convolution (non-vectorized)
 imgCat = double(imgCat);
 tic; imgResult = convolve2d(imgCat,Gx); timeSpent = toc;
-imshow(imgResult);
 fprintf('Took %d seconds to complete(non-vec convolve2d)\n',timeSpent);
 
 %% Now emulating a real life convnet.
@@ -254,13 +255,30 @@ for idxConv=1:512
 end
 timeSpent = toc;
 result_im2col_conv = reshape(resConvIm2col, sizeResult);
-imshow(result_im2col_conv);
 diffTime = timeSpentNonVec / timeSpent;
 fprintf('Took %d seconds to complete 512 vectorized im2col grayscale, speedup=%dx\n',timeSpent,round(diffTime));
 
 %%
 %
-% With vectorization GPU
+% With vectorization GPU(double)
+
+W = flipud(fliplr(Gx));
+W_col = W(:)';
+X_col = im2col(imgCat,size(W));
+gpuArray((W_col));
+gpuArray((X_col));
+tic;
+for idxConv=1:512
+    resConvIm2col = W_col * X_col;
+end
+timeSpent = toc;
+result_im2col_conv = reshape(resConvIm2col, sizeResult);
+diffTime = timeSpentNonVec / timeSpent;
+fprintf('Took %d seconds to complete 512 vectorized im2col(GPU)double grayscale, speedup=%dx\n',timeSpent,round(diffTime));
+
+%%
+%
+% With vectorization GPU(single)
 
 W = flipud(fliplr(Gx));
 W_col = W(:)';
@@ -273,9 +291,8 @@ for idxConv=1:512
 end
 timeSpent = toc;
 result_im2col_conv = reshape(resConvIm2col, sizeResult);
-imshow(result_im2col_conv);
 diffTime = timeSpentNonVec / timeSpent;
-fprintf('Took %d seconds to complete 512 vectorized im2col(GPU) grayscale, speedup=%dx\n',timeSpent,round(diffTime));
+fprintf('Took %d seconds to complete 512 vectorized im2col(GPU)single grayscale, speedup=%dx\n',timeSpent,round(diffTime));
 
 %% Handle colors
 % With color images, we need to apply the matrix multiplication for every
@@ -305,7 +322,7 @@ fprintf('Took %d seconds to complete 512 (convn (Matlab) CPU) color\n',timeSpent
 imgCat = double(imgCat);
 tic;
 for idxConv=1:512
-    imgResult = convn_vanila(imgCat,Gx);
+    imgResult = convn_vanilla(imgCat,Gx);
 end
 timeSpentConvn = toc;
 fprintf('Took %d seconds to complete 512 (convn_vanila (Non-Vectorized) CPU) color\n',timeSpentConvn);

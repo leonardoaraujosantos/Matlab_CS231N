@@ -10,7 +10,7 @@
 % Example
 % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/Simple_XOR_Coursera.PNG>>
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
 %
 % Perceptron test for AND
 X = [0 0; 0 1; 1 0; 1 1];
@@ -43,7 +43,7 @@ fprintf('%d AND %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
 % Example
 % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/Simple_XOR_Coursera.PNG>>
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
 %
 % Perceptron test for OR
 layers = LayerContainer;
@@ -73,7 +73,7 @@ fprintf('%d OR %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
 % Example
 % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/Simple_XOR_Coursera.PNG>>
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
 %
 % Perceptron test for XNOR
 

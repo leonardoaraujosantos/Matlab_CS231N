@@ -134,7 +134,11 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             initialIndex = 1;
             
             % Initialize loss vector
-            obj.lossVector = zeros(1,epochs);
+            if isa(X_vec,'gpuArray')
+                obj.lossVector = gpuArray(zeros(1,epochs));
+            else
+                obj.lossVector = zeros(1,epochs);
+            end
             
             iterationsToCompleteTraining = size(X_vec,1)/miniBatchSize;
             iterCounter=1;
@@ -191,6 +195,16 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             scores = obj.feedForward();
             [~, maxscore] = max(scores);
             timeElapsed = toc;
+        end
+        
+        % Get number of parameters
+        function [numParameters] = getNumParameters(obj)
+            numParameters = 0;
+            for idxLayer=1:obj.layers.getNumLayers-1
+                curLayer = obj.layers.getLayer(idxLayer);
+                numParameters = numParameters + ...
+                    curLayer.getNumParameters();                
+            end
         end
     end
 end

@@ -90,6 +90,11 @@ classdef FullyConnectedLayer < BaseLayer
             [~, names] = enumeration('ActivationType');
             descText = sprintf('FC num_neurons=%d Activation=%s\n',obj.numberNeurons,names{obj.activationType});
         end
+        
+        % Get number of parameters
+        function [numParameters] = getNumParameters(obj)
+            numParameters = numel(obj.weights);
+        end
     end    
 end
 

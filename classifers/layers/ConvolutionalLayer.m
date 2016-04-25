@@ -88,6 +88,17 @@ classdef ConvolutionalLayer < BaseLayer
                 obj.kernelSize,obj.numFilters,obj.stepStride,...
                 obj.numPad,names{obj.activationType});
         end
+        
+        function [outSize] = getOutputSize(obj, inputSize)
+            spatialSize = ((inputSize-obj.kernelSize)/obj.stepStride)+1;
+            outSize = [spatialSize spatialSize obj.numFilters];
+        end
+        
+        % Get number of parameters
+        function [numParameters] = getNumParameters(obj)
+            numParameters = ...
+                (obj.kernelSize*obj.kernelSize*obj.numFilters)+1;
+        end
     end
 end
 

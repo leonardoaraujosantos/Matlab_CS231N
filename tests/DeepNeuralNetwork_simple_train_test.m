@@ -5,7 +5,7 @@
 % Example
 % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/Simple_XOR_Coursera.PNG>>
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
 %
 % MLP train for XOR
 X = [0 0; 0 1; 1 0; 1 1];
@@ -27,6 +27,8 @@ lossFunction = CrossEntropy();
 nn = DeepNeuralNetwork(layers,solver,lossFunction);
 %nn.layers.getLayer(1).weights = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
 %nn.layers.getLayer(2).weights = [-0.1433   -0.4840   -0.6903];
+
+fprintf('This neural network has %d parameters\n',nn.getNumParameters);
 
 % Train the neural network with the given solver (Type gradient descent)
 timeTrain = nn.train(X, Y);
@@ -74,7 +76,7 @@ title('Cost vs epochs');
 % Example
 % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/Simple_XOR_Coursera.PNG>>
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
 %
 % MLP train for XOR
 X = [0 0; 0 1; 1 0; 1 1];
@@ -96,6 +98,8 @@ lossFunction = CrossEntropy();
 nn = DeepNeuralNetwork(layers,solver,lossFunction);
 %nn.layers.getLayer(1).weights = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
 %nn.layers.getLayer(2).weights = [-0.1433   -0.4840   -0.6903];
+
+fprintf('This neural network has %d parameters\n',nn.getNumParameters);
 
 % Train the neural network with the given solver (Type gradient descent)
 timeTrain = nn.train(X, Y);
@@ -143,7 +147,7 @@ title('Cost vs epochs');
 % Example
 % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/Simple_XOR_Coursera.PNG>>
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
 %
 % MLP train for XOR
 X = [0 0; 0 1; 1 0; 1 1];
@@ -168,6 +172,8 @@ lossFunction = CrossEntropy();
 nn = DeepNeuralNetwork(layers,solver,lossFunction);
 %nn.layers.getLayer(1).weights = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
 %nn.layers.getLayer(2).weights = [-0.1433   -0.4840   -0.6903];
+
+fprintf('This neural network has %d parameters\n',nn.getNumParameters);
 
 % Train the neural network with the given solver (Type gradient descent)
 timeTrain = nn.train(X, Y);
@@ -214,7 +220,7 @@ title('Cost vs epochs');
 % Example
 % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/Simple_XOR_Coursera.PNG>>
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
 %
 % MLP train for XOR
 X = [0 0; 0 1; 1 0; 1 1];

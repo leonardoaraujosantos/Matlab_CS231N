@@ -63,6 +63,19 @@ classdef PoolingLayer < BaseLayer
                 obj.kernelSize,...
                 obj.stepStride,names{obj.poolingType});
         end
+        
+        % Get number of parameters (No parameters on pooling layer)
+        function [numParameters] = getNumParameters(obj)
+            numParameters = 0;
+        end
+        
+        function [outSize] = getOutputSize(obj, inputSize, prevDepth)
+            spatialSize = ((inputSize-obj.kernelSize)/obj.stepStride)+1;
+            % The pooling layer does not change the depth of the previous
+            % layer, just scale it down (Sumarize information of the
+            % previous layer)
+            outSize = [spatialSize spatialSize prevDepth];
+        end
     end
 end
 

@@ -8,11 +8,11 @@
 %
 % Some examples (Javascript)
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/sample_convjs_DeepNeuralNetwork_3HiddenLayer.PNG>>
+% <<../../docs/imgs/sample_convjs_DeepNeuralNetwork_3HiddenLayer.PNG>>
 %
 % Convnet:
 % 
-% <</home/leo/work/Matlab_CS231N/docs/imgs/sample_convjs_CNN_LeNet.PNG>>
+% <<../../docs/imgs/sample_convjs_CNN_LeNet.PNG>>
 %
 
 %% Test 1: Simple Perceptron layers creation

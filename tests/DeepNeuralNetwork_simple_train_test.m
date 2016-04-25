@@ -290,19 +290,31 @@ title('Cost vs epochs');
 % Load dataset of 5000 images (20x20)
 load mnist_matlab_ready
 
-% Randomly select 100 data points to display
+% Randomly select 100 data points just to display
 sel = randperm(size(X, 1));
 sel = sel(1:100);
 display_MNIST_Data(X(sel, :));
-trainSize = size(X, 1);
-y = oneHot(y);
 
-% Get 10 elements to test
+% Shuffle training
 sel = randperm(size(X, 1));
-sel = sel(1:100);
-X_test = X(sel, :);
-y_test = y(sel, :);
+X = X(sel,:);
+y = y(sel,:);
+
+% Get 10% for test
+numTest = round(size(X, 1) * (10/100));
+X_test = X(1:numTest,:);
+y_test = y(1:numTest,:);
 testSize = size(X_test, 1);
+
+% Get the rest  for train
+X_train = X(numTest+1:end,:);
+y_train = y(numTest+1:end,:);
+
+trainSize = size(X_train, 1);
+
+% Convert outputs to one-hot (Used on multiclass training)
+y_train = oneHot(y_train);
+y_test = oneHot(y_test);
 
 % Reset random number generator state
 rng(0,'v5uniform');
@@ -311,6 +323,7 @@ rng(0,'v5uniform');
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',20*20,'cols',1,'depth',1);
 layers <= struct('type',LayerType.FullyConnected,'numNeurons',300,'ActivationType',ActivationType.Relu);
+layers <= struct('type',LayerType.FullyConnected,'numNeurons',50,'ActivationType',ActivationType.Relu);
 layers <= struct('type',LayerType.Output,'numClasses',10,'ActivationType',ActivationType.Linear);
 layers.showStructure();
 solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.01, 'numEpochs', 6000, 'RegularizationL1',0.01));
@@ -324,12 +337,12 @@ fprintf('This neural network has %d parameters\n',nn.getNumParameters);
 nn.verboseTraining = true;
 
 % Train the neural network with the given solver (Type gradient descent)
-timeTrain = nn.train(X, y);
+timeTrain = nn.train(X_train, y_train);
 fprintf('Time to train %2.1d seconds\n',timeTrain);
 
 % Test
 figure(2);
-display_MNIST_Data(X(sel, :));
+display_MNIST_Data(X_test);
 title('Images on validation');
 errorCount = 0;
 for idxTest=1:testSize
@@ -347,7 +360,7 @@ for idxTest=1:testSize
     fprintf('Predicted %d and should be %d\n',idx_MaxScore,trained_out);    
 end
 errorPercentage = (errorCount*100) / testSize;
-fprintf('Accuracy is %d percent \n',(100-errorPercentage));
+fprintf('Accuracy is %d percent \n',round((100-errorPercentage)));
 
 figure(1);
 plot(nn.lossVector);

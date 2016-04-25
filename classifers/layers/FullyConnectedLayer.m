@@ -42,6 +42,8 @@ classdef FullyConnectedLayer < BaseLayer
                     obj.activationObject = TanhActivation();
                 case ActivationType.Relu
                     obj.activationObject = ReluActivation();
+                case ActivationType.LeakyRelu
+                    obj.activationObject = LeakyReluActivation();
                 case ActivationType.Linear
                     obj.activationObject = LinearActivation();
                 otherwise

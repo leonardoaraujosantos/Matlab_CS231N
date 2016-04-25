@@ -310,10 +310,7 @@ rng(0,'v5uniform');
 % Prepare network 5 layers 1-Input, 3-Hidden, 1-Output
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',20*20,'cols',1,'depth',1);
-layers <= struct('type',LayerType.FullyConnected,'numNeurons',100,'ActivationType',ActivationType.Relu);
-layers <= struct('type',LayerType.FullyConnected,'numNeurons',100,'ActivationType',ActivationType.Relu);
-layers <= struct('type',LayerType.FullyConnected,'numNeurons',100,'ActivationType',ActivationType.Relu);
-layers <= struct('type',LayerType.FullyConnected,'numNeurons',100,'ActivationType',ActivationType.Relu);
+layers <= struct('type',LayerType.FullyConnected,'numNeurons',300,'ActivationType',ActivationType.Relu);
 layers <= struct('type',LayerType.Output,'numClasses',10,'ActivationType',ActivationType.Linear);
 layers.showStructure();
 solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.01, 'numEpochs', 6000, 'RegularizationL1',0.01));

@@ -24,6 +24,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
         solver
         lossVector
         trainingLossFunction
+        verboseTraining
     end
     
     methods (Access = 'private')
@@ -96,6 +97,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
         function obj = DeepNeuralNetwork(layers, solver, varargin)
             obj.layers = layers;
             obj.solver = solver;
+            obj.verboseTraining = false;
             if nargin > 2
                 obj.trainingLossFunction = varargin{1};
             end
@@ -145,6 +147,9 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             
             for idxEpoch=1:epochs
                 initialIndex = 1;
+                if (obj.verboseTraining)
+                   fprintf('Epoch %d/%d\n',idxEpoch,epochs); 
+                end
                 for idxIter=1:iterationsToCompleteTraining
                     % Extract a chunk(if possible) from the training
                     if (initialIndex+miniBatchSize < size(X_vec,1))

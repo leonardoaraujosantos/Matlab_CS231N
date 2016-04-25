@@ -25,6 +25,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
         lossVector
         trainingLossFunction
         verboseTraining
+        dropOut
     end
     
     methods (Access = 'private')
@@ -38,7 +39,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             if firstLayer.getType == LayerType.Input
                 firstLayer.setActivations(feature);
             end
-            obj.feedForward();
+            obj.feedForward(1);
             
             %% Now the reverse propagation
             % Reverse iterate on the Neural network layers (Don't including
@@ -56,6 +57,10 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 else
                     % Calculate difference for hidden layer
                     smallDelta{idxLayer} = (smallDelta{idxLayer+1} * (curLayer.weights)) .* curLayer.backPropagate();
+                    % Re-apply the mask used on the forward propagation
+                    if obj.dropOut > 0
+                        smallDelta{idxLayer} = smallDelta{idxLayer} .* [ones(sizeTraining, 1) curLayer.dropoutMask];
+                    end
                     % Take the bias
                     smallDeltaNoBias = smallDelta{idxLayer};
                     smallDeltaNoBias = smallDeltaNoBias(:,2:end);
@@ -72,7 +77,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             end
         end
         
-        function [scores] = feedForward(obj)
+        function [scores] = feedForward(obj, isTraining)
             scores = 0;
             for idx=1:obj.layers.getNumLayers
                 currLayer = obj.layers.getLayer(idx);
@@ -85,6 +90,18 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                     
                     % Calculate activations (Vectorized)
                     nextLayer.activations = nextLayer.feedForward(activations,weights);
+                    
+                    % Implement dropout (If needed)
+                    % http://cs231n.github.io/neural-networks-2/#reg
+                    if (isTraining && obj.dropOut > 0 && nextLayer.typeLayer == LayerType.FullyConnected)
+                       % If we're on training phase and dropout is asked...
+                       sizeAct = size(nextLayer.activations);
+                       maskNeuronsLayer = (rand(sizeAct) < obj.dropOut) ...
+                           / obj.dropOut;
+                       nextLayer.activations = nextLayer.activations .* maskNeuronsLayer;
+                       % Save mask (Going to be used on backpropagation)
+                       nextLayer.dropoutMask = maskNeuronsLayer;
+                    end
                 end
             end
             
@@ -98,6 +115,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             obj.layers = layers;
             obj.solver = solver;
             obj.verboseTraining = false;
+            obj.dropOut = 0;
             if nargin > 2
                 obj.trainingLossFunction = varargin{1};
             end
@@ -109,7 +127,18 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 currLayer = layers.getLayer(idx);
                 if (idx+1) <= layers.getNumLayers
                     nextLayer = layers.getLayer(idx+1);
+                    % Andrew Ng Machine learning course initialization
                     currLayer.weights = rand(nextLayer.getNumNeurons,currLayer.getNumNeurons+1) * (2*INIT_EPISLON) - INIT_EPISLON;
+                    
+                    % Cs231n Xavier Initialization
+                    % http://stackoverflow.com/questions/33640581/how-to-do-xavier-initialization-on-tensorflow
+                    % http://jmlr.org/proceedings/papers/v9/glorot10a/glorot10a.pdf
+                    % http://uk.mathworks.com/help/stats/unifrnd.html?refresh=true
+                    % http://uk.mathworks.com/help/matlab/ref/rand.html
+                    %low = -sqrt(6.0/(currLayer.getNumNeurons+1 + nextLayer.getNumNeurons));
+                    %high = sqrt(6.0/(currLayer.getNumNeurons+1 + nextLayer.getNumNeurons));
+                    %currLayer.weights = low + (2*high) * rand(nextLayer.getNumNeurons,currLayer.getNumNeurons+1);
+                    %currLayer.weights = rand(nextLayer.getNumNeurons,currLayer.getNumNeurons+1) / sqrt(currLayer.getNumNeurons+1);
                 end
             end
         end                
@@ -197,7 +226,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             if firstLayer.getType == LayerType.Input
                 firstLayer.setActivations(X_vec);
             end
-            scores = obj.feedForward();
+            scores = obj.feedForward(0);
             [~, maxscore] = max(scores);
             timeElapsed = toc;
         end

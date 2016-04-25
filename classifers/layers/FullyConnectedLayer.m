@@ -9,6 +9,7 @@ classdef FullyConnectedLayer < BaseLayer
         weights
         activations
         z
+        dropoutMask
     end
     
     properties (Access = 'private')        

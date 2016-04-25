@@ -1,3 +1,5 @@
+% Used on multi-class supervised training where we need a collumn of zeros
+% with a single one representing the correct class.
 function oneHotLabels = oneHot(labels)
 
 % Takes a vector of size n by 1 as input and creates a one-hot encoding of its

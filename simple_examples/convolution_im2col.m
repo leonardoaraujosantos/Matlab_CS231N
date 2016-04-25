@@ -75,13 +75,31 @@
 
 
 %% The Idea
+% Note that the convolution operation essentially performs dot products 
+% between the filters and local regions of the input. A common 
+% implementation pattern of the CONV layer is to take advantage of this 
+% fact and formulate the forward pass of a convolutional layer as one big 
+% matrix multiply as follows:
+%%
+% 
+% * The local regions in the input image are stretched out into columns in 
+%   an operation commonly called im2col. 
+% * The weights of the CONV layer are similarly stretched out into rows.
+% * The result of a convolution is now equivalent to performing one large 
+%   matrix multiply which evaluates the dot product between every filter 
+%   and every receptive field location.
+% * The result must finally be reshaped back to its proper output dimension
+% 
+
 % The idea is to transform the input image into a set of collumn vectors
-% that will then be multiplied by the kernel
+% that will then be multiplied by the kernel(also transformed)
 %
 % <<../../docs/imgs/im2col_1.png>>
 %
 % <<../../docs/imgs/im2col_3.png>>
 %
+% This approach has the downside that it can use a lot of memory, since 
+% some values in the input volume are replicated multiple times
 % Matlab does have a implementation for im2col, but it lacks of the
 % following capabilities that will be necessary later for implementing
 % other layers (like pool)
@@ -115,33 +133,39 @@
 %
 
 % Defining the data
-W = [1 3; 2 4]
-X = [1 4 7; 2 5 8; 3 6 9]
+W = [1 3; 2 4];
+X = [1 4 7; 2 5 8; 3 6 9];
 
 
 %%
 %
 % Doing the normal convolution using the conv2 from matlab, which is fast
 % already, here we also get the result size that will be used later.
-reference_result = conv2(X,W,'valid')
+reference_result = conv2(X,W,'valid');
 % No need to do a convolution to know this size ok.
 size_valid_conv = size(reference_result);
 
 %%
 %
 % Prepare the kernel matrix (W)
-W = flipud(fliplr(W))
-W_col = W(:)'
+W = flipud(fliplr(W));
+W_col = W(:)';
 
 %%
 %
-% Transform input X on collumns (im2col)
-X_col = im2col(X,size(W))
+% Transform input X on collumns (im2col sliding)
+X_col = im2col(X,size(W));
 
 %%
 %
 % Now to convolve just multiply and reshape back the results
-result_im2col_conv = reshape(W_col * X_col, size_valid_conv)
+result_im2col_conv = reshape(W_col * X_col, size_valid_conv);
+
+fprintf('Result with im2col\n');
+disp(result_im2col_conv);
+
+fprintf('Result with conv2(valid)\n');
+disp(reference_result);
 
 %% Benchmarking with real life example
 % Here we compare the time spent doing a convolution with the operations
@@ -183,7 +207,7 @@ fprintf('Took %d seconds to complete (im2col)\n',timeSpent);
 imgCat = double(imgCat);
 tic; imgResult = convolve2d(imgCat,Gx); timeSpent = toc;
 imshow(imgResult);
-fprintf('Took %d seconds to complete(non-vec conv2)\n',timeSpent);
+fprintf('Took %d seconds to complete(non-vec convolve2d)\n',timeSpent);
 
 %% Now emulating a real life convnet.
 % The vectorization of the convolutional neural network will shine on this
@@ -216,7 +240,7 @@ for idxConv=1:512
 end
 timeSpentNonVec = toc;
 imshow(imgResult);
-fprintf('Took %d seconds to complete 512 non-vectorized convs\n',timeSpentNonVec);
+fprintf('Took %d seconds to complete 512 non-vectorized(grayscale) convolve2d\n',timeSpentNonVec);
 
 %%
 %
@@ -232,7 +256,7 @@ timeSpent = toc;
 result_im2col_conv = reshape(resConvIm2col, sizeResult);
 imshow(result_im2col_conv);
 diffTime = timeSpentNonVec / timeSpent;
-fprintf('Took %d seconds to complete 512 vectorized convs grayscale, speedup=%dx\n',timeSpent,round(diffTime));
+fprintf('Took %d seconds to complete 512 vectorized im2col grayscale, speedup=%dx\n',timeSpent,round(diffTime));
 
 %%
 %
@@ -251,16 +275,13 @@ timeSpent = toc;
 result_im2col_conv = reshape(resConvIm2col, sizeResult);
 imshow(result_im2col_conv);
 diffTime = timeSpentNonVec / timeSpent;
-fprintf('Took %d seconds to complete 512 vectorized convs(GPU) grayscale, speedup=%dx\n',timeSpent,round(diffTime));
+fprintf('Took %d seconds to complete 512 vectorized im2col(GPU) grayscale, speedup=%dx\n',timeSpent,round(diffTime));
 
 %% Handle colors
 % With color images, we need to apply the matrix multiplication for every
 % channel, on this case the im2col is even a little bit faster than convn
 % from Matlab.
 %
-% By the way if we're doing convolutions with color images, we are doing
-% actually 3d convolutions and the "convolve2d" code given earlier will not
-% work (TODO: convolve3d)
 
 % Loading image
 imgCat = imread('datasets/imgs/catColor.jpg');
@@ -269,20 +290,79 @@ imshow(imgCat);
 
 %%
 %
-% With convn
+% With matlab convn 
 imgCat = double(imgCat);
 tic;
 for idxConv=1:512
-    imgResult = convn(imgCat,Gx,'valid');
+    imgResult = convn(imgCat,Gx,'same');
 end
 timeSpentConvn = toc;
-sizeResult = size(imgResult);
-imshow(imgResult);
-fprintf('Took %d seconds to complete 512 (convn CPU) color\n',timeSpentConvn);
+fprintf('Took %d seconds to complete 512 (convn (Matlab) CPU) color\n',timeSpentConvn);
 
 %%
 %
-% With vectorization
+% With convn_vanila (Non-Vectorized)
+imgCat = double(imgCat);
+tic;
+for idxConv=1:512
+    imgResult = convn_vanila(imgCat,Gx);
+end
+timeSpentConvn = toc;
+fprintf('Took %d seconds to complete 512 (convn_vanila (Non-Vectorized) CPU) color\n',timeSpentConvn);
+
+%%
+%
+% With vectorization on CPU
+
+W = flipud(fliplr(Gx));
+W_col = W(:)';
+X_col_R = im2col(imgCat(:,:,1),size(W));
+X_col_G = im2col(imgCat(:,:,2),size(W));
+X_col_B = im2col(imgCat(:,:,3),size(W));
+resConvIm2col = zeros(size(imgCat));
+
+tic;
+for idxConv=1:512
+    prod_R = W_col * X_col_R;
+    prod_G = W_col * X_col_G;
+    prod_B = W_col * X_col_B;
+end
+result_im2col_conv = reshape([prod_R prod_G prod_B], [254 254 3]);
+timeSpent = toc;
+diffTime = timeSpentConvn / timeSpent;
+fprintf('Took %d seconds to complete 512 vectorized im2col(CPU) color, speedup=%dx\n',timeSpent,round(diffTime));
+
+%%
+%
+% With vectorization on GPU(double)
+
+W = flipud(fliplr(Gx));
+W_col = W(:)';
+X_col_R = im2col(imgCat(:,:,1),size(W));
+X_col_G = im2col(imgCat(:,:,2),size(W));
+X_col_B = im2col(imgCat(:,:,3),size(W));
+resConvIm2col = zeros(size(imgCat));
+
+W_col = gpuArray(single(W(:)'));
+X_col_R = gpuArray((X_col_R));
+X_col_G = gpuArray((X_col_G));
+X_col_B = gpuArray((X_col_B));
+
+tic;
+for idxConv=1:512
+    prod_R = W_col * X_col_R;
+    prod_G = W_col * X_col_G;
+    prod_B = W_col * X_col_B;
+end
+result_im2col_conv = reshape([prod_R prod_G prod_B], [254 254 3]);
+timeSpent = toc;
+result_im2col_conv = gather(result_im2col_conv);
+diffTime = timeSpentConvn / timeSpent;
+fprintf('Took %d seconds to complete 512 vectorized im2col(GPU)double color, speedup=%dx\n',timeSpent,round(diffTime));
+
+%%
+%
+% With vectorization on GPU (single)
 
 W = flipud(fliplr(Gx));
 W_col = W(:)';
@@ -302,9 +382,8 @@ for idxConv=1:512
     prod_G = W_col * X_col_G;
     prod_B = W_col * X_col_B;
 end
-result_im2col_conv = reshape([prod_R prod_G prod_B], sizeResult);
+result_im2col_conv = reshape([prod_R prod_G prod_B], [254 254 3]);
 timeSpent = toc;
 result_im2col_conv = gather(result_im2col_conv);
-imshow(result_im2col_conv);
 diffTime = timeSpentConvn / timeSpent;
-fprintf('Took %d seconds to complete 512 vectorized convs(GPU) color, speedup=%dx\n',timeSpent,round(diffTime));
+fprintf('Took %d seconds to complete 512 vectorized im2col(GPU)single color, speedup=%dx\n',timeSpent,round(diffTime));

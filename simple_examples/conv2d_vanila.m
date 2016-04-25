@@ -66,52 +66,6 @@
 % <<../../docs/imgs/PatternMatch3.png>>
 %
 
-%% Function code
-% 
-%   function outConv = conv2d_manual(input, kernel)
-%   % Get the input size in terms of rows and cols
-%   [rowsIn, colsIn] = size(input); 
-%   outConv = zeros(rowsIn , colsIn);
-%   % Get kernel size
-%   [rowsKernel, colsKernel] = size(kernel);
-%   %Initialize a sampling window
-%   window = zeros(rowsKernel , colsKernel);
-% 
-%   % Rotate the kernel 180º
-%   rot_kernel = rot90(kernel, 2);
-% 
-%   % Calculate the number of elements to pad
-%   num2Pad = floor(rowsKernel/2);
-%   paddedInput = padarray(input,[num2Pad num2Pad]);
-% 
-%   % Iterate on every element of the input signal
-%   for idxRowsIn = 1 : rowsIn
-%       for idxColsIn = 1 : colsIn
-%           % Populate our window (same size of the kernel)
-%           for idxRowsKernel = 1 : rowsKernel
-%               for idxColsKernel = 1 : colsKernel
-%                   % Slide the window
-%                   slideRow = idxRowsIn - 1;
-%                   slideCol = idxColsIn -1;                 
-%                   % Sample the window
-%                   window(idxRowsKernel,idxColsKernel) = ...
-%                       paddedInput(idxRowsKernel + slideRow, idxColsKernel + slideCol);                                
-%               end
-%           end
-%           % Calculate the convolution here...
-%           outConv(idxRowsIn, idxColsIn) = doConvolution(window,rot_kernel);
-%       end
-%   end
-% 
-%   end
-% 
-%   % Calculate the sum of the product between the kernel and the window
-%   % The convolution is all about the sum of product of the window and kernel
-%   function result = doConvolution(window, kernel)
-%   result = sum(sum(window .* kernel));
-%   end
-% 
-
 
 %% Code explanation
 % As seen on the function interface, it has the input(image) and kernel,

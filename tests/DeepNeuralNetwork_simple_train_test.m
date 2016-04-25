@@ -320,6 +320,9 @@ solver.batch_size = trainSize;
 lossFunction = CrossEntropy();
 nn = DeepNeuralNetwork(layers,solver,lossFunction);
 
+fprintf('This neural network has %d parameters\n',nn.getNumParameters);
+nn.verboseTraining = true;
+
 % Train the neural network with the given solver (Type gradient descent)
 timeTrain = nn.train(X, y);
 fprintf('Time to train %2.1d seconds\n',timeTrain);

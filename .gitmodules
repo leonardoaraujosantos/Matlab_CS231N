@@ -1,0 +1,3 @@
+[submodule "python_reference_code/cs231n_2016_solutions"]
+	path = python_reference_code/cs231n_2016_solutions
+	url = https://github.com/leonardoaraujosantos/cs231n_2016_solutions.git

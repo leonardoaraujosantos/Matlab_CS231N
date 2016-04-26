@@ -10,7 +10,7 @@ classdef TanhActivation < BaseActivationFunction
         end
         
         function [result] = back_prop(x)
-            t = single(tanh(-x));
+            t = (tanh(-x));
             result  = (1 - (t.*t));
         end
     end

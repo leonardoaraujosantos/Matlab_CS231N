@@ -10,7 +10,7 @@ classdef SigmoidActivation < BaseActivationFunction
         end
         
         function [result] = back_prop(x)
-            t = single(1./(1+exp(-x)));
+            t = (1./(1+exp(-x)));
             result  = (t .* (1 - t));
         end
     end

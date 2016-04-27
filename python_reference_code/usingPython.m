@@ -54,5 +54,5 @@ matMatrix = matMatrix';
 
 % Matlab python only support transfering 1-N vectors (collumn vectors)
 vec_1d_numpy = py.numpy.array(matMatrix(:)');
-matPython = vec_1d.reshape(2,3);
+matPython = vec_1d_numpy.reshape(2,3);
 py.print(matPython);

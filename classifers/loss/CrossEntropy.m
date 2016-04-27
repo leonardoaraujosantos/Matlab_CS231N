@@ -5,12 +5,14 @@ classdef CrossEntropy < BaseLossFunction
     methods
         % Here the smalles value will be zero (Perfect, no loss) and the
         % biggest value is 1 (100%)
-        function [lossResult] = getLoss(obj, scores, idxCorrect)
-            % This implementation avoid explicit for loops (Vectorized)            
-            Y_train = idxCorrect;
-            sizeTraining = size(Y_train,1);
+        function [lossResult, dw] = getLoss(obj, scores, correct)
+            % This implementation avoid explicit for loops (Vectorized)                        
+            sizeTraining = size(correct,1);
             h = scores;
-            lossResult = sum(sum((-Y_train).*log(h) - (1-Y_train).*log(1-h), 2))/sizeTraining;                        
+            lossResult = sum(sum((-correct).*log(h) - (1-correct).*log(1-h), 2))/sizeTraining; 
+            
+            % dw is the derivative of the loss function over the scores
+            dw = 0;
         end
     end
 end

@@ -6,7 +6,7 @@ classdef (Abstract) BaseLossFunction < handle
     methods(Abstract, Access = public)
         % Calculate how far we are for the correct pointed by
         % classification(idxCorrect)
-        [lossResult] = getLoss(obj, score, idxCorrect);        
+        [lossResult, dw] = getLoss(obj, score, correct);        
     end
     
 end

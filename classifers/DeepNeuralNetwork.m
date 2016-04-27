@@ -23,6 +23,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
         layers
         solver
         lossVector
+        currentLoss
         trainingLossFunction
         verboseTraining
         dropOut
@@ -40,6 +41,11 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 firstLayer.setActivations(feature);
             end
             obj.feedForward(1);
+            
+            % Calculate loss            
+            lastLayer = obj.layers.getLayer(obj.layers.getNumLayers);
+            h = lastLayer.activations;
+            obj.currentLoss = obj.trainingLossFunction.getLoss(h,target);            
             
             %% Now the reverse propagation
             % Reverse iterate on the Neural network layers (Don't including
@@ -175,10 +181,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             iterCounter=1;
             
             for idxEpoch=1:epochs
-                initialIndex = 1;
-                if (obj.verboseTraining)
-                   fprintf('Epoch %d/%d\n',idxEpoch,epochs); 
-                end
+                initialIndex = 1;                
                 for idxIter=1:iterationsToCompleteTraining
                     % Extract a chunk(if possible) from the training
                     if (initialIndex+miniBatchSize < size(X_vec,1))
@@ -208,12 +211,12 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                         curLayer.weights = obj.solver.optimize(curLayer.weights,deltas{idxLayer}./numItemsBatch);
                     end
                     
-                    % After every epoch calculate the error function
-                    lastLayer = obj.layers.getLayer(obj.layers.getNumLayers);
-                    h = lastLayer.activations;
-                    J = obj.trainingLossFunction.getLoss(h,batchLabels);
-                    obj.lossVector(iterCounter) = J;
-                    iterCounter = iterCounter + 1;
+                    % Append calculated loss(During training FP) on loss vector                    
+                    obj.lossVector(iterCounter) = obj.currentLoss;                    
+                    iterCounter = iterCounter + 1;                    
+                end
+                if (obj.verboseTraining)
+                    fprintf('Epoch %d/%d loss: %d\n',idxEpoch,epochs,obj.currentLoss); 
                 end
             end
             timeElapsed = toc;

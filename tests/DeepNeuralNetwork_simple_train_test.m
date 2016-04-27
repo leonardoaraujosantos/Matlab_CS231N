@@ -288,48 +288,44 @@ title('Cost vs epochs');
 
 %% Test 4: Train on MNIST dataset
 % Load dataset of 5000 images (20x20)
-load mnist_matlab_ready
+load mnist_oficial
 
 % Randomly select 100 data points just to display
-sel = randperm(size(X, 1));
+sel = randperm(size(input_train, 1));
 sel = sel(1:100);
-display_MNIST_Data(X(sel, :));
+display_MNIST_Data(input_train(sel, :));
 
 % Shuffle training
-sel = randperm(size(X, 1));
-X = X(sel,:);
-y = y(sel,:);
+sel = randperm(size(input_train, 1));
+X_train = input_train(sel,:);
+y_train = output_train(sel,:);
 
 % Get 10% for test
-numTest = round(size(X, 1) * (10/100));
-X_test = X(1:numTest,:);
-y_test = y(1:numTest,:);
+X_test = input_test;
+y_test = output_test;
 testSize = size(X_test, 1);
-
-% Get the rest  for train
-X_train = X(numTest+1:end,:);
-y_train = y(numTest+1:end,:);
 
 trainSize = size(X_train, 1);
 
 % Convert outputs to one-hot (Used on multiclass training)
-y_train = oneHot(y_train);
-y_test = oneHot(y_test);
+if size(y_train,2) == 1
+    y_train = oneHot(y_train);
+    y_test = oneHot(y_test);
+end
 
 % Reset random number generator state
 rng(0,'v5uniform');
 
 % Prepare network 5 layers 1-Input, 3-Hidden, 1-Output
 layers = LayerContainer;
-layers <= struct('type',LayerType.Input,'rows',20*20,'cols',1,'depth',1);
-layers <= struct('type',LayerType.FullyConnected,'numNeurons',300,'ActivationType',ActivationType.Relu);
-%layers <= struct('type',LayerType.FullyConnected,'numNeurons',100,'ActivationType',ActivationType.Relu);
+layers <= struct('type',LayerType.Input,'rows',size(X_train, 2),'cols',1,'depth',1);
+layers <= struct('type',LayerType.FullyConnected,'numNeurons',50,'ActivationType',ActivationType.Relu);
 %layers <= struct('type',LayerType.FullyConnected,'numNeurons',50,'ActivationType',ActivationType.Relu);
 layers <= struct('type',LayerType.Output,'numClasses',10,'ActivationType',ActivationType.Linear);
 layers.showStructure();
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.01, 'numEpochs', 6000, 'RegularizationL1',0.01));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.05, 'numEpochs', 100, 'RegularizationL1',0.01));
 % Force a batch size
-solver.batch_size = trainSize;
+solver.batch_size = 64;
 % Get a loss function object to be used on the training
 lossFunction = CrossEntropy();
 nn = DeepNeuralNetwork(layers,solver,lossFunction);
@@ -359,7 +355,8 @@ for idxTest=1:testSize
     if trained_out ~= idx_MaxScore
         errorCount = errorCount + 1;
     end
-    fprintf('Predicted %d and should be %d\n',idx_MaxScore,trained_out);    
+    % Uncomment if you want to see all the predictions 
+    %fprintf('Predicted %d and should be %d\n',idx_MaxScore,trained_out);
 end
 errorPercentage = (errorCount*100) / testSize;
 fprintf('Accuracy is %d percent \n',round((100-errorPercentage)));

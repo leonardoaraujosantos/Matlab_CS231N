@@ -45,7 +45,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
             % Calculate loss            
             lastLayer = obj.layers.getLayer(obj.layers.getNumLayers);
             h = lastLayer.activations;
-            obj.currentLoss = obj.trainingLossFunction.getLoss(h,target);            
+            [obj.currentLoss, dL_dout] = obj.trainingLossFunction.getLoss(h,target);            
             
             %% Now the reverse propagation
             % Reverse iterate on the Neural network layers (Don't including
@@ -60,6 +60,7 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 if curLayer.getType == LayerType.Output
                     % Calculate difference for output layer
                     smallDelta{idxLayer} = (curLayer.getActivations - target);
+                    %smallDelta{idxLayer} = dL_dout;
                 else
                     % Calculate difference for hidden layer
                     smallDelta{idxLayer} = (smallDelta{idxLayer+1} * (curLayer.weights)) .* curLayer.backPropagate();

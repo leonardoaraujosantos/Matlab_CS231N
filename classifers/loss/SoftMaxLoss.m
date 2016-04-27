@@ -34,7 +34,7 @@ classdef SoftMaxLoss < BaseLossFunction
             % More info on numpy for matlab users
             % http://mathesaurus.sourceforge.net/matlab-numpy.html
             % Get the correct indexes
-            [~, idxCorrect] = max(correct);
+            [~, idxCorrect] = max(correct,[],2);
             % Select a particular element from each row of a matrix based 
             % on another matrix 
             probCorrect = diag(probabilities(:,idxCorrect));

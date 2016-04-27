@@ -1,5 +1,10 @@
 function [ matArray ] = numpyArray2Mat( numpyArray )
 %NUMPYARRAY2MAT Convert a numpy array to matlab array
+% Example
+% A = rand(2,3);
+% numpyMatrix = matArray2Numpy(A)
+% B = numpyArray2Mat(numpyMatrix);
+% isequal(A,B)
 
 %% Import numpy
 py.importlib.import_module('numpy');

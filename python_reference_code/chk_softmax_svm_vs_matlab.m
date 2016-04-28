@@ -73,7 +73,7 @@ pythonDw = numpyArray2Mat(pythonSVMLoss{2});
 fprintf('Python CS231n svm_loss reference\n');
 disp(pythonLoss);
 disp(pythonDw);
-
+ 
 %% Call matlab custom version (SVMLoss)
 testLossFunction = SVMLoss(1);
 [matLoss, matDw] = testLossFunction.getLoss(scores,correctOneHot);

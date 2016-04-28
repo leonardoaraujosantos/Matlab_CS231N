@@ -35,9 +35,13 @@ else
 end
 
 %% Convert to correct type
-if isequal(typeData,'uint8')
-    numpyArray = numpyArray.astype(typeData);
-end
+numpyArray = numpyArray.astype(typeData);
+% if isequal(typeData,'uint8')
+%     numpyArray = numpyArray.astype(typeData);
+% end
+% if isequal(typeData,'int64')
+%     numpyArray = numpyArray.astype(typeData);
+% end
 
 end
 

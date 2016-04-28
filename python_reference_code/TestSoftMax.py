@@ -26,3 +26,12 @@ print(result[0])
 
 print('\nDw:')
 print(result[1])
+
+# Call svm_loss reference
+result = cs231n.layers.svm_loss(scores, correct)
+
+print('\nLoss:')
+print(result[0])
+
+print('\nDw:')
+print(result[1])

@@ -9,7 +9,7 @@ classdef SoftMaxLoss < BaseLossFunction
     methods
         % Here the smalles value will be zero (Perfect, no loss) and the
         % biggest value is 1 (100%)
-        function [lossResult, dw] = getLoss(obj, scores, correct)
+        function [lossResult, dx] = getLoss(obj, scores, correct)
             % This implementation avoid explicit for loops (Vectorized)
             N = size(scores,1);
             % Improve numerical stability
@@ -36,16 +36,24 @@ classdef SoftMaxLoss < BaseLossFunction
             % Get the correct indexes
             [~, idxCorrect] = max(correct,[],2);
             % Select a particular element from each row of a matrix based 
-            % on another matrix 
+            % on another matrix, you can do with 2 ways, using sub2ind or
+            % diag
+            % probabilities(sub2ind(size(probabilities),[1:length(idxCorrect)]',idxCorrect))
             probCorrect = diag(probabilities(:,idxCorrect));
             
             % Now calculate the loss
             lossResult = -sum(log(probCorrect))/N;
             
-            % dw is the derivative of the loss function over the scores
-            dw = probCorrect;
-            dw = dw - 1;
-            dw = dw/N;
+            % dw is the derivative of the loss function over the scores,
+            % basically we're going to decrement 1 from the probabilities
+            % that were correct, then divide all by size of the batch
+            dx = probabilities;
+            % Subtract 1 from the currect probabilities
+            dxCorr = probCorrect - 1;
+            % Put the calculated correction back on 
+            dx(sub2ind(size(dx),[1:length(idxCorrect)]',idxCorrect)) = dxCorr;            
+            % Divide by N(will be the batch size)
+            dx = dx/N;
         end
     end
 end

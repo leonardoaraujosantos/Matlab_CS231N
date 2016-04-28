@@ -327,7 +327,7 @@ solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRat
 % Force a batch size
 solver.batch_size = 64;
 % Get a loss function object to be used on the training
-lossFunction = CrossEntropy();
+lossFunction = SoftMaxLoss();
 nn = DeepNeuralNetwork(layers,solver,lossFunction);
 
 fprintf('This neural network has %d parameters\n',nn.getNumParameters);
@@ -340,7 +340,8 @@ fprintf('Time to train %2.1d seconds\n',timeTrain);
 
 % Test
 figure(2);
-display_MNIST_Data(X_test);
+dispTests = 10;
+display_MNIST_Data(X_test(1:dispTests,:));
 title('Images on validation');
 errorCount = 0;
 for idxTest=1:testSize
@@ -355,8 +356,9 @@ for idxTest=1:testSize
     if trained_out ~= idx_MaxScore
         errorCount = errorCount + 1;
     end
-    % Uncomment if you want to see all the predictions 
-    %fprintf('Predicted %d and should be %d\n',idx_MaxScore,trained_out);
+    if idxTest < dispTests
+        fprintf('Predicted %d and should be %d\n',idx_MaxScore,trained_out);
+    end
 end
 errorPercentage = (errorCount*100) / testSize;
 fprintf('Accuracy is %d percent \n',round((100-errorPercentage)));

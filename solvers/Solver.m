@@ -13,6 +13,8 @@ classdef Solver < handle
         lossVector
         trainAccuracyVector
         validationAccuracyVector
+        X_val
+        Y_val
     end
     
     methods (Access = 'private')
@@ -36,6 +38,10 @@ classdef Solver < handle
         end
         
         function train(obj, X_vec, y_vec)
+            
+        end
+        
+        function setValidation(obj, X_val, Y_val)
             
         end
     end

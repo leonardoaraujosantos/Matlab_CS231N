@@ -16,23 +16,15 @@ scratchData = matArray;
 
 %% Transform data from colmajor to rowmajor (for every dimension)
 if numDimensions > 1    
-    if numDimensions == 3
-        for idxDims=1:numDimensions
-            scratchData(:,:,idxDims) = scratchData(:,:,idxDims)';
-        end
-    elseif numDimensions == 2
-        scratchData = scratchData';
-    end
+    revIndexOrder = [numDimensions:-1:1];
+    % Permute allows to transpose on n-dimensions
+    scratchData = permute(scratchData,revIndexOrder);    
 end
 
 %% Create a numpy array
 % Matlab python only support transfering 1-N vectors (collumn vectors)
 vec_1d_numpy = py.numpy.array(scratchData(:)');
-if numDimensions > 2
-    numpyArray = vec_1d_numpy.reshape(fliplr(sizeInfo));
-else
-    numpyArray = vec_1d_numpy.reshape(sizeInfo);
-end
+numpyArray = vec_1d_numpy.reshape(sizeInfo);
 
 %% Convert to correct type
 numpyArray = numpyArray.astype(typeData);

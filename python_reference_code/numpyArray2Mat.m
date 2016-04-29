@@ -22,7 +22,11 @@ end
 % Get double data from python numpy array
 data = double(py.array.array('d', py.numpy.nditer(numpyArray, pyargs('order', 'F'))));
 %data = double(py.array.array('d',py.numpy.nditer(pythonMatrix)));
-matArray = reshape(data, sizeInfo);
+if (numDimensions > 1)
+    matArray = reshape(data, sizeInfo);
+else
+    matArray = data;
+end
 
 end
 

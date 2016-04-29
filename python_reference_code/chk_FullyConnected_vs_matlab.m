@@ -1,18 +1,7 @@
 %% Test Python version vs Matlab (FullyConnect)
-% On this script we will test the softmax code reference from cs231n
-% assigment with our own softmax version, both should return the loss and
-% the gradients related to the target input, both versions receive the same
-% data.
-% 
-% <<../../docs/imgs/SVM_vs_Softmax.png>>
-%
+% On this script we will test the fully connected layer on our system
+% against the cs231n affine layer (affine==fully connected)
 
-%% Reference code on Python
-% Basically this piece of code does the same thing but on python
-% Code:
-%
-% <include>TestSoftMax.py</include>
-%
 
 %% Python preparation
 % Add on python path assigment 2 (With teacher softmax)
@@ -26,32 +15,66 @@ py.importlib.import_module('layers');
 %% Define data
 load dataTestFullyConnected_FP
 
-%% Call python reference code (relu_forward)
+%% Call python reference code (affine_forward)
 % The functions matArray2Numpy and numpyArray2Mat do the job of converting
 % a matlab array to a numpy array and bring a numpy array to matlab array
-% pythonReluFPOut = cell(py.layers.relu_forward(matArray2Numpy(x)));
-% pythonReluOut = numpyArray2Mat(pythonReluFPOut{1});
-% pythonReluCache = numpyArray2Mat(pythonReluFPOut{2});
+python_FC_FP = cell(py.layers.affine_forward(matArray2Numpy(x), matArray2Numpy(w), matArray2Numpy(b')));
+pythonFC = numpyArray2Mat(python_FC_FP{1});
 % 
 % % Just display
-% fprintf('Python CS231n FullyConnected(forward) reference\n');
-% disp(pythonReluOut);
-% disp(correct_fp);
-% disp('Cache the input itself');
-% disp(pythonReluCache);
+fprintf('External Python CS231n FullyConnected(forward) reference\n');
+disp(pythonFC);
 
-%% Call matlab custom version (ReluActivation.forward_prop)
+%% Call matlab custom version (InnerProductLayer.forward_prop)
 fpMat = InnerProductLayer();
 fpOutMat = fpMat.feedForward(x,w,b);
+disp('Calculated on matlab');
 disp(fpOutMat);
+disp('CS231n reference (mat file)');
+disp(correct_out);
 
 
-%% Check if they are equal (Relu Forward propagation)
+%% Check if they are equal (InnerProductLayer Forward propagation)
 error = abs(fpOutMat - out);
 error = sum(error(:));
-if error > 1e-7
+if error > 1e-8
     fprintf('Matlab (FullyConnected FP) calculation is wrong\n');
 else
     fprintf('Matlab (FullyConnected FP) calculation is right\n');
 end
+
+%% Now test the back-propagation part
+clear all;
+load dataTestFullyConnected_BP;
+
+%% Call python reference code (affine_backward)
+python_FC_BP = cell(py.layers.affine_backward(matArray2Numpy(dout), py.tuple({matArray2Numpy(cache{1}),matArray2Numpy(cache{2}),matArray2Numpy(cache{3})})));
+pyDx = numpyArray2Mat(python_FC_BP{1});
+pyDw = numpyArray2Mat(python_FC_BP{2});
+pyDb = numpyArray2Mat(python_FC_BP{3});
+
+% Check if external python call went right
+if isequal(pyDx,dx) && isequal(pyDw,dw) && isequal(pyDb,db)
+    disp('External python call(affine_backward) is right');
+end
+
+%% Call matlab custom version (InnerProductLayer.backPropagate)
+fpMat = InnerProductLayer();
+fpOutMatFP = fpMat.feedForward(x,w,b);
+[mat_dx,mat_dw,mat_db] = fpMat.backPropagate(dout);
+disp('Calculated on matlab dx');
+error_dx = abs(mat_dx - dx);
+error_dw = abs(mat_dw - dw);
+error_db = abs(mat_db - db);
+
+error_dx = sum(error_dx(:));
+error_dw = sum(error_dw(:));
+error_db = sum(error_db(:));
+
+if (error_dx > 1e-8) || (error_dw > 1e-8) || (error_db > 1e-8)
+    fprintf('Matlab (FullyConnected BP) calculation is wrong\n');
+else
+    fprintf('Matlab (FullyConnected BP) calculation is right\n');
+end
+
 

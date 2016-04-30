@@ -21,12 +21,14 @@ classdef Optimizer < handle
         end
         
         function [w] = sgd_momentum(obj, w, dw)
+            learnRate = obj.configs.learning_rate;
             momentum = obj.configs.momentum;
             velocity = zeros(size(w));
             
             next_w = w;
             
             % Momentum
+            velocity = (velocity * momentum) - (learnRate * dw);
             next_w = next_w + velocity;
             
             % Save velocity

@@ -26,14 +26,14 @@ pythonConfigs.velocity = numpyArray2Mat(pythonConfigs.velocity);
 % 
 % % Just display
 fprintf('External Python CS231n sgd_momentum expected values\n');
-disp('expected_new_dw');
+disp('Expected New W');
 disp(expected_next_w);
 disp('Velocity');
 disp(expected_velocity);
 
 % % Just display
 fprintf('External Python CS231n sgd_momentum calculated externally\n');
-disp('dw');
+disp('New W');
 disp(pythonDw);
 disp('Velocity');
 disp(pythonConfigs.velocity);
@@ -45,11 +45,20 @@ fprintf('External Python CS231n sgd_momentum calculated externally\n');
 optMat = Optimizer();
 optMat.configs = configPython;
 optMat.configs.velocity = v;
-newDwMatlab = optMat.sgd_momentum(w,dw);
+newWMatlab = optMat.sgd_momentum(w,dw);
 
 % % Just display
 fprintf('Matlab sgd_momentum calculated externally\n');
-disp('dw');
-disp(newDwMatlab);
+disp('New W');
+disp(newWMatlab);
 disp('Velocity');
-disp(optMat.configs.velocity);
+disp(optMat.configs.velocity); 
+
+% Calculate errors
+errorNewW = abs(newWMatlab - expected_next_w);
+errorNewW = sum(errorNewW(:));
+errorVelocity = abs(optMat.configs.velocity - expected_velocity);
+errorVelocity = sum(errorVelocity(:));
+
+fprintf('Error new W %d\n',errorNewW);
+fprintf('Error new W %d\n',errorVelocity);

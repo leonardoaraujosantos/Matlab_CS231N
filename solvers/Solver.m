@@ -21,6 +21,7 @@ classdef Solver < handle
         best_val_acc
         bestParameters
         verbose
+        print_every
     end
     
     methods (Access = 'private')
@@ -29,24 +30,47 @@ classdef Solver < handle
         end
         
         function step(obj)
+            % Extract a randomic mini batch from the training
+            numTrainTotal = size(obj.X_train,1);
+            batch_mask = PartitionDataSet.getRandomBatchIndex(numTrainTotal, obj.batchSize);
+            X_batch = obj.X_train(batch_mask,:);
+            Y_batch = obj.Y_train(batch_mask,:);
+            
+            % Compute the loss and gradient
+            [loss, grads, ~] = obj.model.loss(X_batch, Y_batch);
+            obj.lossVector(end+1) = loss;
+            
+            % Perform a parameter update, for every
+            % layer. Some layers have two seta of parameters
+            for idxPar = 1:obj.model.getParamCount
+                dw = grads{idxPar};
+                w = obj.model.params{idxPar};
+                nextW =obj.optimizer{idxPar}.sgd_momentum(w,dw);
+                obj.model.params{idxPar} = nextW;
+            end
             
         end
         
-        function checkAccuracy(obj)
-            
+        function [accuracy] = checkAccuracy(obj, X,Y, sizeCheck)
+            accuracy = 0;
         end
     end
     
     methods
         function obj = Solver(model, optimizer)
             obj.model = model;
-            obj.optimizer = optimizer;
             obj.epochs = 0;
             obj.best_val_acc = 0;
+            obj.print_every = 10;
+            obj.verbose = false;
+            obj.learn_rate_decay = 1;
+            for idxPar = 1:obj.model.getParamCount
+                obj.optimizer{idxPar} = Optimizer();
+            end
         end
         
         function train(obj)
-            num_train = size(obj.X_vec);
+            num_train = size(obj.X_train,1);
             iterations_per_epoch = max(num_train / obj.batchSize, 1);
             num_iterations = obj.num_epochs * iterations_per_epoch;
             
@@ -62,8 +86,10 @@ classdef Solver < handle
                 epoch_end = mod(t,iterations_per_epoch) == 0;
                 if epoch_end
                     obj.epochs = obj.epochs + 1;
-                    obj.optimizer.learnRate = obj.optimizer.learnRate ...
-                        * obj.learn_rate_decay;
+                    for idxPar = 1:obj.model.getParamCount
+                        obj.optimizer{idxPar}.configs.learning_rate = obj.optimizer{idxPar}.configs.learning_rate ...
+                            * obj.learn_rate_decay;
+                    end
                 end
                 
                 % Check train and val accuracy on the first iteration,
@@ -72,15 +98,15 @@ classdef Solver < handle
                 isLast = (t == num_iterations);
                 if isFirst || isLast || epoch_end
                     train_acc = obj.checkAccuracy(obj.X_train, ...
-                        obj.Y_train);
+                        obj.Y_train, 1000);
                     val_acc = obj.checkAccuracy(obj.X_val, ...
-                        obj.Y_val);
+                        obj.Y_val, -1);
                     % Append accuracies
                     obj.trainAccuracyVector(end+1) = train_acc;
                     obj.validationAccuracyVector(end+1) = val_acc;
                     if (obj.verbose)
                         fprintf('(Epoch %d / %d) train acc: %f; val_acc: %f', ...
-                            obj.epoch, obj.num_epochs, train_acc, val_acc);
+                            obj.epochs, obj.num_epochs, train_acc, val_acc);
                     end
                     
                     % Keep track of the best model

@@ -12,7 +12,7 @@ classdef Optimizer < handle
     
     methods
         function obj = Optimizer()
-            obj.configs.learnRate = 1e-2;
+            obj.configs.learning_rate = 1e-2;
             obj.configs.momentum = 0.9;
         end
         
@@ -23,7 +23,7 @@ classdef Optimizer < handle
         function [w] = sgd_momentum(obj, w, dw)
             learnRate = obj.configs.learning_rate;
             momentum = obj.configs.momentum;
-            if isempty(obj.configs.velocity)
+            if ~isfield(obj.configs, 'velocity')
                 velocity = zeros(size(w));
             else
                 velocity = obj.configs.velocity;

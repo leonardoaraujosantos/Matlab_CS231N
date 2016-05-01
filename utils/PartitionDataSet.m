@@ -34,6 +34,11 @@ classdef PartitionDataSet < handle
         function [shuffledIndex] = getShuffledIndex(numObservations)
             shuffledIndex = randperm(numObservations);
         end
+        
+        function [shuffledIndex] = getRandomBatchIndex(sizeTotal, batchSize)
+            % Get a random number from 1 to sizeTotal with size 1xbatchSize
+            shuffledIndex =  randi([1 sizeTotal],1,batchSize);
+        end
     end
     
     methods ( Access = 'public' )

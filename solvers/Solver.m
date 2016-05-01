@@ -53,6 +53,28 @@ classdef Solver < handle
         
         function [accuracy] = checkAccuracy(obj, X,Y, sizeCheck)
             accuracy = 0;
+            numTrainTotal = size(X,1);
+            if sizeCheck ~= -1
+                batch_mask = PartitionDataSet.getRandomBatchIndex(numTrainTotal, sizeCheck);
+                X_batch = X(batch_mask,:);
+                Y_batch = Y(batch_mask,:);
+                testSize = sizeCheck;
+            else
+                X_batch = X;
+                Y_batch = Y;
+                testSize = numTrainTotal;
+            end
+            [~,~,scores] = obj.model.loss(X_batch);
+            [~, trainedResults] = max(Y_batch,[],2);
+            [~, modelResults] = max(scores,[],2);
+            error = 0;
+            for idxCheck=1:numTrainTotal
+                if trainedResults(idxCheck) ~= modelResults(idxCheck)
+                    error = error + 1;
+                end
+            end
+            errorPercentage = (error*100) / testSize;
+            accuracy = 100 -  errorPercentage;
         end
     end
     
@@ -61,9 +83,11 @@ classdef Solver < handle
             obj.model = model;
             obj.epochs = 0;
             obj.best_val_acc = 0;
-            obj.print_every = 10;
+            obj.print_every = 100;
             obj.verbose = false;
             obj.learn_rate_decay = 1;
+            obj.trainAccuracyVector = 0;
+            obj.validationAccuracyVector = 0;
             for idxPar = 1:obj.model.getParamCount
                 obj.optimizer{idxPar} = Optimizer();
             end
@@ -98,14 +122,14 @@ classdef Solver < handle
                 isLast = (t == num_iterations);
                 if isFirst || isLast || epoch_end
                     train_acc = obj.checkAccuracy(obj.X_train, ...
-                        obj.Y_train, 1000);
+                        obj.Y_train, -1);
                     val_acc = obj.checkAccuracy(obj.X_val, ...
                         obj.Y_val, -1);
                     % Append accuracies
                     obj.trainAccuracyVector(end+1) = train_acc;
                     obj.validationAccuracyVector(end+1) = val_acc;
                     if (obj.verbose)
-                        fprintf('(Epoch %d / %d) train acc: %f; val_acc: %f', ...
+                        fprintf('(Epoch %d / %d) train acc: %f; val_acc: %f\n', ...
                             obj.epochs, obj.num_epochs, train_acc, val_acc);
                     end
                     

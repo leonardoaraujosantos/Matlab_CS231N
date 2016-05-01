@@ -18,7 +18,7 @@ load optimResults
 %% Call python reference code (sgd_momentum)
 configPython = config;
 configPython.velocity = matArray2Numpy(v);
-python_optim_res = cell(py.optim.sgd_momentum(matArray2Numpy(w),matArray2Numpy(dw),configPython));
+python_optim_res = cell(py.optim.sgd_momentum(matArray2Numpy(W),matArray2Numpy(dw),configPython));
 pythonDw = numpyArray2Mat(python_optim_res{1});
 % A python dictionary is converted to a matlab struct
 pythonConfigs = struct(python_optim_res{2});
@@ -45,7 +45,7 @@ fprintf('External Python CS231n sgd_momentum calculated externally\n');
 optMat = Optimizer();
 optMat.configs = configPython;
 optMat.configs.velocity = v;
-newWMatlab = optMat.sgd_momentum(w,dw);
+newWMatlab = optMat.sgd_momentum(W,dw);
 
 % % Just display
 fprintf('Matlab sgd_momentum calculated externally\n');
@@ -61,4 +61,4 @@ errorVelocity = abs(optMat.configs.velocity - expected_velocity);
 errorVelocity = sum(errorVelocity(:));
 
 fprintf('Error new W %d\n',errorNewW);
-fprintf('Error new W %d\n',errorVelocity);
+fprintf('Error new Velocity %d\n',errorVelocity);

@@ -12,17 +12,15 @@ classdef Optimizer < handle
     
     methods
         function obj = Optimizer()
-            obj.configs.learning_rate = 1e-2;
-            obj.configs.momentum = 0.9;
+            obj.configs.learning_rate = 1e-3;
+            obj.configs.momentum = 0.9;            
         end
         
         function [next_w] = sgd(obj, w, dw)
             
         end
         
-        function [w] = sgd_momentum(obj, w, dw)
-            learnRate = obj.configs.learning_rate;
-            momentum = obj.configs.momentum;
+        function [next_w] = sgd_momentum(obj, w, dw)           
             if ~isfield(obj.configs, 'velocity')
                 velocity = zeros(size(w));
             else
@@ -31,6 +29,8 @@ classdef Optimizer < handle
             
             next_w = w;
             
+            learnRate = obj.configs.learning_rate;
+            momentum = obj.configs.momentum;
             % Momentum
             velocity = (velocity * momentum) - (learnRate * dw);
             next_w = next_w + velocity;

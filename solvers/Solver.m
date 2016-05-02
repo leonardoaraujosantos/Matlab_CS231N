@@ -90,6 +90,7 @@ classdef Solver < handle
             obj.validationAccuracyVector = 0;
             for idxPar = 1:obj.model.getParamCount
                 obj.optimizer{idxPar} = Optimizer();
+                obj.optimizer{idxPar}.configs = optimizer.configs;
             end
         end
         

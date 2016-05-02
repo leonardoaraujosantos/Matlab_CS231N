@@ -3,8 +3,10 @@ clear all
 load mnist_oficial
 
 %% Create model
-model = TwoLayerNet(784,100,10);
+model = TwoLayerNet(784,50,10);
 optimizer = Optimizer();
+optimizer.configs.learning_rate = 0.05;
+optimizer.configs.momentum = 0.1;
 
 %% Create and configure solver
 solver = Solver(model, optimizer);
@@ -12,8 +14,8 @@ solver.X_train = input_train;
 solver.Y_train = output_train;
 solver.X_val = input_test;
 solver.Y_val = output_test;
-solver.batchSize = 100;
-solver.num_epochs = 20;
+solver.batchSize = 64;
+solver.num_epochs = 150;
 solver.learn_rate_decay = 0.95;
 solver.verbose = 1;
 

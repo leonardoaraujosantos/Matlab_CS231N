@@ -14,37 +14,33 @@ sizeRowsOut = ((rowsIn-F)/S) + 1;
 sizeColsOut = ((colsIn-F)/S) + 1;
 outConv = zeros(sizeRowsOut , sizeColsOut, numDims);
 
-%% Get kernel size
-[rowsKernel, colsKernel] = size(kernel);
-
 %% Initialize a sampling window
-window = zeros(rowsKernel , colsKernel);
+window = zeros(F , F);
 
 %% Sample the input signal to form the window
 % Iterate on every dimension
-for idxDims=1:numDims
-    %paddedInput = padarray(input(:,:,idxDims),[num2Pad num2Pad]);
-    paddedInput = input(:,:,idxDims);
+for idxDims=1:numDims    
+    inputCurDim = input(:,:,idxDims);
     % Iterate on every element of the input signal
     % Iterate on every row
     for idxRowsIn = 1 : sizeRowsOut
         % Iterate on every col
         for idxColsIn = 1 : sizeColsOut
             % Populate our window (same size of the kernel)
-            for idxRowsKernel = 1 : rowsKernel
-                for idxColsKernel = 1 : colsKernel
+            for idxRowsKernel = 1 : F
+                for idxColsKernel = 1 : F
                     % Slide the window
                     slideRow = (idxRowsIn-1)*S;
                     slideCol = (idxColsIn-1)*S;
                     
                     % Sample the window, but avoid going out of the input
-                    if (idxRowsKernel + slideRow) <= size(paddedInput,1) && idxColsKernel + slideCol <= size(paddedInput,2)
+                    if (idxRowsKernel + slideRow) <= size(inputCurDim,1) && idxColsKernel + slideCol <= size(inputCurDim,2)
                         window(idxRowsKernel,idxColsKernel) = ...
-                            paddedInput(idxRowsKernel + slideRow, idxColsKernel + slideCol);
+                            inputCurDim(idxRowsKernel + slideRow, idxColsKernel + slideCol);
                     end                    
                 end
             end
-            % Calculate the convolution here...
+            % Get the biggest value on the window here...
             outConv(idxRowsIn, idxColsIn,idxDims) = getMax(window,kernel);
         end
     end

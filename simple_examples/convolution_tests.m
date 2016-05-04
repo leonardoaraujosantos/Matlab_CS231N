@@ -322,7 +322,7 @@ fprintf('Took %d seconds to complete 512 (convn (Matlab) CPU) color\n',timeSpent
 imgCat = double(imgCat);
 tic;
 for idxConv=1:512
-    imgResult = convn_vanilla(imgCat,Gx);
+    imgResult = convn_vanilla(imgCat,Gx,1);
 end
 timeSpentConvn = toc;
 fprintf('Took %d seconds to complete 512 (convn_vanila (Non-Vectorized) CPU) color\n',timeSpentConvn);

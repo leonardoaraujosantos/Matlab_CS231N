@@ -16,36 +16,26 @@ classdef ConvolutionalLayer < BaseLayer
         numFilters
         stepStride
         numPad
-        activationType
     end
     
     methods (Access = 'public')
-        function obj = ConvolutionalLayer(pKernelSize, pFilters, pStride, pPad, pActType)
+        function obj = ConvolutionalLayer(pKernelSize, pFilters, pStride, pPad)
             % Initialize type
             obj.typeLayer = LayerType.Convolutional;
             obj.kernelSize = pKernelSize;
             obj.numFilters = pFilters;
             obj.stepStride = pStride;
             obj.numPad = pPad;
-            obj.activationType = pActType;
-            
-            switch pActType
-                case ActivationType.Sigmoid
-                    obj.activationObject = SigmoidActivation();
-                case ActivationType.Tanh
-                    obj.activationObject = TanhActivation();
-                case ActivationType.Relu
-                    obj.activationObject = ReluActivation();
-                otherwise
-                    obj.activationObject = SigmoidActivation();
-            end
         end
         
-        function [result] = feedForward(obj, inputs)
+        % http://cs231n.github.io/convolutional-networks/#conv
+        function [result] = feedForward(obj, activations, theta, biasWeights)
+            %size_H = ((activations_H + (2*obj.numPad)) / obj.stepStride) + 1;
+            %size_W = ((activations_W + (2*obj.numPad)) / obj.stepStride) + 1;
             result = 0;
         end
         
-        function [gradient] = backPropagate(obj, targets)
+        function [gradient] = backPropagate(obj, dout)
             gradient = 0;
         end
         
@@ -81,9 +71,9 @@ classdef ConvolutionalLayer < BaseLayer
         function [numNeurons] = getNumNeurons(obj)
             numNeurons = [];
         end
-         
+        
         function [descText] = getDescription(obj)
-            [~, names] = enumeration('ActivationType');            
+            [~, names] = enumeration('ActivationType');
             descText = sprintf('CONV ksize=%d num_filters=%d stride=%d num_pad=%d Activation=%s\n',...
                 obj.kernelSize,obj.numFilters,obj.stepStride,...
                 obj.numPad,names{obj.activationType});

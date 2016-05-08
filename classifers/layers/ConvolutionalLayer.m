@@ -33,28 +33,27 @@ classdef ConvolutionalLayer < BaseLayer
             [N, C, H, W] = size(activations);
             [F, C, HH, WW] = size(theta);
             
-            size_out_H = ((HH + (2*obj.numPad)) / obj.stepStride) + 1;
-            size_out_W = size_out_H;
+            size_out_H = ((H + (2*obj.numPad) - HH) / obj.stepStride) + 1;
+            size_out_W = ((W + (2*obj.numPad) - WW) / obj.stepStride) + 1;
             
             % Pad if needed
             if (obj.numPad > 0)
-                activations = padarray(activations,obj.numPad);
+                activations = padarray(activations,[0 0 obj.numPad obj.numPad]);
             end
             
             result = zeros(N,F,size_out_H,size_out_W);
             
             for idxInputDepth=1:N
                 for idxOutputDepth=1:F
-                    for idxRows=1:obj.stepStride:H
-                        for idxCols=1:obj.stepStride:W
-                            result(idxInputDepth,idxOutputDepth,idxRows/obj.stepStride,idxCols/obj.stepStride) = sum(activations(idxInputDepth,:,idxRows:idxRows+HH,idxCols:idxCols+WW) * theta(idxOutputDepth,:,:,:)) + biasWeights(idxOutputDepth);
-                        end
-                    end
+                    weights =  reshape(theta(idxOutputDepth,:,:,:),[ 3 3 3]);
+                    input = reshape(activations(idxInputDepth,:,:,:),[3 202 202]);
+                    input = permute(input,[2,3,1]);
+                    weights = rot90(weights, 2);
+                    resConv = convn(input,weights,'valid');
+
+                    result(idxInputDepth,idxOutputDepth,:,:) = resConv + biasWeights(idxOutputDepth);
                 end
-            end
-            
-            
-            result = 0;
+            end                                    
         end
         
         function [gradient] = backPropagate(obj, dout)

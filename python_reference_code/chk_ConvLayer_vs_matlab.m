@@ -24,8 +24,8 @@ image2 = permute(image2,[2,3,1]);
 
 figure(1);
 hold on;
-subplot(3,2,1);imshow(uint8(image1)); title('Dog');
-subplot(3,2,2);imshow(uint8(image2)); title('Cat');
+subplot(5,2,1);imshow(uint8(image1)); title('Dog');
+subplot(5,2,2);imshow(uint8(image2)); title('Cat');
 
 conv_param.stride = uint8(1);
 conv_param.pad = uint8(1);
@@ -38,10 +38,10 @@ image_out_2 = reshape(python_CONV_FP_OUT(2,1,:,:),[200 200]);
 image_out_3 = reshape(python_CONV_FP_OUT(1,2,:,:),[200 200]);
 image_out_4 = reshape(python_CONV_FP_OUT(2,2,:,:),[200 200]);
 
-subplot(3,2,3);imshow(uint8(image_out_1)); title('Dog Gray');
-subplot(3,2,4);imshow(uint8(image_out_2)); title('Cat Gray');
-subplot(3,2,5);imshow(uint8(image_out_3)); title('Dog Edge');
-subplot(3,2,6);imshow(uint8(image_out_4)); title('Cat Edge');
+subplot(5,2,3);imshow(uint8(image_out_1)); title('Dog Gray');
+subplot(5,2,4);imshow(uint8(image_out_2)); title('Cat Gray');
+subplot(5,2,5);imshow(uint8(image_out_3)); title('Dog Edge');
+subplot(5,2,6);imshow(uint8(image_out_4)); title('Cat Edge');
 
 %% Call Matlab version
 kernelSize = 3;
@@ -49,20 +49,31 @@ numFilters = 2;
 stride = 1;
 pad = 1;
 convMat = ConvolutionalLayer(kernelSize, numFilters, stride, pad);
-convMat.feedForward(x,w,b);
+matlabResult = convMat.feedForward(x,w,double(b));
 
-%% Define data
-load ConvForward
+image_out_mat_1 = reshape(matlabResult(1,1,:,:),[200 200]);
+image_out_mat_2 = reshape(matlabResult(2,1,:,:),[200 200]);
+image_out_mat_3 = reshape(matlabResult(1,2,:,:),[200 200]);
+image_out_mat_4 = reshape(matlabResult(2,2,:,:),[200 200]);
 
-%% Call python reference code (affine_forward)
-% The functions matArray2Numpy and numpyArray2Mat do the job of converting
-% a matlab array to a numpy array and bring a numpy array to matlab array
-python_CONV_FP = cell(py.layers.conv_forward_naive(matArray2Numpy(x), matArray2Numpy(w), matArray2Numpy(b'), conv_param));
-python_CONV_FP_OUT = numpyArray2Mat(python_CONV_FP{1});
+subplot(5,2,7);imshow(uint8(image_out_mat_1)); title('Dog Gray(mat)');
+subplot(5,2,8);imshow(uint8(image_out_mat_2)); title('Cat Gray(mat)');
+subplot(5,2,9);imshow(uint8(image_out_mat_3)); title('Dog Edge(mat)');
+subplot(5,2,10);imshow(uint8(image_out_mat_4)); title('Cat Edge(mat)');
+
+% %% Define data
+% clear all;clc;
+% load ConvForward
 % 
-% % Just display
-fprintf('External Python CS231n FullyConnected(forward) reference\n');
-disp(size(python_CONV_FP_OUT));
+% %% Call python reference code (affine_forward)
+% % The functions matArray2Numpy and numpyArray2Mat do the job of converting
+% % a matlab array to a numpy array and bring a numpy array to matlab array
+% python_CONV_FP = cell(py.layers.conv_forward_naive(matArray2Numpy(x), matArray2Numpy(w), matArray2Numpy(b'), conv_param));
+% python_CONV_FP_OUT = numpyArray2Mat(python_CONV_FP{1});
+% % 
+% % % Just display
+% fprintf('External Python CS231n FullyConnected(forward) reference\n');
+% disp(size(python_CONV_FP_OUT));
 
 % %% Call matlab custom version (InnerProductLayer.forward_prop)
 % kernelSize = 

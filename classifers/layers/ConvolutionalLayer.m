@@ -30,8 +30,30 @@ classdef ConvolutionalLayer < BaseLayer
         
         % http://cs231n.github.io/convolutional-networks/#conv
         function [result] = feedForward(obj, activations, theta, biasWeights)
-            %size_H = ((activations_H + (2*obj.numPad)) / obj.stepStride) + 1;
-            %size_W = ((activations_W + (2*obj.numPad)) / obj.stepStride) + 1;
+            [N, C, H, W] = size(activations);
+            [F, C, HH, WW] = size(theta);
+            
+            size_out_H = ((HH + (2*obj.numPad)) / obj.stepStride) + 1;
+            size_out_W = size_out_H;
+            
+            % Pad if needed
+            if (obj.numPad > 0)
+                activations = padarray(activations,obj.numPad);
+            end
+            
+            result = zeros(N,F,size_out_H,size_out_W);
+            
+            for idxInputDepth=1:N
+                for idxOutputDepth=1:F
+                    for idxRows=1:obj.stepStride:H
+                        for idxCols=1:obj.stepStride:W
+                            result(idxInputDepth,idxOutputDepth,idxRows/obj.stepStride,idxCols/obj.stepStride) = sum(activations(idxInputDepth,:,idxRows:idxRows+HH,idxCols:idxCols+WW) * theta(idxOutputDepth,:,:,:)) + biasWeights(idxOutputDepth);
+                        end
+                    end
+                end
+            end
+            
+            
             result = 0;
         end
         

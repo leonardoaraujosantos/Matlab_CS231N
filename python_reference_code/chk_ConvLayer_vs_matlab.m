@@ -13,6 +13,45 @@ insert(py.sys.path,int32(0),[pwd filesep 'python_reference_code' ...
 py.importlib.import_module('layers');
 
 %% Define data
+load ConvImages
+
+% Get the image
+image1 = reshape(x(1,:,:,:),[3 200 200]);
+image2 = reshape(x(2,:,:,:),[3 200 200]);
+% Transpose to put on matlab format, this is needed for color
+image1 = permute(image1,[2,3,1]);
+image2 = permute(image2,[2,3,1]);
+
+figure(1);
+hold on;
+subplot(3,2,1);imshow(uint8(image1)); title('Dog');
+subplot(3,2,2);imshow(uint8(image2)); title('Cat');
+
+conv_param.stride = uint8(1);
+conv_param.pad = uint8(1);
+
+%% Call python reference code (convolution)
+python_CONV_FP = cell(py.layers.conv_forward_naive(matArray2Numpy(x), matArray2Numpy(w), matArray2Numpy(b'), conv_param));
+python_CONV_FP_OUT = numpyArray2Mat(python_CONV_FP{1});
+image_out_1 = reshape(python_CONV_FP_OUT(1,1,:,:),[200 200]);
+image_out_2 = reshape(python_CONV_FP_OUT(2,1,:,:),[200 200]);
+image_out_3 = reshape(python_CONV_FP_OUT(1,2,:,:),[200 200]);
+image_out_4 = reshape(python_CONV_FP_OUT(2,2,:,:),[200 200]);
+
+subplot(3,2,3);imshow(uint8(image_out_1)); title('Dog Gray');
+subplot(3,2,4);imshow(uint8(image_out_2)); title('Cat Gray');
+subplot(3,2,5);imshow(uint8(image_out_3)); title('Dog Edge');
+subplot(3,2,6);imshow(uint8(image_out_4)); title('Cat Edge');
+
+%% Call Matlab version
+kernelSize = 3;
+numFilters = 2;
+stride = 1;
+pad = 1;
+convMat = ConvolutionalLayer(kernelSize, numFilters, stride, pad);
+convMat.feedForward(x,w,b);
+
+%% Define data
 load ConvForward
 
 %% Call python reference code (affine_forward)
@@ -23,29 +62,30 @@ python_CONV_FP_OUT = numpyArray2Mat(python_CONV_FP{1});
 % 
 % % Just display
 fprintf('External Python CS231n FullyConnected(forward) reference\n');
-disp(python_CONV_FP_OUT);
+disp(size(python_CONV_FP_OUT));
 
-%% Call matlab custom version (InnerProductLayer.forward_prop)
-convMat = ConvLayer();
-fpOutMat = fpMat.feedForward(x,w,b);
-disp('Calculated on matlab');
-disp(fpOutMat);
-disp('CS231n reference (mat file)');
-disp(correct_out);
-
-
-%% Check if they are equal (InnerProductLayer Forward propagation)
-error = abs(fpOutMat - out);
-error = sum(error(:));
-if error > 1e-8
-    fprintf('Matlab (FullyConnected FP) calculation is wrong\n');
-else
-    fprintf('Matlab (FullyConnected FP) calculation is right\n');
-end
-
-%% Now test the back-propagation part
-clear all;
-load ConvBackward;
+% %% Call matlab custom version (InnerProductLayer.forward_prop)
+% kernelSize = 
+% convMat = ConvolutionalLayer();
+% fpOutMat = fpMat.feedForward(x,w,b);
+% disp('Calculated on matlab');
+% disp(fpOutMat);
+% disp('CS231n reference (mat file)');
+% disp(correct_out);
+% 
+% 
+% %% Check if they are equal (InnerProductLayer Forward propagation)
+% error = abs(fpOutMat - out);
+% error = sum(error(:));
+% if error > 1e-8
+%     fprintf('Matlab (FullyConnected FP) calculation is wrong\n');
+% else
+%     fprintf('Matlab (FullyConnected FP) calculation is right\n');
+% end
+% 
+% %% Now test the back-propagation part
+% clear all;
+% load ConvBackward;
 
 % %% Call python reference code (affine_backward)
 % python_FC_BP = cell(py.layers.affine_backward(matArray2Numpy(dout), py.tuple({matArray2Numpy(cache{1}),matArray2Numpy(cache{2}),matArray2Numpy(cache{3})})));

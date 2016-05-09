@@ -3,10 +3,15 @@
 % Parameters:
 % K: kernel
 % S: stride
+% This implementation is like the 'valid' parameter on normal convolution
 
-function outConv = convn_vanila(input, kernel, S)
-%% Get the input size in terms of rows and cols
-[rowsIn, colsIn, numDims] = size(input);
+function outConv = convn_vanilla(input, kernel, S)
+% Get the input size in terms of rows and cols. The weights should have
+% same depth as the input volume(image)
+[rowsIn, colsIn, ~] = size(input);
+
+% Get volume dimensio
+depthInput = ndims(input);
 
 % Get the kernel size, considering a square kernel always
 F = size(kernel,1);
@@ -14,56 +19,28 @@ F = size(kernel,1);
 %% Initialize outputs
 sizeRowsOut = ((rowsIn-F)/S) + 1;
 sizeColsOut = ((colsIn-F)/S) + 1;
-outConv = zeros(sizeRowsOut , sizeColsOut, numDims);
+outConvAcc = zeros(sizeRowsOut , sizeColsOut, depthInput);
 
-
-%% Initialize a sampling window
-window = zeros(F , F);
-
-%% Rotate the kernel 180�
-rot_kernel = rot90(kernel, 2);
-
-%% Sample the input signal to form the window
-% Iterate on every dimension  
-for idxDims=1:ndims(input)
-    inputCurDim = input(:,:,idxDims);
-    % Iterate on every element of the input signal
-    % Iterate on every row
-    for idxRowsIn = 1 : rowsIn
-        % Iterate on every col
-        for idxColsIn = 1 : colsIn
-            % Populate our window (same size of the kernel)
-            for idxRowsKernel = 1 : F
-                for idxColsKernel = 1 : F                    
-                    % Slide the window
-                    slideRow = (idxRowsIn-1)*S;
-                    slideCol = (idxColsIn-1)*S;
-                    
-                    % Sample the window, but avoid going out of the input
-                    if (idxRowsKernel + slideRow) <= size(inputCurDim,1) && idxColsKernel + slideCol <= size(inputCurDim,2)
-                        window(idxRowsKernel,idxColsKernel) = ...
-                            inputCurDim(idxRowsKernel + slideRow, idxColsKernel + slideCol);
-                    end
-                end
+% Convolve each channel on the input with it's respective kernel channel
+for depth=1:depthInput
+    % Select input and kernel current channel
+    inputCurrDepth = input(:,:,depth);
+    kernelCurrDepth = kernel(:,:,depth);
+    % Iterate on every row and col, (using stride)
+    for r=1:S:(rowsIn-1)
+        for c=1:S:(colsIn-1)
+            if (((c+F)-1) <= colsIn) && (((r+F)-1) <= rowsIn)
+                % Select window on input volume
+                sampleWindow = inputCurrDepth(r:(r+F)-1,c:(c+F)-1);
+                % Do the dot product
+                dotProd = sum(sampleWindow(:) .* kernelCurrDepth(:));
+                % Store result
+                outConvAcc(ceil(r/S),ceil(c/S),depth) = dotProd;
             end
-            % Calculate the convolution here...
-            outConv(idxRowsIn, idxColsIn,idxDims) = doConvolution(window,rot_kernel);
         end
     end
 end
 
-%% Moving window effect
-% The previous inner for loop updates the variables slideRow, and slideCol
-% those updates will create the following effect
-%
-% <<../../docs/imgs/3D_Convolution_Animation.gif>>
-%
-
-end
-
-%% Calculate the sum of the product between the kernel and the window
-% The convolution is all about the sum of product of the window and kernel,
-% bye the way this is a dot product
-function result = doConvolution(window, kernel)
-result = sum(sum(window .* kernel));
+% Sum elements over the input volume dimension (sum all the channels)
+outConv = sum(outConvAcc,depthInput);
 end

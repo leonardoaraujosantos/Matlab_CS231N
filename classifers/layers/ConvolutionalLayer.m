@@ -8,6 +8,8 @@ classdef ConvolutionalLayer < BaseLayer
         typeLayer
         weights
         activations
+        previousInput
+        biasWeights
     end
     
     properties (Access = 'private')
@@ -30,34 +32,41 @@ classdef ConvolutionalLayer < BaseLayer
         
         % http://cs231n.github.io/convolutional-networks/#conv
         function [result] = feedForward(obj, activations, theta, biasWeights)
-            [N, C, H, W] = size(activations);
-            [F, C, HH, WW] = size(theta);
+            % N (input volume), F(output volume)
+            % C channels
+            % H (rows), W(cols)
+            [H, W, C, N] = size(activations);
+            [HH, WW, C, F] = size(theta);
             
             size_out_H = ((H + (2*obj.numPad) - HH) / obj.stepStride) + 1;
             size_out_W = ((W + (2*obj.numPad) - WW) / obj.stepStride) + 1;
             
             % Pad if needed
             if (obj.numPad > 0)
-                activations = padarray(activations,[0 0 obj.numPad obj.numPad]);
+                activations = padarray(activations,[obj.numPad obj.numPad 0 0]);
             end
             
-            result = zeros(N,F,size_out_H,size_out_W);
+            result = zeros(size_out_H,size_out_W,N,F);
             
             for idxInputDepth=1:N
-                for idxOutputDepth=1:F
-                    weights =  reshape(theta(idxOutputDepth,:,:,:),[ 3 3 3]);
-                    input = reshape(activations(idxInputDepth,:,:,:),[3 202 202]);
-                    input = permute(input,[2,3,1]);
-                    weights = rot90(weights, 2);
-                    resConv = convn(input,weights,'valid');
+                for idxOutputDepth=1:F                    
+                    weights = theta(:,:,:,idxOutputDepth);
+                    input = activations(:,:,:,idxInputDepth);                    
+                    resConv = convn_vanilla(input,weights,obj.stepStride);
 
-                    result(idxInputDepth,idxOutputDepth,:,:) = resConv + biasWeights(idxOutputDepth);
+                    result(:,:,idxInputDepth,idxOutputDepth) = resConv + biasWeights(idxOutputDepth);
                 end
-            end                                    
+            end
+            % Save the previous inputs for use later on backpropagation
+            obj.previousInput = activations;
+            obj.weights = theta;
+            obj.biasWeights = biasWeights;
         end
         
-        function [gradient] = backPropagate(obj, dout)
-            gradient = 0;
+        function [dx, dw, db] = backPropagate(obj, dout)
+            dw = zeros(;
+            dx = 0;
+            db = 0;
         end
         
         function [result] = getActivations(obj)

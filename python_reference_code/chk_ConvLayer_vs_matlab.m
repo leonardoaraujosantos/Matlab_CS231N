@@ -49,83 +49,107 @@ numFilters = 2;
 stride = 1;
 pad = 1;
 convMat = ConvolutionalLayer(kernelSize, numFilters, stride, pad);
-matlabResult = convMat.feedForward(x,w,double(b));
 
-image_out_mat_1 = reshape(matlabResult(1,1,:,:),[200 200]);
-image_out_mat_2 = reshape(matlabResult(2,1,:,:),[200 200]);
-image_out_mat_3 = reshape(matlabResult(1,2,:,:),[200 200]);
-image_out_mat_4 = reshape(matlabResult(2,2,:,:),[200 200]);
+% Convert arrays from numpy to matlab multidimension format
+% [rows,cols,dim1,... dimn] (Images comes transposed)
+x_matlab = permute(x,[3 4 2 1]);
+w_matlab = permute(w,[3 4 2 1]);
+matlabResult = convMat.feedForward(x_matlab,w_matlab,double(b));
+
+image_out_mat_1 = matlabResult(:,:,1,1);
+image_out_mat_2 = matlabResult(:,:,2,1);
+image_out_mat_3 = matlabResult(:,:,1,2);
+image_out_mat_4 = matlabResult(:,:,2,2);
 
 subplot(5,2,7);imshow(uint8(image_out_mat_1)); title('Dog Gray(mat)');
 subplot(5,2,8);imshow(uint8(image_out_mat_2)); title('Cat Gray(mat)');
 subplot(5,2,9);imshow(uint8(image_out_mat_3)); title('Dog Edge(mat)');
 subplot(5,2,10);imshow(uint8(image_out_mat_4)); title('Cat Edge(mat)');
 
-% %% Define data
-% clear all;clc;
-% load ConvForward
-% 
-% %% Call python reference code (affine_forward)
-% % The functions matArray2Numpy and numpyArray2Mat do the job of converting
-% % a matlab array to a numpy array and bring a numpy array to matlab array
-% python_CONV_FP = cell(py.layers.conv_forward_naive(matArray2Numpy(x), matArray2Numpy(w), matArray2Numpy(b'), conv_param));
-% python_CONV_FP_OUT = numpyArray2Mat(python_CONV_FP{1});
-% % 
-% % % Just display
-% fprintf('External Python CS231n FullyConnected(forward) reference\n');
-% disp(size(python_CONV_FP_OUT));
+%% Define data
+clear all;clc;
+load ConvForward
 
-% %% Call matlab custom version (InnerProductLayer.forward_prop)
-% kernelSize = 
-% convMat = ConvolutionalLayer();
-% fpOutMat = fpMat.feedForward(x,w,b);
-% disp('Calculated on matlab');
-% disp(fpOutMat);
-% disp('CS231n reference (mat file)');
-% disp(correct_out);
-% 
-% 
-% %% Check if they are equal (InnerProductLayer Forward propagation)
-% error = abs(fpOutMat - out);
-% error = sum(error(:));
-% if error > 1e-8
-%     fprintf('Matlab (FullyConnected FP) calculation is wrong\n');
-% else
-%     fprintf('Matlab (FullyConnected FP) calculation is right\n');
-% end
-% 
-% %% Now test the back-propagation part
-% clear all;
-% load ConvBackward;
+%% Call python reference code (affine_forward)
+% The functions matArray2Numpy and numpyArray2Mat do the job of converting
+% a matlab array to a numpy array and bring a numpy array to matlab array
+python_CONV_FP = cell(py.layers.conv_forward_naive(matArray2Numpy(x), matArray2Numpy(w), matArray2Numpy(b'), conv_param));
+python_CONV_FP_OUT = numpyArray2Mat(python_CONV_FP{1});
+%
+% % Just display
+fprintf('External Python CS231n FullyConnected(forward) reference\n');
+error = sum(abs(out(:) - python_CONV_FP_OUT(:)));
+fprintf('Difference on python (exteral) version is %d\n',error);
 
-% %% Call python reference code (affine_backward)
-% python_FC_BP = cell(py.layers.affine_backward(matArray2Numpy(dout), py.tuple({matArray2Numpy(cache{1}),matArray2Numpy(cache{2}),matArray2Numpy(cache{3})})));
-% pyDx = numpyArray2Mat(python_FC_BP{1});
-% pyDw = numpyArray2Mat(python_FC_BP{2});
-% pyDb = numpyArray2Mat(python_FC_BP{3});
-% 
-% % Check if external python call went right
-% if isequal(pyDx,dx) && isequal(pyDw,dw) && isequal(pyDb,db)
-%     disp('External python call(affine_backward) is right');
-% end
-% 
-% %% Call matlab custom version (InnerProductLayer.backPropagate)
-% fpMat = InnerProductLayer();
-% fpOutMatFP = fpMat.feedForward(x,w,b);
-% [mat_dx,mat_dw,mat_db] = fpMat.backPropagate(dout);
-% disp('Calculated on matlab dx');
-% error_dx = abs(mat_dx - dx);
-% error_dw = abs(mat_dw - dw);
-% error_db = abs(mat_db - db);
-% 
-% error_dx = sum(error_dx(:));
-% error_dw = sum(error_dw(:));
-% error_db = sum(error_db(:));
-% 
-% if (error_dx > 1e-8) || (error_dw > 1e-8) || (error_db > 1e-8)
-%     fprintf('Matlab (FullyConnected BP) calculation is wrong\n');
-% else
-%     fprintf('Matlab (FullyConnected BP) calculation is right\n');
-% end
-% 
-% 
+%% Call matlab custom version (InnerProductLayer.forward_prop)
+kernelSize = 3;
+numFilters = 4;
+stride = 2;
+pad = 1;
+convMat = ConvolutionalLayer(kernelSize, numFilters, stride, pad);
+% Convert arrays from numpy to matlab multidimension format
+% [rows,cols,dim1,... dimn] (Images comes transposed)
+x_matlab = permute(x,[3 4 2 1]);
+w_matlab = permute(w,[3 4 2 1]);
+matlabResult = convMat.feedForward(x_matlab,w_matlab,b);
+% Put on same order has python
+matlabResult = permute(matlabResult,[3 4 1 2]);
+error = sum(abs(out(:) - matlabResult(:)));
+fprintf('Difference with matlab version is %d\n',error);
+
+%% Check if they are equal (InnerProductLayer Forward propagation)
+if error > 1e-8
+    fprintf('Matlab (Conv FP) calculation is wrong\n');
+else
+    fprintf('Matlab (Conv FP) calculation is right\n');
+end
+
+
+%% Now test the back-propagation part
+clear all;
+load ConvBackward;
+
+%% Call python reference code (affine_backward)
+pythonCacheTup = py.tuple({matArray2Numpy(cache{1}),matArray2Numpy(cache{2}),matArray2Numpy(cache{3}'),cache{4}});
+python_FC_BP = cell(py.layers.conv_backward_naive(matArray2Numpy(dout), pythonCacheTup));
+pyDx = numpyArray2Mat(python_FC_BP{1});
+pyDw = numpyArray2Mat(python_FC_BP{2});
+pyDb = numpyArray2Mat(python_FC_BP{3});
+
+errorDx = sum(abs(pyDx(:)-dx(:)));
+errorDw = sum(abs(pyDw(:)-dw(:)));
+errorDb = sum(abs(pyDb(:)-db(:)));
+
+if (errorDx > 1e-8) || (errorDb > 1e-8) || (errorDw > 1e-8)
+    fprintf('Problem calling python conv backprop\n');
+else
+    fprintf('Python conv backprop is correct\n');
+end
+
+% Put 4d tensors on matlab format
+dout_matlab = permute(dout,[3 4 2 1]);
+prev_x = permute(cache{1},[3 4 2 1]);
+prev_w = permute(cache{2},[3 4 2 1]);
+prev_b = cache{3};
+
+kernelSize = 3;
+numFilters = 2;
+stride = 1;
+pad = 1;
+convMat = ConvolutionalLayer(kernelSize, numFilters, stride, pad);
+
+convMat.previousInput = prev_x;
+convMat.weights = prev_w;
+convMat.biasWeights = prev_b;
+
+[matDx, matDw, matDb] = convMat.backPropagate(dout_matlab);
+
+errorDx = sum(abs(matDx(:)-dx(:)));
+errorDw = sum(abs(matDw(:)-dw(:)));
+errorDb = sum(abs(matDb(:)-db(:)));
+
+if (errorDx > 1e-8) || (errorDb > 1e-8) || (errorDw > 1e-8)
+    fprintf('Matlab conv backprop calculation incorrect\n');
+else
+    fprintf('Matlab conv backprop calculation correct\n');
+end

@@ -41,6 +41,11 @@ classdef ConvolutionalLayer < BaseLayer
             size_out_H = ((H + (2*obj.numPad) - HH) / obj.stepStride) + 1;
             size_out_W = ((W + (2*obj.numPad) - WW) / obj.stepStride) + 1;
             
+            % Save the previous inputs for use later on backpropagation
+            obj.previousInput = activations;
+            obj.weights = theta;
+            obj.biasWeights = biasWeights;
+            
             % Pad if needed
             if (obj.numPad > 0)
                 activations = padarray(activations,[obj.numPad obj.numPad 0 0]);
@@ -49,24 +54,69 @@ classdef ConvolutionalLayer < BaseLayer
             result = zeros(size_out_H,size_out_W,N,F);
             
             for idxInputDepth=1:N
-                for idxOutputDepth=1:F                    
+                for idxOutputDepth=1:F
                     weights = theta(:,:,:,idxOutputDepth);
-                    input = activations(:,:,:,idxInputDepth);                    
+                    input = activations(:,:,:,idxInputDepth);
                     resConv = convn_vanilla(input,weights,obj.stepStride);
-
+                    
                     result(:,:,idxInputDepth,idxOutputDepth) = resConv + biasWeights(idxOutputDepth);
                 end
             end
-            % Save the previous inputs for use later on backpropagation
-            obj.previousInput = activations;
-            obj.weights = theta;
-            obj.biasWeights = biasWeights;
         end
         
         function [dx, dw, db] = backPropagate(obj, dout)
-            dw = zeros(;
-            dx = 0;
-            db = 0;
+            % N (input volume), F(output volume)
+            % C channels
+            % H (rows), W(cols)
+            [H_R, W_R,F, N] = size(dout);
+            [H, W,C, N] = size(obj.previousInput);
+            [HH, WW,C, F] = size(obj.weights);
+            S = obj.stepStride;
+            % Pad if needed
+            if (obj.numPad > 0)
+                obj.previousInput = padarray(obj.previousInput,[obj.numPad obj.numPad 0 0]);
+            end
+            
+            dx = zeros(size(obj.previousInput));
+            dw = zeros(size(obj.weights));
+            db = zeros(size(obj.biasWeights));
+            
+            % Calculate dx
+            for n=1:N
+                for depth=1:F
+                    weights = obj.weights(:,:,:,depth);
+                    for r=1:S:H
+                        for c=1:S:W
+                            input =dout(ceil(r/S),ceil(c/S),depth,n);
+                            prod =  weights * input;
+                            dx(r:(r+HH)-1,c:(c+WW)-1,:,n) = dx(r:(r+HH)-1,c:(c+WW)-1,:,n) + prod;
+                        end
+                    end
+                end
+            end
+            
+            % Delete padded rows
+            dx = dx(1+obj.numPad:end-obj.numPad, 1+obj.numPad:end-obj.numPad,:,:);
+            
+            % Calculate dw            
+            for n=1:N
+                for depth=1:F                    
+                    for r=1:H_R
+                        for c=1:W_R
+                            input =dout(r,c,depth,n);
+                            weights = obj.previousInput(r*S:(r*S+HH)-1,c*S:(c*S+WW)-1,:,n);
+                            prod =  weights * input;                            
+                            dw(:,:,:,depth) = dw(:,:,:,depth) + prod;
+                        end
+                    end
+                end
+            end
+            
+            % Calculate db
+            for depth=1:F
+                selDoutDepth = dout(: , : , depth, :);
+                db(depth) = sum( selDoutDepth(:) );
+            end
         end
         
         function [result] = getActivations(obj)

@@ -131,6 +131,10 @@ dout_matlab = permute(dout,[3 4 2 1]);
 prev_x = permute(cache{1},[3 4 2 1]);
 prev_w = permute(cache{2},[3 4 2 1]);
 prev_b = cache{3};
+% Example on python dx (4,3,5,5)
+% On matlab the same 4d array should be (5,5,3,4)
+dx = permute(dx,[3 4 2 1]);
+dw = permute(dw,[3 4 2 1]);
 
 kernelSize = 3;
 numFilters = 2;

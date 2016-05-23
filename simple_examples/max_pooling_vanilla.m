@@ -3,7 +3,7 @@
 % F: Kernel size
 % S: stride
 
-function outConv = max_pooling_vanila(input, F, S)
+function outConv = max_pooling_vanilla(input, F, S)
 %% Get the input size in terms of rows and cols
 [rowsIn, colsIn, numDims] = size(input);
 

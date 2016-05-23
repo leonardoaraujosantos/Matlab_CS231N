@@ -26,7 +26,7 @@ classdef MaxPoolingLayer < BaseLayer
             obj.kernelSize = pKernelSize;
             obj.stepStride = pStride;
             obj.weights = 0;
-            obj.poolingType = PoolingType.MaxPooling;                        
+            obj.poolingType = PoolingType.MaxPooling;
         end
         
         % Get number of neurons
@@ -38,7 +38,7 @@ classdef MaxPoolingLayer < BaseLayer
             % N (input volume), F(output volume)
             % C channels
             % H (rows), W(cols)
-            [H, W, C, N] = size(activations);            
+            [H, W, C, N] = size(activations);
             S = obj.stepStride;
             W_P = obj.kernelSize;
             H_P = obj.kernelSize;
@@ -52,24 +52,45 @@ classdef MaxPoolingLayer < BaseLayer
             % instead of getting the window multiplied by heights, it just
             % return the biggest window value
             for n=1:N
-                for depth=1:C     
-                    input = activations(:,:,:,n);
-                    resPool = max_pooling_vanilla(input,W_P,S);
-                    result(:,:,:,n) = resPool;
-%                     for r=1:S:H
-%                         for c=1:S:W               
-%                             % Get the sampling window
-%                             window = activations((r*S)-1:(r*S+H_P)-1,(c*S)-1:(c*S+W_P)-1,depth,n);                            
-%                             % Give the biggest value from the window
-%                             result(r,c,depth,n) = max(window(:));
-%                         end
-%                     end
-                end
+                input = activations(:,:,:,n);
+                resPool = max_pooling_vanilla(input,W_P,S);
+                result(:,:,:,n) = resPool;                
             end
+            
+            % Cache information to be used on backpropagation
+            obj.activations = activations;
         end
         
-        function [gradient] = backPropagate(obj, targets)
-            gradient = 0;
+        function [dx] = backPropagate(obj, dout)
+            [H, W, C, N] = size(obj.activations);
+            [HH,WW,~,~] = size(dout);
+            S = obj.stepStride;
+            W_P = obj.kernelSize;
+            H_P = obj.kernelSize;
+            
+            dx = zeros(size(obj.activations));
+            
+            % Calculate dx            
+            for n=1:N
+                for depth=1:C                    
+                    for r=1:HH
+                        for c=1:WW
+                            initRow = ((r-1)*S) + 1;
+                            endRow = ((r-1)*S+H_P);
+                            initCol = ((c-1)*S) + 1;
+                            endCol = ((c-1)*S+W_P);
+                            x_pool = obj.activations(initRow:endRow,initCol:endCol,depth,n); 
+                            
+                            % Mask in only the biggest value on this window
+                            mask = x_pool == max(x_pool(:));
+                            
+                            % Apply this mask on dout, then accumulate
+                            prodMask = mask * dout(r,c,depth,n);
+                            dx(initRow:endRow,initCol:endCol,depth,n) = dx(initRow:endRow,initCol:endCol,depth,n) + prodMask;
+                        end
+                    end
+                end
+            end
         end
         
         function [result] = getActivations(obj)
@@ -93,7 +114,7 @@ classdef MaxPoolingLayer < BaseLayer
         end
         
         function [descText] = getDescription(obj)
-            [~, names] = enumeration('PoolingType');            
+            [~, names] = enumeration('PoolingType');
             descText = sprintf('POOL ksize=%d stride=%d Type=%s\n',...
                 obj.kernelSize,...
                 obj.stepStride,names{obj.poolingType});

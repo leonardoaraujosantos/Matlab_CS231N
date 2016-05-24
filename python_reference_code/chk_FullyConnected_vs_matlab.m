@@ -65,6 +65,8 @@ fprintf('isequal(w_mat(:),w(:))==%d\n',~(diffW > 1e-9));
 x_mat = reshape_row_major(x_mat,[2,4,5,6]);
 diffX = sum(abs(x_mat(:) - x(:)));
 fprintf('isequal(x_mat(:),x(:))==%d\n',~(diffX > 1e-9));
+% Now put on the matlab order
+x_mat = permute(x_mat,[3,4,2,1]);
 
 b_mat = linspace(-0.3,0.1,output_dim);
 diffB = sum(abs(b_mat(:) - b(:)));

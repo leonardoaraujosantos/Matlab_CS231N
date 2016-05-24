@@ -30,7 +30,8 @@ classdef InnerProductLayer < BaseLayer
         
         function [result] = feedForward(obj, activations, theta, biasWeights)
             % Get number of inputs (depth N) 
-            N = size(activations,ndims(activations));
+            N = size(activations,ndims(activations)); % Matlab array highest dimension
+            N = size(activations,1); % Python array highest dimension
             D = size(theta,1);
 
             % Matlab reshape order is not the same as numpy, so to make the
@@ -40,9 +41,10 @@ classdef InnerProductLayer < BaseLayer
             % assigments but in the end of the day is just a dot product
             % between activations and theta, plus 1*biasWeights, I dont
             % think that the order will change the results ...
-            % a1 = reshape(activations,size(activations,1),[])
+            % a1 = reshape(activations,[N,D]);
             % permuting all dimensions [4 3 2 1] 
             a1 = reshape(permute(activations,[ndims(activations):-1:1]),[],size(activations,1))';
+            %a1 = reshape(activations,[N,D]);
             result = (a1*theta) + (repmat(biasWeights,size(a1,1),1));
             
             % Save the previous inputs for use later on backpropagation

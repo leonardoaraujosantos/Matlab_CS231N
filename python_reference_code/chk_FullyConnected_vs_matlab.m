@@ -15,6 +15,66 @@ py.importlib.import_module('layers');
 %% Define data
 load dataTestFullyConnected_FP
 
+%% Create the same data on python exercise on matlab by hand
+num_inputs=2;
+% Notice the difference that on python (4,5,6) create a 4 dimension matrix
+% with 5x6, the same thing on matlab will be (5,6,4)
+input_shape = [5 6 4];
+output_dim = 3;
+input_size = num_inputs * prod(input_shape);
+weight_size = output_dim * prod(input_shape);
+
+x_py = py.numpy.linspace(-0.1,0.5,input_size);
+x_py_conv = numpyArray2Mat(x_py);
+x_mat = linspace(-0.1,0.5,input_size);
+diffX = sum(abs(x_py_conv - x_mat));
+fprintf('isequal(x_mat,x_py_conv)==%d\n',~(diffX > 1e-9));
+
+
+% Also notice that the reshape on python is by default row-major, and on
+% matlab is col-major
+x_py = x_py.reshape(2,4,5,6);
+x_py_conv = numpyArray2Mat(x_py);
+fprintf('isequal(x,x_py_conv)==%d\n',isequal(x,x_py_conv));
+
+w_py = py.numpy.linspace(-0.2,0.3,weight_size);
+w_py_conv = numpyArray2Mat(w_py);
+w_mat = linspace(-0.2,0.3,weight_size);
+diffW = sum(abs(w_mat - w_py_conv));
+fprintf('isequal(w_mat,w_py_conv)==%d\n',~(diffW > 1e-9));
+
+% Don't forget if you want numerical match between python and matlab pay
+% attention that the reshape operation on python is row-major and in matlab
+% col-major. So instead of the following line:
+%w_mat = reshape(w_mat,[prod(input_shape) output_dim]);
+% do this....
+% w_mat = reshape(w_mat,[output_dim prod(input_shape)])';
+% Also don't forget that if the matrices involved has more than 2
+% dimensions you need to "permute"
+w_mat = reshape(w_mat,[output_dim prod(input_shape)])';
+diffW = sum(abs(w_mat(:) - w(:)));
+fprintf('isequal(w_mat(:),w(:))==%d\n',~(diffW > 1e-9));
+
+% On ths multidimensional case, we create a matrix 2x4x5x6 on python, to
+% have the same matrix on matlab we need to reshape to 6x5x4x2, then
+% transpose(permute) all of it's dimensions
+%x_mat = reshape(x_mat,[6 5 4 2]);
+%x_mat = permute(x_mat,[ndims(x_mat):-1:1]);
+% We create a helper function "reshape_row_major" that do the reshape on
+% the same numpy order
+x_mat = reshape_row_major(x_mat,[2,4,5,6]);
+diffX = sum(abs(x_mat(:) - x(:)));
+fprintf('isequal(x_mat(:),x(:))==%d\n',~(diffX > 1e-9));
+
+b_mat = linspace(-0.3,0.1,output_dim);
+diffB = sum(abs(b_mat(:) - b(:)));
+
+if (diffW < 1e-9) && (diffX < 1e-9) && (diffB < 1e-9)
+    fprintf('Manual creation of the data on matlab passed\n');
+else
+    fprintf('Manual creation of the data on matlab failed\n');
+end
+
 %% Call python reference code (affine_forward)
 % The functions matArray2Numpy and numpyArray2Mat do the job of converting
 % a matlab array to a numpy array and bring a numpy array to matlab array

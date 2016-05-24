@@ -29,6 +29,10 @@ classdef InnerProductLayer < BaseLayer
         end
         
         function [result] = feedForward(obj, activations, theta, biasWeights)
+            % Get number of inputs (depth N) 
+            N = size(activations,ndims(activations));
+            D = size(theta,1);
+
             % Matlab reshape order is not the same as numpy, so to make the
             % same you need to transpose the dimensions of the input, than
             % reshape on the reverse order then transpose...
@@ -56,8 +60,10 @@ classdef InnerProductLayer < BaseLayer
             % NOW TO PUT ON PYTHON FORMAT
             % Again to match python reshape we need to transpose the input,
             % reverse the reshape order and transpose again            
+            % dx = reshape(dx,inputSize);
             dx = reshape(permute(dx,[ndims(dx):-1:1]),fliplr(inputSize));
             dx = permute(dx,[ndims(dx):-1:1]);
+            
                                     
             % reshape(matrix,firstDim,[]) will reshape the matrix with the
             % first dimension as firstDim and the rest automatically

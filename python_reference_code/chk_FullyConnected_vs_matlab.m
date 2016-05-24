@@ -88,8 +88,9 @@ fprintf('External Python CS231n FullyConnected(forward) reference\n');
 disp(pythonFC);
 
 %% Call matlab custom version (InnerProductLayer.forward_prop)
+x_perm_mat = permute(x,[4,3,2,1]);
 fpMat = InnerProductLayer();
-fpOutMat = fpMat.feedForward(x,w,b);
+fpOutMat = fpMat.feedForward(x_perm_mat,w,b);
 disp('Calculated on matlab');
 disp(fpOutMat);
 disp('CS231n reference (mat file)');
@@ -122,8 +123,10 @@ end
 
 %% Call matlab custom version (InnerProductLayer.backPropagate)
 fpMat = InnerProductLayer();
-fpOutMatFP = fpMat.feedForward(x,w,b);
+x_perm_mat = permute(x,[3,2,1]);
+fpOutMatFP = fpMat.feedForward(x_perm_mat,w,b);
 [mat_dx,mat_dw,mat_db] = fpMat.backPropagate(dout);
+%mat_dx = permute(mat_dx,[ndims(mat_dx):-1:1]);
 disp('Calculated on matlab dx');
 error_dx = abs(mat_dx - dx);
 error_dw = abs(mat_dw - dw);

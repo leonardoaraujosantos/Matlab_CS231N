@@ -29,9 +29,15 @@ classdef InnerProductLayer < BaseLayer
         end
         
         function [result] = feedForward(obj, activations, theta, biasWeights)
+            %% Python version
+            %N = x.shape[0]
+            %a1 = x.reshape(N, -1)
+            %out = a1.dot(w) + b.T
+            
+            %% Matlab (on the beginning we match the results with python)
             % Get number of inputs (depth N) 
             N = size(activations,ndims(activations)); % Matlab array highest dimension
-            N = size(activations,1); % Python array highest dimension
+            %N = size(activations,1); % Python array highest dimension
             D = size(theta,1);
 
             % Matlab reshape order is not the same as numpy, so to make the
@@ -43,8 +49,10 @@ classdef InnerProductLayer < BaseLayer
             % think that the order will change the results ...
             % a1 = reshape(activations,[N,D]);
             % permuting all dimensions [4 3 2 1] 
-            a1 = reshape(permute(activations,[ndims(activations):-1:1]),[],size(activations,1))';
-            %a1 = reshape(activations,[N,D]);
+            %a1 = reshape(permute(activations,[ndims(activations):-1:1]),D,N)';
+            a1 = reshape_row_major(activations,[N,D]); 
+            % Dont care on python numeric match
+            %a1 = reshape(activations,[N,D]); 
             result = (a1*theta) + (repmat(biasWeights,size(a1,1),1));
             
             % Save the previous inputs for use later on backpropagation
@@ -55,24 +63,32 @@ classdef InnerProductLayer < BaseLayer
         end
         
         function [dx, dw, db] = backPropagate(obj, dout)
+            %% Python version
+            % dx = np.dot(dout,w.T).reshape(x.shape)
+            % dw = x.reshape(x.shape[0], -1).T.dot(dout)
+            % db = np.sum(dout, axis=0)            
+            
+            %% Matlab (on the beginning we match the results with python)
+            % Get number of inputs (depth N) 
+            N = size(obj.previousInput,ndims(obj.previousInput)); % Matlab array highest dimension
+            D = size(obj.weights,1);
             inputSize = size(obj.previousInput);
-            dx = dout * obj.weights';
-            %dx = reshape(dx,inputSize); TODO test like THIS on production
             
-            % NOW TO PUT ON PYTHON FORMAT
-            % Again to match python reshape we need to transpose the input,
-            % reverse the reshape order and transpose again            
-            % dx = reshape(dx,inputSize);
-            dx = reshape(permute(dx,[ndims(dx):-1:1]),fliplr(inputSize));
-            dx = permute(dx,[ndims(dx):-1:1]);
-            
+            %% Calculate dx (same shape of previous input)                      
+            dx = dout * obj.weights';            
+            % Python format
+            dx = reshape_row_major(permute(dx,[ndims(dx):-1:1]),fliplr(inputSize));            
+            %dx = reshape(dx,inputSize);
                                     
+            %% Calculate dw (same shape of previous weight)
             % reshape(matrix,firstDim,[]) will reshape the matrix with the
             % first dimension as firstDim and the rest automatically
-            % calculated
-            x_reshape = reshape(permute(obj.previousInput,[ndims(obj.previousInput):-1:1]),[],inputSize(1))';
+            % calculated            
+            x_reshape = reshape_row_major(obj.previousInput,[N,D]);
+            %x_reshape = reshape(obj.previousInput,N,[]);
             dw = x_reshape' * dout;
             
+            %% Calculate db (same shape as previous bias)
             db = sum(dout,1);
         end
         

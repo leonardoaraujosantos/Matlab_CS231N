@@ -10,6 +10,7 @@ classdef LayerType < uint32
       Relu (6)
       Sigmoid (7)
       Tanh(8)      
+      InnerProduct(9)
    end
     
 end

@@ -54,9 +54,8 @@ classdef ReluLayer < BaseLayer
             actFunc = obj.activationObject;
         end
         
-        function [descText] = getDescription(obj)
-            [~, names] = enumeration('ActivationType');
-            descText = sprintf('Relu num_neurons=%d Activation=%s\n',obj.numberNeurons,names{obj.activationType});
+        function [descText] = getDescription(obj)            
+            descText = sprintf('Relu\n');
         end
         
         % Get number of parameters

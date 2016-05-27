@@ -6,7 +6,7 @@ classdef InnerProductLayer < BaseLayer
         weights
         activations
         z
-        dropoutMask
+        numOutputs
         previousInput
         biasWeights
     end
@@ -18,9 +18,10 @@ classdef InnerProductLayer < BaseLayer
     end
     
     methods (Access = 'public')
-        function obj = InnerProductLayer()
+        function obj = InnerProductLayer(numOutputs)
             % Initialize type
-            obj.typeLayer = LayerType.FullyConnected;            
+            obj.typeLayer = LayerType.InnerProduct;  
+            obj.numOutputs = numOutputs;
         end
         
         % Get number of neurons
@@ -110,7 +111,7 @@ classdef InnerProductLayer < BaseLayer
         
         function [descText] = getDescription(obj)
             [~, names] = enumeration('ActivationType');
-            descText = sprintf('FC num_params=%d \n',numel(obj.weights) + numel(obj.biasWeights));
+            descText = sprintf('InnerProduct numOutputs=%d \n',obj.numOutputs);
         end
         
         % Get number of parameters

@@ -24,6 +24,11 @@ classdef LayerContainer < BaseLayerContainer
                 case LayerType.FullyConnected
                     % Number of neurons, Activation type
                     layerInst = FullyConnectedLayer(metaDataLayer.numNeurons,metaDataLayer.ActivationType);
+                case LayerType.InnerProduct
+                    % Number of outputs
+                    layerInst = InnerProductLayer(metaDataLayer.numOutputs);
+                case LayerType.Relu                    
+                    layerInst = ReluLayer();
                 case LayerType.OutputRegression
                     % Number of neurons
                     layerInst = OutputRegressionLayer(metaDataLayer.numNeurons);

@@ -22,6 +22,7 @@ layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',1,'cols',2,'depth',1);
 layers <= struct('type',LayerType.InnerProduct, 'numOutputs',numHidden);
 layers <= struct('type',LayerType.Relu);
+layers <= struct('type',LayerType.InnerProduct, 'numOutputs',numClasses);
 layers.showStructure();
 solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.011, 'numEpochs', 30, 'RegularizationL1',0.00));
 

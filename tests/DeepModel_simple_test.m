@@ -16,62 +16,63 @@
 X = [0 0; 0 1; 1 0; 1 1];
 Y = [ 0; 0; 0; 1];
 numClasses = 1;
-numHidden = 4;
 
+% This is a structure of a perceptron, so it can handle only linear
+% separable problems
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',1,'cols',2,'depth',1);
-layers <= struct('type',LayerType.InnerProduct, 'numOutputs',numHidden);
-layers <= struct('type',LayerType.Relu);
 layers <= struct('type',LayerType.InnerProduct, 'numOutputs',numClasses);
+layers <= struct('type',LayerType.Relu);
 layers.showStructure();
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.011, 'numEpochs', 30, 'RegularizationL1',0.00));
 
-nn = DeepNeuralNetwork(layers,solver);
+nn = DeepLearningModel(layers);
 % Training part is not to be tested yet so we put the weights manually...
-% First layer input has 2 neurons, and the output (1 neuron) so we're going
-% 1x(2+1) [1 3] matrix
-layers.getLayer(1).weights = [-30 20 20];
+% Weights on the innerProduct (Fully connected layer)
+layers.getLayer(2).biasWeights = -30;
+layers.getLayer(2).weights = [20; 20];
 
 Xt = [0 0; 0 1; 1 0; 1 1];
-[maxscore, scores, predictTime] = nn.predict(Xt(1,:));
+[maxscore, scores, predictTime] = nn.loss(Xt(1,:));
 fprintf('%d AND %d = %d\n',Xt(1,1), Xt(1,2), round(scores));
-[maxscore, scores, predictTime] = nn.predict(Xt(2,:));
+[maxscore, scores, predictTime] = nn.loss(Xt(2,:));
 fprintf('%d AND %d = %d\n',Xt(2,1), Xt(2,2), round(scores));
-[maxscore, scores, predictTime] = nn.predict(Xt(3,:));
+[maxscore, scores, predictTime] = nn.loss(Xt(3,:));
 fprintf('%d AND %d = %d\n',Xt(3,1), Xt(3,2), round(scores));
-[maxscore, scores, predictTime] = nn.predict(Xt(4,:));
+[maxscore, scores, predictTime] = nn.loss(Xt(4,:));
 fprintf('%d AND %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
 
-% %% Test 2: Simple Perceptron OR
-% % Create the DNN strucutre and train with Gradient Descent
-% % Example
-% % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
-% % 
-% % <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
-% %
-% % Perceptron test for OR
-% layers = LayerContainer;
-% layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
-% layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
-% layers.showStructure();
-% solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.011, 'numEpochs', 30, 'RegularizationL1',0.00));
+%% Test 2: Simple Perceptron OR
+% Create the DNN strucutre and train with Gradient Descent
+% Example
+% https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% nn = DeepNeuralNetwork(layers,solver);
-% % Training part is not to be tested yet so we put the weights manually...
-% % First layer input has 2 neurons, and the output (1 neuron) so we're going
-% % 1x(2+1) [1 3] matrix
-% layers.getLayer(1).weights = [-10 20 20];
-% 
-% Xt = [0 0; 0 1; 1 0; 1 1];
-% [maxscore, scores, predictTime] = nn.predict(Xt(1,:));
-% fprintf('%d OR %d = %d\n',Xt(1,1), Xt(1,2), round(scores));
-% [maxscore, scores, predictTime] = nn.predict(Xt(2,:));
-% fprintf('%d OR %d = %d\n',Xt(2,1), Xt(2,2), round(scores));
-% [maxscore, scores, predictTime] = nn.predict(Xt(3,:));
-% fprintf('%d OR %d = %d\n',Xt(3,1), Xt(3,2), round(scores));
-% [maxscore, scores, predictTime] = nn.predict(Xt(4,:));
-% fprintf('%d OR %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
-% 
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
+%
+% Perceptron test for OR
+% This is a structure of a perceptron, so it can handle only linear
+% separable problems
+layers = LayerContainer;
+layers <= struct('type',LayerType.Input,'rows',1,'cols',2,'depth',1);
+layers <= struct('type',LayerType.InnerProduct, 'numOutputs',numClasses);
+layers <= struct('type',LayerType.Relu);
+layers.showStructure();
+
+nn = DeepLearningModel(layers);
+% Training part is not to be tested yet so we put the weights manually...
+% Weights on the innerProduct (Fully connected layer)
+layers.getLayer(2).biasWeights = -10;
+layers.getLayer(2).weights = [20; 20];
+
+Xt = [0 0; 0 1; 1 0; 1 1];
+[maxscore, scores, predictTime] = nn.loss(Xt(1,:));
+fprintf('%d OR %d = %d\n',Xt(1,1), Xt(1,2), round(scores));
+[maxscore, scores, predictTime] = nn.loss(Xt(2,:));
+fprintf('%d OR %d = %d\n',Xt(2,1), Xt(2,2), round(scores));
+[maxscore, scores, predictTime] = nn.loss(Xt(3,:));
+fprintf('%d OR %d = %d\n',Xt(3,1), Xt(3,2), round(scores));
+[maxscore, scores, predictTime] = nn.loss(Xt(4,:));
+fprintf('%d OR %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
+
 % %% Test 3: Simple Multilayer layers creation
 % % Create the DNN strucutre and train with Gradient Descent
 % % Example

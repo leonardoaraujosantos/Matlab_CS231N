@@ -28,6 +28,10 @@ classdef ReluLayer < BaseLayer
             numNeurons = obj.numberNeurons;
         end
         
+        function [activations] = fp(obj,prevLayerActivations)
+            activations = obj.feedForward(prevLayerActivations);
+        end
+        
         function [result] = feedForward(obj, input)
             obj.previousInput = input;
             result = max(0,input);

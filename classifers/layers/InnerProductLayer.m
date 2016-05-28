@@ -29,17 +29,31 @@ classdef InnerProductLayer < BaseLayer
             numNeurons = obj.numberNeurons;
         end
         
+        function [activations] = fp(obj,prevLayerActivations)
+            activations = obj.feedForward(prevLayerActivations, obj.weights, obj.biasWeights);
+        end
+        
         function [result] = feedForward(obj, activations, theta, biasWeights)
             %% Python version
             %N = x.shape[0]
             %a1 = x.reshape(N, -1)
-            %out = a1.dot(w) + b.T
-            
+            %out = a1.dot(w) + b.T                        
             %% Matlab (on the beginning we match the results with python)
             % Get number of inputs (depth N) 
-            N = size(activations,ndims(activations)); % Matlab array highest dimension
+            lenSizeActivations = length(size(activations));
+            if (lenSizeActivations < 3)
+                N = 1;
+            else
+                N = size(activations,ndims(activations)); % Matlab array highest dimension
+            end
+            
             %N = size(activations,1); % Python array highest dimension
-            D = size(theta,1);
+            szActivations = size(activations);
+            if N > 1
+                szActivations = szActivations(1:end-1);
+            end
+            %D = size(theta,1);
+            D = prod(szActivations);
 
             % Matlab reshape order is not the same as numpy, so to make the
             % same you need to transpose the dimensions of the input, than
@@ -60,6 +74,7 @@ classdef InnerProductLayer < BaseLayer
             obj.previousInput = activations;
             obj.weights = theta;
             obj.biasWeights = biasWeights;
+            obj.activations = result;
             
         end
         

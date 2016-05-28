@@ -29,6 +29,8 @@ classdef LayerContainer < BaseLayerContainer
                     layerInst = InnerProductLayer(metaDataLayer.numOutputs);
                 case LayerType.Relu                    
                     layerInst = ReluLayer();
+                case LayerType.Sigmoid                    
+                    layerInst = SigmoidLayer();
                 case LayerType.OutputRegression
                     % Number of neurons
                     layerInst = OutputRegressionLayer(metaDataLayer.numNeurons);

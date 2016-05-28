@@ -60,7 +60,7 @@ classdef DeepLearningModel < handle
                 curLayer = obj.layers.getLayer(idxLayer);
                 if curLayer.typeLayer == LayerType.InnerProduct
                     curLayer.weights = rand(sizeInputVector,curLayer.numOutputs);                    
-                    curLayer.biasWeights = rand(curLayer.numOutputs,1);
+                    curLayer.biasWeights = rand(1,curLayer.numOutputs);
                     countWeights = countWeights + 1;
                 end                
             end

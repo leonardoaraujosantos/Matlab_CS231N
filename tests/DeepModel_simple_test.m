@@ -22,7 +22,7 @@ numClasses = 1;
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',1,'cols',2,'depth',1);
 layers <= struct('type',LayerType.InnerProduct, 'numOutputs',numClasses);
-layers <= struct('type',LayerType.Relu);
+layers <= struct('type',LayerType.Sigmoid);
 layers.showStructure();
 
 nn = DeepLearningModel(layers);
@@ -54,7 +54,7 @@ fprintf('%d AND %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',1,'cols',2,'depth',1);
 layers <= struct('type',LayerType.InnerProduct, 'numOutputs',numClasses);
-layers <= struct('type',LayerType.Relu);
+layers <= struct('type',LayerType.Sigmoid);
 layers.showStructure();
 
 nn = DeepLearningModel(layers);
@@ -73,39 +73,49 @@ fprintf('%d OR %d = %d\n',Xt(3,1), Xt(3,2), round(scores));
 [maxscore, scores, predictTime] = nn.loss(Xt(4,:));
 fprintf('%d OR %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
 
-% %% Test 3: Simple Multilayer layers creation
-% % Create the DNN strucutre and train with Gradient Descent
-% % Example
-% % https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
-% % 
-% % <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
-% %
-% % Perceptron test for XNOR
+%% Test 3: Simple Multilayer layers creation
+% Create the DNN strucutre and train with Gradient Descent
+% Example
+% https://www.coursera.org/learn/machine-learning/lecture/solUx/examples-and-intuitions-ii
 % 
-% layers = LayerContainer;
-% layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
-% layers <= struct('type',LayerType.FullyConnected,'numNeurons',2,'ActivationType',ActivationType.Sigmoid);
-% layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
-% layers.showStructure();
-% solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.011, 'numEpochs', 30, 'RegularizationL1',0.00));
-% 
-% nn = DeepNeuralNetwork(layers,solver);
-% % Training part is not to be tested yet so we put the weights manually...
-% % Input layer has 2 neurons and the hidden layer more 2, so the 
-% % weight matrix will be 2x3 [2 3]
-% layers.getLayer(1).weights = [-30 20 20; 10 -20 -20]; 
-% % Second(hidden) layer has 2 neurons and the third(output) 1 neuron, so the
-% % weight matrix that will map layer 2 to 3 will have the format 1x3
-% layers.getLayer(2).weights = [-10 20 20];
-% 
-% Xt = [0 0; 0 1; 1 0; 1 1];
-% [maxscore, scores, predictTime] = nn.predict(Xt(1,:));
-% fprintf('%d XOR %d = %d\n',Xt(1,1), Xt(1,2), round(scores));
-% [maxscore, scores, predictTime] = nn.predict(Xt(2,:));
-% fprintf('%d XOR %d = %d\n',Xt(2,1), Xt(2,2), round(scores));
-% [maxscore, scores, predictTime] = nn.predict(Xt(3,:));
-% fprintf('%d XOR %d = %d\n',Xt(3,1), Xt(3,2), round(scores));
-% [maxscore, scores, predictTime] = nn.predict(Xt(4,:));
-% fprintf('%d XOR %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
-% 
+% <<../../docs/imgs/Simple_XOR_Coursera.PNG>>
+%
+% Multi-layer perceptron test for XNOR
+% Thinking on neural network structure we would have the first input layer
+% with 2 neurons, a hidden layer with more 2 neurons and an output layer
+% with 1 neuron
+numClasses = 1;
+layers = LayerContainer;
+layers <= struct('type',LayerType.Input,'rows',1,'cols',2,'depth',1);
+layers <= struct('type',LayerType.InnerProduct, 'numOutputs',2);
+layers <= struct('type',LayerType.Sigmoid);
+layers <= struct('type',LayerType.InnerProduct, 'numOutputs',numClasses);
+layers <= struct('type',LayerType.Sigmoid);
+layers.showStructure();
+
+nn = DeepLearningModel(layers);
+% Training part is not to be tested yet so we put the weights manually...
+% Weights on the innerProduct (Fully connected layer)
+% On previous neural network model
+%layers.getLayer(1).weights = [-30 20 20; 10 -20 -20]; 
+%layers.getLayer(2).weights = [-10 20 20];
+
+% First fully connected layer
+layers.getLayer(2).biasWeights = [-30 10];
+layers.getLayer(2).weights = [20 -20; 20 -20];
+
+% Second fully connected layer
+layers.getLayer(4).biasWeights = -10;
+layers.getLayer(4).weights = [20; 20];
+
+Xt = [0 0; 0 1; 1 0; 1 1];
+[maxscore, scores, predictTime] = nn.loss(Xt(1,:));
+fprintf('%d XNOR %d = %d\n',Xt(1,1), Xt(1,2), round(scores));
+[maxscore, scores, predictTime] = nn.loss(Xt(2,:));
+fprintf('%d XNOR %d = %d\n',Xt(2,1), Xt(2,2), round(scores));
+[maxscore, scores, predictTime] = nn.loss(Xt(3,:));
+fprintf('%d XNOR %d = %d\n',Xt(3,1), Xt(3,2), round(scores));
+[maxscore, scores, predictTime] = nn.loss(Xt(4,:));
+fprintf('%d XNOR %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
+
 

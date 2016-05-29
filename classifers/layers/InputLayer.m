@@ -66,7 +66,7 @@ classdef InputLayer < BaseLayer
             descText = sprintf('INPUT %dx%d depth=%d\n',obj.numRows, obj.numCols, obj.depthInput);
         end
         
-        function [numInputs] = getNumInputs(obj)
+        function [numInputs] = numOutputs(obj)
             numInputs = obj.numRows * obj.numCols * obj.depthInput;
         end
     end    

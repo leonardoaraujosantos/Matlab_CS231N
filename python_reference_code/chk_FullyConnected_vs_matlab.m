@@ -89,7 +89,7 @@ disp(pythonFC);
 
 %% Call matlab custom version (InnerProductLayer.forward_prop)
 x_perm_mat = permute(x,[4,3,2,1]);
-fpMat = InnerProductLayer();
+fpMat = InnerProductLayer(1);
 fpOutMat = fpMat.feedForward(x_perm_mat,w,b);
 disp('Calculated on matlab');
 disp(fpOutMat);
@@ -122,7 +122,7 @@ if isequal(pyDx,dx) && isequal(pyDw,dw) && isequal(pyDb,db)
 end
 
 %% Call matlab custom version (InnerProductLayer.backPropagate)
-fpMat = InnerProductLayer();
+fpMat = InnerProductLayer(1);
 x_perm_mat = permute(x,[3,2,1]);
 fpOutMatFP = fpMat.feedForward(x_perm_mat,w,b);
 [mat_dx,mat_dw,mat_db] = fpMat.backPropagate(dout);

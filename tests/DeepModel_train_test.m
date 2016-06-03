@@ -32,8 +32,11 @@ layers.showStructure();
 layers.showStructure();
 
 % Get a loss function object to be used on the training
-lossFunction = CrossEntropy();
+lossFunction = SoftMaxLoss();
 myModel = DeepLearningModel(layers);
+
+% Set the model loss function
+myModel.lossFunction = lossFunction;
 
 optimizer = Optimizer();
 optimizer.configs.learning_rate = 0.1;

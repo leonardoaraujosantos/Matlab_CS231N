@@ -12,6 +12,16 @@ classdef DeepLearningModel < handle
             obj.inititializeWeights();            
         end
         
+        function numLayers = getNumLayersWithWeight(obj)
+            numLayers = 0;
+            for idxLayer=1:obj.layers.getNumLayers
+                currLayer = obj.layers.getLayer(idxLayer);  
+                if ~isempty(currLayer.weights)
+                    numLayers = numLayers + 1;
+                end                
+            end
+        end
+        
         % Can be used to predict or during training
         function [maxscore, scores, timeElapsed] = loss(obj, X_vec, varargin)
             maxscore = 0;

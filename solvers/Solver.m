@@ -2,6 +2,14 @@ classdef Solver < handle
     %SOLVER Encapsulate all the logic for training, like, separating stuff
     % on batches, shuffling the dataset, and updating the weights with a
     % policy defined on the class optimizer
+    % Example:
+    % myModel = DeepLearningModel(layers);
+    % optimizer = Optimizer();
+    % optimizer.configs.learning_rate = 1e-3;
+    % optimizer.configs.momentum = 0.9;
+    % solver = Solver(myModel, optimizer);
+    % solver.train();
+    % myModel.loss(X);
     
     
     properties
@@ -30,11 +38,12 @@ classdef Solver < handle
         end
         
         function step(obj)
-            % Extract a randomic mini batch from the training
-            numTrainTotal = size(obj.X_train,1);
+            % Extract a randomic mini batch from the training, so basically
+            % we extract some pieces of the training data on a random order
+            numTrainTotal = size(obj.X_train,4);
             batch_mask = PartitionDataSet.getRandomBatchIndex(numTrainTotal, obj.batchSize);
-            X_batch = obj.X_train(batch_mask,:);
-            Y_batch = obj.Y_train(batch_mask,:);
+            X_batch = obj.X_train(:,:,:,batch_mask);
+            Y_batch = obj.Y_train(batch_mask,:);                                   
             
             % Compute the loss and gradient
             [loss, grads, ~] = obj.model.loss(X_batch, Y_batch);
@@ -42,7 +51,7 @@ classdef Solver < handle
             
             % Perform a parameter update, for every
             % layer. Some layers have two seta of parameters
-            for idxPar = 1:obj.model.getParamCount
+            for idxPar = 1:obj.model.getNumLayersWithWeight
                 dw = grads{idxPar};
                 w = obj.model.params{idxPar};
                 nextW =obj.optimizer{idxPar}.sgd_momentum(w,dw);
@@ -79,7 +88,7 @@ classdef Solver < handle
     end
     
     methods
-        function obj = Solver(model, optimizer)
+        function obj = Solver(model, optimizer, data)
             obj.model = model;
             obj.epochs = 0;
             obj.best_val_acc = 0;
@@ -88,7 +97,20 @@ classdef Solver < handle
             obj.learn_rate_decay = 1;
             obj.trainAccuracyVector = 0;
             obj.validationAccuracyVector = 0;
-            for idxPar = 1:obj.model.getParamCount
+            obj.X_train = data{1};
+            obj.Y_train = data{2};
+            if length(data) == 4
+                obj.X_val = data{3};
+                obj.Y_val = data{4};
+            else
+                obj.X_val = [];
+                obj.Y_val = [];
+            end
+            
+            % Make a copy of the optimizer for every layer with weights,
+            % this is done because each layer could have it's own momentum
+            % velocities
+            for idxPar = 1:obj.model.getNumLayersWithWeight
                 obj.optimizer{idxPar} = Optimizer();
                 obj.optimizer{idxPar}.configs = optimizer.configs;
             end

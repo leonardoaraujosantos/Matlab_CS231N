@@ -39,21 +39,23 @@ classdef InnerProductLayer < BaseLayer
             %a1 = x.reshape(N, -1)
             %out = a1.dot(w) + b.T                        
             %% Matlab (on the beginning we match the results with python)
-            % Get number of inputs (depth N) 
+            % Get number of inputs (depth N)             
             lenSizeActivations = length(size(activations));
             if (lenSizeActivations < 3)
-                N = 1;
+                N = size(activations,1);
             else
                 N = size(activations,ndims(activations)); % Matlab array highest dimension
             end
-            
+       
             %N = size(activations,1); % Python array highest dimension
             szActivations = size(activations);
             if N > 1
                 szActivations = szActivations(1:end-1);
-            end
-            %D = size(theta,1);
+            end                        
             D = prod(szActivations);
+            
+            % On the python code we don't care about D....
+            D = floor(numel(activations) / N);
 
             % Matlab reshape order is not the same as numpy, so to make the
             % same you need to transpose the dimensions of the input, than
@@ -65,9 +67,10 @@ classdef InnerProductLayer < BaseLayer
             % a1 = reshape(activations,[N,D]);
             % permuting all dimensions [4 3 2 1] 
             %a1 = reshape(permute(activations,[ndims(activations):-1:1]),D,N)';
-            a1 = reshape_row_major(activations,[N,D]); 
+            a1 = reshape_row_major(activations,[N,D]);             
             % Dont care on python numeric match
             %a1 = reshape(activations,[N,D]); 
+            %a1 = reshape(activations,N,[]); 
             result = (a1*theta) + (repmat(biasWeights,size(a1,1),1));
             
             % Save the previous inputs for use later on backpropagation

@@ -37,7 +37,10 @@ classdef PartitionDataSet < handle
         
         function [shuffledIndex] = getRandomBatchIndex(sizeTotal, batchSize)
             % Get a random number from 1 to sizeTotal with size 1xbatchSize
+            % randi([valMin, valMax],start,end)
             shuffledIndex =  randi([1 sizeTotal],1,batchSize);
+            % randperm shuffle the numbers between 1..batchSize
+            %shuffledIndex =  randperm(batchSize);
         end
     end
     

@@ -45,16 +45,11 @@ classdef InnerProductLayer < BaseLayer
                 N = size(activations,1);
             else
                 N = size(activations,ndims(activations)); % Matlab array highest dimension
-            end
-       
-            %N = size(activations,1); % Python array highest dimension
-            szActivations = size(activations);
-            if N > 1
-                szActivations = szActivations(1:end-1);
-            end                        
-            D = prod(szActivations);
+            end                
             
-            % On the python code we don't care about D....
+            % On the python code we don't care about D size, it implicitly
+            % let the reshape calculate it in our case we're using the
+            % reshape_row_major that does not calculate implicitly...
             D = floor(numel(activations) / N);
 
             % Matlab reshape order is not the same as numpy, so to make the
@@ -87,10 +82,20 @@ classdef InnerProductLayer < BaseLayer
             % dw = x.reshape(x.shape[0], -1).T.dot(dout)
             % db = np.sum(dout, axis=0)            
             
-            %% Matlab (on the beginning we match the results with python)
-            % Get number of inputs (depth N) 
-            N = size(obj.previousInput,ndims(obj.previousInput)); % Matlab array highest dimension
-            D = size(obj.weights,1);
+            %% Matlab (on the beginning we match the results with python)            
+            % Get number of inputs (depth N)             
+            lenSizeActivations = length(size(obj.previousInput));
+            if (lenSizeActivations < 3)
+                N = size(obj.previousInput,1);
+            else
+                N = size(obj.previousInput,ndims(obj.previousInput)); % Matlab array highest dimension
+            end
+            
+            % On the python code we don't care about D size, it implicitly
+            % let the reshape calculate it in our case we're using the
+            % reshape_row_major that does not calculate implicitly...
+            D = floor(numel(obj.previousInput) / N);
+            
             inputSize = size(obj.previousInput);
             
             %% Calculate dx (same shape of previous input)                      

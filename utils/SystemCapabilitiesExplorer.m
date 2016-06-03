@@ -61,6 +61,21 @@ classdef SystemCapabilitiesExplorer < handle
             osDescription = obj.operationSystemDesc;
         end
         
+        function [memsize, freemem] = getMemAvailable(obj)
+            sys_info = obj.isWhat();
+            if isequal(sys_info ,'is_linux')
+                % Return in gigabytes
+                [~,w] = unix('free | grep Mem');
+                stats = str2double(regexp(w, '[0-9]*', 'match'));
+                memsize = stats(1)/1e6;
+                freemem = (stats(3)+stats(end))/1e6;
+            else
+                if isequal(sys_info ,'is_windows')
+                    [freemem,memsize] = memory;
+                end
+            end
+        end
+        
         function sys_info = isWhat(vargin)
             if ismac
                 % Code to run on Mac plaform

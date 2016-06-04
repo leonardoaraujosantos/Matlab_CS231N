@@ -43,21 +43,38 @@ classdef Solver < handle
             numTrainTotal = size(obj.X_train,4);
             batch_mask = PartitionDataSet.getRandomBatchIndex(numTrainTotal, obj.batchSize);
             X_batch = obj.X_train(:,:,:,batch_mask);
-            Y_batch = obj.Y_train(batch_mask,:);                                   
+            Y_batch = obj.Y_train(batch_mask,:);
             
             % Compute the loss and gradient
-            [loss, grads, ~] = obj.model.loss(X_batch, Y_batch);
-            obj.lossVector(end+1) = loss;
+            [loss, grads] = obj.model.loss(X_batch, Y_batch);
+            obj.lossVector =[obj.lossVector; loss];
             
             % Perform a parameter update, for every
             % layer. Some layers have two seta of parameters
-            for idxPar = 1:obj.model.getNumLayersWithWeight
-                dw = grads{idxPar};
-                w = obj.model.params{idxPar};
-                nextW =obj.optimizer{idxPar}.sgd_momentum(w,dw);
-                obj.model.params{idxPar} = nextW;
-            end
-            
+            idxOptimizerConf = 1;
+            for idxLayerIdx = 1:length(grads)
+                elementGrads = grads{idxLayerIdx};
+                if ~isempty(elementGrads)
+                    for idxPar = 1:length(elementGrads)
+                        dw = elementGrads{idxPar};                        
+                        if (idxPar == 1)
+                            w = obj.model.layers.getLayer(idxLayerIdx).weights;
+                        else
+                            w = obj.model.layers.getLayer(idxLayerIdx).biasWeights;
+                        end
+                        
+                        % Optimize a little
+                        nextW =obj.optimizer{idxOptimizerConf}.sgd_momentum(w,dw);
+                        idxOptimizerConf = idxOptimizerConf + 1;
+                        
+                        if (idxPar == 1)
+                            obj.model.layers.getLayer(idxLayerIdx).weights = nextW;
+                        else
+                            obj.model.layers.getLayer(idxLayerIdx).biasWeights = nextW;
+                        end
+                    end
+                end
+            end                        
         end
         
         function [accuracy] = checkAccuracy(obj, X,Y, sizeCheck)
@@ -73,7 +90,7 @@ classdef Solver < handle
                 Y_batch = Y;
                 testSize = numTrainTotal;
             end
-            [~,~,scores] = obj.model.loss(X_batch);
+            [scores,~] = obj.model.loss(X_batch);
             [~, trainedResults] = max(Y_batch,[],2);
             [~, modelResults] = max(scores,[],2);
             error = 0;
@@ -99,6 +116,7 @@ classdef Solver < handle
             obj.validationAccuracyVector = 0;
             obj.X_train = data{1};
             obj.Y_train = data{2};
+            obj.lossVector = 0;
             if length(data) == 4
                 obj.X_val = data{3};
                 obj.Y_val = data{4};
@@ -109,8 +127,8 @@ classdef Solver < handle
             
             % Make a copy of the optimizer for every layer with weights,
             % this is done because each layer could have it's own momentum
-            % velocities
-            for idxPar = 1:obj.model.getNumLayersWithWeight
+            % velocities (Multiplied by two due to the bias)
+            for idxPar = 1:(obj.model.getNumLayersWithWeight*2)
                 obj.optimizer{idxPar} = Optimizer();
                 obj.optimizer{idxPar}.configs = optimizer.configs;
             end
@@ -133,10 +151,10 @@ classdef Solver < handle
                 epoch_end = mod(t,iterations_per_epoch) == 0;
                 if epoch_end
                     obj.epochs = obj.epochs + 1;
-                    for idxPar = 1:obj.model.getParamCount
+                    for idxPar = 1:(obj.model.getNumLayersWithWeight*2)
                         obj.optimizer{idxPar}.configs.learning_rate = obj.optimizer{idxPar}.configs.learning_rate ...
                             * obj.learn_rate_decay;
-                    end
+                    end                    
                 end
                 
                 % Check train and val accuracy on the first iteration,
@@ -159,12 +177,12 @@ classdef Solver < handle
                     % Keep track of the best model
                     if val_acc > obj.best_val_acc
                         obj.best_val_acc = val_acc;
-                        obj.bestParameters = obj.model.params;
+                        obj.bestParameters = obj.model.getModelParameters();
                     end
                 end
             end
             % At the end of training swap the best params into the model
-            obj.model.params = obj.bestParameters;
+            obj.model.setModelParams(obj.bestParameters);            
         end
         
         function setValidation(obj)

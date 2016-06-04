@@ -100,8 +100,10 @@ classdef InnerProductLayer < BaseLayer
             
             %% Calculate dx (same shape of previous input)                      
             dx = dout * obj.weights';            
-            % Python format
-            dx = reshape_row_major(permute(dx,[ndims(dx):-1:1]),fliplr(inputSize));            
+            % Python format (Oposite of matlab format), so we need to
+            % permute when comparing with python results
+            %dx = reshape_row_major(permute(dx,[ndims(dx):-1:1]),fliplr(inputSize));  % Was working with python          
+            dx = reshape_row_major(dx,inputSize);
             %dx = reshape(dx,inputSize);
                                     
             %% Calculate dw (same shape of previous weight)

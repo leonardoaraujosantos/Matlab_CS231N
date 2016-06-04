@@ -32,7 +32,7 @@ layers.showStructure();
 layers.showStructure();
 
 % Get a loss function object to be used on the training
-lossFunction = SoftMaxLoss();
+lossFunction = CrossEntropy();
 myModel = DeepLearningModel(layers);
 
 % Set the model loss function
@@ -41,18 +41,17 @@ myModel.lossFunction = lossFunction;
 optimizer = Optimizer();
 optimizer.configs.learning_rate = 0.1;
 optimizer.configs.momentum = 0.9;
-solver = Solver(myModel, optimizer, {X, Y});
+solver = Solver(myModel, optimizer, {X, Y, X, Y});
 solver.batchSize = 4;
 solver.num_epochs = 2000;
 solver.train();
 
-Xt = [0 0; 0 1; 1 0; 1 1];
-[maxscore, scores, predictTime] = myModel.loss(Xt(1,:));
+[scores, ~] = myModel.loss(X(:,:,:,1));
 fprintf('%d XOR %d = %d\n',Xt(1,1), Xt(1,2), round(scores));
-[maxscore, scores, predictTime] = myModel.loss(Xt(2,:));
+[scores, ~] = myModel.loss(X(:,:,:,2));
 fprintf('%d XOR %d = %d\n',Xt(2,1), Xt(2,2), round(scores));
-[maxscore, scores, predictTime] = myModel.loss(Xt(3,:));
+[scores, ~] = myModel.loss(X(:,:,:,3));
 fprintf('%d XOR %d = %d\n',Xt(3,1), Xt(3,2), round(scores));
-[maxscore, scores, predictTime] = myModel.loss(Xt(4,:));
+[scores, ~] = myModel.loss(X(:,:,:,4));
 fprintf('%d XOR %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
 

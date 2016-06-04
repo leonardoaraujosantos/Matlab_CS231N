@@ -3,32 +3,52 @@ classdef DeepLearningModel < handle
     %   Detailed explanation goes here
     
     properties
-        layers  
+        layers
         lossFunction
     end
     
     methods
         function [obj] = DeepLearningModel(layers)
-            obj.layers = layers;                  
-            obj.inititializeWeights();            
+            obj.layers = layers;
+            obj.inititializeWeights();
         end
         
         function numLayers = getNumLayersWithWeight(obj)
             numLayers = 0;
             for idxLayer=1:obj.layers.getNumLayers
-                currLayer = obj.layers.getLayer(idxLayer);  
+                currLayer = obj.layers.getLayer(idxLayer);
                 if ~isempty(currLayer.weights)
                     numLayers = numLayers + 1;
-                end                
+                end
+            end
+        end
+        
+        function params = getModelParameters(obj)
+            params = {};
+            for idxLayer=1:obj.layers.getNumLayers
+                currLayer = obj.layers.getLayer(idxLayer);
+                if ~isempty(currLayer.weights)
+                    params{idxLayer} = {currLayer.weights,currLayer.biasWeights};
+                end
+            end
+        end
+        
+        function setModelParams(obj,params)
+            for idxLayer=1:obj.layers.getNumLayers
+                currLayer = obj.layers.getLayer(idxLayer);
+                if ~isempty(currLayer.weights)
+                    paramsLayer = params{idxLayer};
+                    currLayer.weights = paramsLayer{1};
+                    currLayer.biasWeights = paramsLayer{2};
+                end
             end
         end
         
         % Can be used to predict or during training
-        function [maxscore, scores, timeElapsed] = loss(obj, X_vec, varargin)
-            maxscore = 0;
+        function [scores, grads] = loss(obj, X_vec, varargin)
             isTraining = 0;
             scores = 0;
-            timeElapsed = 0;
+            grads = {};
             
             % More than 2 parameters given, so we're o trainning
             if nargin > 2
@@ -38,11 +58,11 @@ classdef DeepLearningModel < handle
                 isTraining = 0;
             end
             
-            % Iterate on all layers after the input layer            
-            inLayer = obj.layers.getLayer(1);             
+            % Iterate on all layers after the input layer
+            inLayer = obj.layers.getLayer(1);
             inLayer.setActivations(X_vec);
             for idxLayer=1:obj.layers.getNumLayers
-                currLayer = obj.layers.getLayer(idxLayer);                                
+                currLayer = obj.layers.getLayer(idxLayer);
                 activations = currLayer.getActivations;
                 % Get next layer if available
                 if (idxLayer+1) <= obj.layers.getNumLayers
@@ -53,7 +73,7 @@ classdef DeepLearningModel < handle
             lastLayerIndex = obj.layers.getNumLayers;
             scores = obj.layers.getLayer(lastLayerIndex).activations;
             if ~isTraining
-               return; 
+                return;
             else
                 % If we're on trainning we should calculate the loss and
                 % the whole backpropagation(Get dW and dB for every layer)
@@ -61,16 +81,23 @@ classdef DeepLearningModel < handle
                 
                 for idxLayer=obj.layers.getNumLayers:-1:2
                     curLayer = obj.layers.getLayer(idxLayer);
-                    1+1;
+                    if isempty(curLayer.weights)
+                        % Layer with no weights
+                        dout = curLayer.backPropagate(dout);
+                    else
+                        % Layers with weights
+                        [dout, dw, db] = curLayer.backPropagate(dout);
+                        grads{idxLayer} = {dw,db};
+                    end;
                 end
             end
-        end        
+        end
     end
     
     methods (Access = 'private')
         %% Set the height and bias of all weights
         % Notice that not all layers have weights/bias
-        function inititializeWeights(obj)            
+        function inititializeWeights(obj)
             countWeights = 1;
             
             % Iterate on all layers after the input layer
@@ -81,16 +108,16 @@ classdef DeepLearningModel < handle
                     % Look back for layers that have parameters
                     for idxBackLayer=(idxLayer-1):-1:1
                         backLayer = obj.layers.getLayer(idxBackLayer);
-                        if backLayer.typeLayer == LayerType.InnerProduct || backLayer.typeLayer == LayerType.Input                            
+                        if backLayer.typeLayer == LayerType.InnerProduct || backLayer.typeLayer == LayerType.Input
                             sizePrevVector = backLayer.numOutputs;
                             break;
                         end
                     end
                     
-                    curLayer.weights = rand(sizePrevVector,curLayer.numOutputs);                    
+                    curLayer.weights = rand(sizePrevVector,curLayer.numOutputs);
                     curLayer.biasWeights = rand(1,curLayer.numOutputs);
                     countWeights = countWeights + 1;
-                end                
+                end
             end
         end
     end

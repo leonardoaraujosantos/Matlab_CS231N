@@ -126,7 +126,10 @@ fpMat = InnerProductLayer(1);
 x_perm_mat = permute(x,[3,2,1]);
 fpOutMatFP = fpMat.feedForward(x_perm_mat,w,b);
 [mat_dx,mat_dw,mat_db] = fpMat.backPropagate(dout);
-%mat_dx = permute(mat_dx,[ndims(mat_dx):-1:1]);
+
+% Permute to make on the same dimensions of python for comparison
+mat_dx = permute(mat_dx,[ndims(mat_dx):-1:1]);
+
 disp('Calculated on matlab dx');
 error_dx = abs(mat_dx - dx);
 error_dw = abs(mat_dw - dw);
@@ -138,6 +141,7 @@ error_db = sum(error_db(:));
 
 if (error_dx > 1e-8) || (error_dw > 1e-8) || (error_db > 1e-8)
     fprintf('Matlab (FullyConnected BP) calculation is wrong\n');
+    fprintf('Errors dx=%d,dw=%d,db=%d\n',error_dx,error_dw,error_db);
 else
     fprintf('Matlab (FullyConnected BP) calculation is right\n');
 end

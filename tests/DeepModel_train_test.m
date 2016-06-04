@@ -23,7 +23,7 @@ rng(0,'v5uniform');
 numClasses = 1;
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',1,'cols',2,'depth',1);
-layers <= struct('type',LayerType.InnerProduct, 'numOutputs',2);
+layers <= struct('type',LayerType.InnerProduct, 'numOutputs',3);
 layers <= struct('type',LayerType.Sigmoid);
 layers <= struct('type',LayerType.InnerProduct, 'numOutputs',numClasses);
 layers <= struct('type',LayerType.Sigmoid);
@@ -39,11 +39,14 @@ myModel = DeepLearningModel(layers);
 myModel.lossFunction = lossFunction;
 
 optimizer = Optimizer();
-optimizer.configs.learning_rate = 0.1;
+optimizer.configs.learning_rate = 0.001;
 optimizer.configs.momentum = 0.9;
 solver = Solver(myModel, optimizer, {X, Y, X, Y});
 solver.batchSize = 4;
 solver.num_epochs = 2000;
+%solver.learn_rate_decay=0.99;
+solver.verbose = 0;
+solver.print_every = 100;
 solver.train();
 
 [scores, ~] = myModel.loss(X(:,:,:,1));
@@ -54,4 +57,6 @@ fprintf('%d XOR %d = %d\n',Xt(2,1), Xt(2,2), round(scores));
 fprintf('%d XOR %d = %d\n',Xt(3,1), Xt(3,2), round(scores));
 [scores, ~] = myModel.loss(X(:,:,:,4));
 fprintf('%d XOR %d = %d\n',Xt(4,1), Xt(4,2), round(scores));
+
+plot(solver.lossVector(2:end));
 

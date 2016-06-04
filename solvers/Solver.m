@@ -46,7 +46,7 @@ classdef Solver < handle
             Y_batch = obj.Y_train(batch_mask,:);
             
             % Compute the loss and gradient
-            [loss, grads] = obj.model.loss(X_batch, Y_batch);
+            [~,grads,loss] = obj.model.loss(X_batch, Y_batch);
             obj.lossVector =[obj.lossVector; loss];
             
             % Perform a parameter update, for every
@@ -182,7 +182,7 @@ classdef Solver < handle
                 end
             end
             % At the end of training swap the best params into the model
-            obj.model.setModelParams(obj.bestParameters);            
+            %obj.model.setModelParams(obj.bestParameters);            
         end
         
         function setValidation(obj)

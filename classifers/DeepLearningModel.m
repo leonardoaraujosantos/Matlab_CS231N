@@ -45,7 +45,7 @@ classdef DeepLearningModel < handle
         end
         
         % Can be used to predict or during training
-        function [scores, grads] = loss(obj, X_vec, varargin)
+        function [scores, grads, computedLoss] = loss(obj, X_vec, varargin)
             isTraining = 0;
             scores = 0;
             grads = {};
@@ -77,7 +77,7 @@ classdef DeepLearningModel < handle
             else
                 % If we're on trainning we should calculate the loss and
                 % the whole backpropagation(Get dW and dB for every layer)
-                [loss, dout] = obj.lossFunction.getLoss(scores,Y_vec);
+                [computedLoss, dout] = obj.lossFunction.getLoss(scores,Y_vec);
                 
                 for idxLayer=obj.layers.getNumLayers:-1:2
                     curLayer = obj.layers.getLayer(idxLayer);

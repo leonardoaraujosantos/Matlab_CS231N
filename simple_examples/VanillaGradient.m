@@ -16,14 +16,16 @@ crit_pts = solve(deriv_f_w);
 pretty(round(crit_pts));
 
 % Initial weight value
-weight = -2;
+weight = -1.5;
 
 % Step size
-step = 0.01;
+step = 0.001;
 
 % Plot function
+filename = 'gradDescentAnim.gif';
+figure(1);
 fplot(matlabFunction(L_w),[-2 3.5]);
-title('Plot function and critical points (minimas,maximas) if available');
+title('L(w)=w^4-3w^3+2');
 hold on
 plot(double(crit_pts), double(subs(L_w,crit_pts)),'ro');
 text(0,5,'Local minima');
@@ -36,16 +38,25 @@ hold off
 axis manual
 
 % Gradient descent
-for iters=1:500
-    % Get gradient by evaluating derivative of Loss related to W
+for iters=1:100
+    %% Get gradient by evaluating derivative of Loss related to W    
     weight_grad = f_derivative(weight);
     weight = weight - (step*weight_grad);
-        
+    
     % Animate dot
     redDot.XData = weight;
     redDot.YData = L_w_mat(weight);
     drawnow limitrate
-    %pause(0.3)
+        
+    % Create animated gif
+    frame = getframe(1);
+    im = frame2im(frame);
+    [imind,cm] = rgb2ind(im,256);
+    if iters == 1;
+        imwrite(imind,cm,filename,'gif', 'Loopcount',inf);
+    else
+        imwrite(imind,cm,filename,'gif','WriteMode','append');
+    end
 end
 
 hold off;

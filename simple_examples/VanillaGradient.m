@@ -19,7 +19,7 @@ pretty(round(crit_pts));
 weight = -1.5;
 
 % Step size
-step = 0.001;
+step = 0.0001;
 
 % Plot function
 filename = 'gradDescentAnim.gif';
@@ -38,7 +38,7 @@ hold off
 axis manual
 
 % Gradient descent
-for iters=1:100
+for iters=1:20
     %% Get gradient by evaluating derivative of Loss related to W    
     weight_grad = f_derivative(weight);
     weight = weight - (step*weight_grad);
@@ -57,6 +57,9 @@ for iters=1:100
     else
         imwrite(imind,cm,filename,'gif','WriteMode','append');
     end
+    
+    % Just to make the animation more interesting
+    step = step * 1.5;
 end
 
 hold off;

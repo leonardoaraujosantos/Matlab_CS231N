@@ -57,6 +57,15 @@ classdef SystemCapabilitiesExplorer < handle
             numWorkers = obj.localCluster.NumWorkers;
         end
         
+        function numWorkers = getNumCurrentWorkers(obj)
+            p = gcp('nocreate');
+            if isempty(p)
+                numWorkers = 0;
+            else
+                numWorkers = p.NumWorkers;
+            end
+        end
+        
         function osDescription = getOsInfo(obj)
             osDescription = obj.operationSystemDesc;
         end

@@ -1,14 +1,17 @@
 function [ filenames ] = getFilenamesFromDirectory( input_args )
 % Get all filenames from a particular directory
 filenames = {};
-if (isunix) %# Linux, mac
-    [~, result] = system( ['find ', input_args, ' -type f'] );
-    result = strsplit(result);
-    filenames = result;        
-elseif (ispc) %# Windows
-    % TODO
-    % type c:\windows\win.ini | find /c /v "~~~"
+result = dir(input_args);
+szResult = numel(result);
+countFiles = 1;
+for idxRes=1:szResult
+   if result(idxRes).isdir == 0
+       filenames{countFiles} = [input_args, '/', result(idxRes).name];
+       countFiles = countFiles + 1;
+   end
 end
+
+
 
 end
 

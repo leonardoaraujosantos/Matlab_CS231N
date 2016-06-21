@@ -4,6 +4,7 @@ function [ meanImage ] = getMeanImageOnBatch( imgBatch )
 % (Height)x(Width)x(channels)x(batchSize), example 10 images
 % 320x240(Width x Height) will be 240x320x3x10, remember tha on
 % matlab/numpy matrices are (rowsXcols)
+% This will only work if all images on the batch has same size
 dimsBatch = size(imgBatch);
 numImagesBatch = dimsBatch(4);
 meanImage = (zeros(dimsBatch(1:3)));

@@ -1,8 +1,9 @@
 %% Convolution n dimensions
 % The following code is just a extension of conv2d_vanila for n dimensions.
 % Parameters:
-% K: kernel
-% S: stride
+% Input: H x W x depth
+% K: kernel F x F x depth
+% S: stride (How many pixels he window will slide on the input)
 % This implementation is like the 'valid' parameter on normal convolution
 
 function outConv = convn_vanilla(input, kernel, S)
@@ -21,7 +22,9 @@ sizeRowsOut = ((rowsIn-F)/S) + 1;
 sizeColsOut = ((colsIn-F)/S) + 1;
 outConvAcc = zeros(sizeRowsOut , sizeColsOut, depthInput);
 
-% Convolve each channel on the input with it's respective kernel channel
+%% Do the convolution
+% Convolve each channel on the input with it's respective kernel channel,
+% at the end sum all the channel results.
 for depth=1:depthInput
     % Select input and kernel current channel
     inputCurrDepth = input(:,:,depth);

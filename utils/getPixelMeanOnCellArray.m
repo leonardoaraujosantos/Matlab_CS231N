@@ -15,9 +15,9 @@ for idxImg = 1:numImagesBatch
         allGreenChannels = img(:,:,2);
         allBlueChannels = img(:,:,3);
 
-        meanR(idxImg) = mean(allRedChannels(:));
-        meanG(idxImg) = mean(allGreenChannels(:));
-        meanB(idxImg) = mean(allBlueChannels(:));
+        meanR(idxImg) = mean2(allRedChannels);
+        meanG(idxImg) = mean2(allGreenChannels);
+        meanB(idxImg) = mean2(allBlueChannels);
     else
         % Grayscale image        
         meanIntensity = mean(img(:));

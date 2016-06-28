@@ -38,8 +38,10 @@ classdef ConvolutionalLayer < BaseLayer
             [H, W, C, N] = size(activations);
             [HH, WW, C, F] = size(theta);
             
+            % Calculate output size, and allocate result
             size_out_H = ((H + (2*obj.numPad) - HH) / obj.stepStride) + 1;
             size_out_W = ((W + (2*obj.numPad) - WW) / obj.stepStride) + 1;
+            result = zeros(size_out_H,size_out_W,N,F);
             
             % Save the previous inputs for use later on backpropagation
             obj.previousInput = activations;
@@ -51,14 +53,18 @@ classdef ConvolutionalLayer < BaseLayer
                 activations = padarray(activations,[obj.numPad obj.numPad 0 0]);
             end
             
-            result = zeros(size_out_H,size_out_W,N,F);
-            
+            % Convolve for each input/output depth
             for idxInputDepth=1:N
                 for idxOutputDepth=1:F
+                    
+                    % Select weights and inputs
                     weights = theta(:,:,:,idxOutputDepth);
                     input = activations(:,:,:,idxInputDepth);
+                    
+                    % Do naive(slow) convolution)
                     resConv = convn_vanilla(input,weights,obj.stepStride);
                     
+                    % Add bias and store
                     result(:,:,idxInputDepth,idxOutputDepth) = resConv + biasWeights(idxOutputDepth);
                 end
             end

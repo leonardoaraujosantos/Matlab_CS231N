@@ -1,5 +1,46 @@
 import numpy as np
 
+def relu_backward(dout, cache):
+  """
+  Computes the backard pass for ReLU
+  Input:
+  - dout: Upstream derivatives, of any shape
+  - cache: Previous input (used on forward propagation)
+
+  Returns:
+  - dx: Gradient with respect to x
+  """
+
+  # Inititalize dx with None and x with cache
+  dx, x = None, cache
+
+  # Make all positive elements in x equal to dout while all the other elements
+  # Become zero
+  dx = dout * (x >= 0)
+
+  # Return dx (gradient with respect to x)
+  return dx
+
+def relu_forward(x):
+  """
+  Computes the forward pass for ReLU
+  Input:
+  - x: Inputs, of any shape
+
+  Returns a tuple of: (out, cache)
+  The shape on the output is the same as the input
+  """
+  out = None
+
+  # Create a function that receive x and return x if x is bigger
+  # than zero, or zero if x is negative
+  relu = lambda x: x * (x > 0).astype(float)
+  out = relu(x)
+
+  # Cache input and return outputs
+  cache = x
+  return out, cache
+
 def fc_forward(x,w,b):
     """
     Computes the forward pass for an affine (fully-connected) layer.
@@ -176,3 +217,88 @@ def conv_backward_naive(dout, cache):
     db[depth] = np.sum(dout[:, depth, :, :])
 
   return dx, dw, db
+
+def max_pool_forward_naive(x, pool_param):
+  """
+  Compute the forward propagation of max pooling (naive way)
+  Inputs:
+  - x: 4d Input tensor , of shape (N, C, H, W)
+  - pool_param: dictionary with the following keys:
+    - 'pool_heigh/widtht': Sliding window height/width
+    - 'stride': Sliding moving distance
+  N: Mini-batch size
+  C: Input depth (ie 3 for RGB images)
+  H/W: Image height/width
+  HH/WW: Kernel Height/Width
+
+  Returns a tuple of: (out, cache)
+  """
+  # Get input tensor and parameter data
+  N, C, H, W = x.shape
+  S = pool_param["stride"]
+  # Consider H_P and W_P as the sliding window height and width
+  H_P = pool_param["pool_height"]
+  W_P = pool_param["pool_width"]
+
+  # Calculate output size
+  out = None
+  HH = 1 + (H - H_P) / S
+  WW = 1 + (W - W_P) / S
+  out = np.zeros((N,C,HH,WW))
+
+  # Calculate output (Both for loops do the same thing ....)
+  #for n in xrange(N): # For each element on batch
+    #for depth in xrange(C): # For each input depth
+      #for r in xrange(HH): # Slide vertically
+        #for c in xrange(WW): # Slide horizontally
+          # Get biggest element on the window
+          #out[n,depth,r,c] = np.max(x[n,depth,r*S:r*S+H_P,c*S:c*S+W_P])
+
+  # Calculate output
+  for n in xrange(N): # For each element on batch
+    for depth in xrange(C): # For each input depth
+      for r in xrange(0,H,S): # Slide vertically taking stride into account
+        for c in xrange(0,W,S): # Slide horizontally taking stride into account
+          # Get biggest element on the window
+          out[n,depth,r/S,c/S] = np.max(x[n,depth,r:r+H_P,c:c+W_P])
+
+  # Return output and save inputs and paramters to cache
+  cache = (x, pool_param)
+  return out, cache
+
+def max_pool_backward_naive(dout, cache):
+  """
+  Compute the backward propagation of max pooling (naive way)
+  Inputs:
+  - dout: Upstream derivatives, same size as cached x
+  - cache: A tuple of (x, pool_param) as in the forward pass.
+  Returns:
+  - dx: Gradient with respect to x
+  """
+  # Get data back from cache
+  x, pool_param = cache
+
+  # Get input tensor and parameter
+  N, C, H, W = x.shape
+  S = pool_param["stride"]
+  H_P = pool_param["pool_height"]
+  W_P = pool_param["pool_width"]
+  N,C,HH,WW = dout.shape
+
+  # Inititalize dx
+  dx = None
+  dx = np.zeros(x.shape)
+
+  # Calculate dx (mask * dout)
+  for n in xrange(N): # For each element on batch
+    for depth in xrange(C): # For each input depth
+      for r in xrange(HH): # Slide vertically (use stride on the fly)
+        for c in xrange(WW): # Slide horizontally (use stride on the fly)
+          # Get window and calculate the mask
+          x_pool = x[n,depth,r*S:r*S+H_P,c*S:c*S+W_P]
+          mask = (x_pool == np.max(x_pool))
+          # Calculate mask*dout
+          dx[n,depth,r*S:r*S+H_P,c*S:c*S+W_P] = mask*dout[n,depth,r,c]
+
+  # Return dx
+  return dx

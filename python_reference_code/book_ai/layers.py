@@ -1,5 +1,197 @@
 import numpy as np
 
+def batchnorm_backward(dout, cache):
+  """
+  Backward pass for batch normalization (Use on FC layers).
+  Use computation graph to guide the backward propagation!
+  Inputs:
+  - dout: Upstream derivatives, of shape (N, D)
+  - cache: Variable of intermediates from batchnorm_forward.
+
+  Returns a tuple of: (dx(N,D), dgamma(D), dbeta(D))
+  """
+  dx, dgamma, dbeta = None, None, None
+
+  # http://cthorey.github.io./backpropagation/
+  mu, xmu, carre, var, sqrtvar, invvar, va2, va3, gamma, beta, x, bn_param = cache
+  eps = bn_param.get('eps', 1e-5)
+  N, D = dout.shape
+
+  # Backprop Step 9
+  dva3 = dout
+  dbeta = np.sum(dout, axis=0)
+  # Backprop step 8
+  dva2 = gamma * dva3
+  dgamma = np.sum(va2 * dva3, axis=0)
+  # Backprop step 7
+  dxmu = invvar * dva2
+  dinvvar = np.sum(xmu * dva2, axis=0)
+  # Backprop step 6
+  dsqrtvar = -1. / (sqrtvar**2) * dinvvar
+  # Backprop step 5
+  dvar = 0.5 * (var + eps)**(-0.5) * dsqrtvar
+  # Backprop step 4
+  dcarre = 1 / float(N) * np.ones((carre.shape)) * dvar
+  # Backprop step 3
+  dxmu += 2 * xmu * dcarre
+  # Backprop step 2
+  dx = dxmu
+  dmu = - np.sum(dxmu, axis=0)
+  # Basckprop step 1
+  dx += 1 / float(N) * np.ones((dxmu.shape)) * dmu
+
+  return dx, dgamma, dbeta
+
+def batchnorm_forward(x, gamma, beta, bn_param):
+  """
+  Forward pass for batch normalization (Use on FC layers).
+  Input:
+  - x: Data of shape (N, D)
+  - gamma,beta: Scale/Shift parameter of shape (D,)
+  - bn_param: Dictionary with the following keys: (mode,eps,momentum,r_mean/var)
+  Returns a tuple of: (out, cache)
+  """
+  mode = bn_param['mode']
+  eps = bn_param.get('eps', 1e-5)
+  momentum = bn_param.get('momentum', 0.9)
+
+  N, D = x.shape
+  running_mean = bn_param.get('running_mean', np.zeros(D, dtype=x.dtype))
+  running_var = bn_param.get('running_var', np.zeros(D, dtype=x.dtype))
+
+  out, cache = None, None
+  if mode == 'train':
+    # Forward pass
+    # Step 1: Calculate mean
+    mu = 1 / float(N) * np.sum(x, axis=0)
+    # Step 2: Subtract the mean of every training sample
+    xmu = x - mu
+    # Step 3 - Calculate denominator
+    carre = xmu**2
+    # Step 4 - Calculate variance
+    var = 1 / float(N) * np.sum(carre, axis=0)
+    # Step 5 - Add eps for numerical stability then get square root
+    sqrtvar = np.sqrt(var + eps)
+    # Step 6 - Invert square root
+    invvar = 1. / sqrtvar
+    # Step 7 - Calculate normalization
+    va2 = xmu * invvar
+    # Step 8 - Calculate
+    va3 = gamma * va2
+    # Step 9 - Shape out (N,D)
+    out = va3 + beta
+
+    # Calculate running mean and variance to be used on prediction
+    running_mean = momentum * running_mean + (1.0 - momentum) * mu
+    running_var = momentum * running_var + (1.0 - momentum) * var
+    # Store values
+    cache = (mu, xmu, carre, var, sqrtvar, invvar,
+             va2, va3, gamma, beta, x, bn_param)
+  elif mode == 'test':
+    # On prediction get the running mean/variance
+    running_mean =  bn_param['running_mean']
+    running_var  =  bn_param['running_var']
+    xbar = (x - running_mean)/np.sqrt(running_var+eps)
+    out = gamma*xbar + beta
+    cache = (x, xbar, gamma, beta, eps)
+  else:
+    raise ValueError('Invalid forward batchnorm mode "%s"' % mode)
+  # Save updated running mean/variance
+  bn_param['running_mean'] = running_mean
+  bn_param['running_var'] = running_var
+  # Return outputs
+  return out, cache
+
+def dropout_backward(dout, cache):
+  """
+  Perform the backward pass for (inverted) dropout.
+  Inputs:
+  - dout: Upstream derivatives, of any shape
+  - cache: (dropout_param, mask) from dropout_forward.
+  """
+  # Recover dropout parameters (p, mask , mode) from cache
+  dropout_param, mask = cache
+  mode = dropout_param['mode']
+
+  dx = None
+  # Back propagate (Dropout layer has no parameters just input X)
+  if mode == 'train':
+    # Just back propagate dout from the neurons that were used during dropout
+    dx = dout * mask
+  elif mode == 'test':
+    # Disable dropout during prediction/test
+    dx = dout
+
+  # Return dx
+  return dx
+
+def dropout_forward(x, dropout_param):
+  """
+  Performs the forward pass for (inverted) dropout.
+  Inputs:
+  - x: Input data, of any shape
+  - dropout_param: A dictionary with the following keys: (p,test/train,seed)
+  Outputs: (out, cache)
+  """
+  # Get the current dropout mode, p, and seed
+  p, mode = dropout_param['p'], dropout_param['mode']
+  if 'seed' in dropout_param:
+    np.random.seed(dropout_param['seed'])
+
+  # Inititalization of outputs and mask
+  mask = None
+  out = None
+
+  if mode == 'train':
+    # Create an apply mask (normally p=0.5 for half of neurons), we scale all
+    # by p to avoid having to multiply by p on backpropagation, this is called
+    # inverted dropout
+    mask = (np.random.rand(*x.shape) < p) / p
+    # Apply mask
+    out = x * mask
+  elif mode == 'test':
+    # During prediction no mask is used
+    mask = None
+    out = x
+
+  # Save mask and dropout parameters for backpropagation
+  cache = (dropout_param, mask)
+
+  # Convert "out" type and return output and cache
+  out = out.astype(x.dtype, copy=False)
+  return out, cache
+
+
+def softmax_loss(x, y):
+  """
+  Computes the loss and gradient for softmax classification.
+  Inputs:
+  - x: Input Scores (predicted scores from the model) shape (N,Cl)
+  - y: Correct scores (Training set correct labels) shape (N,)
+  N: Batch size
+  Cl: number of classes
+  Returns a tuple of: (loss, dout)
+  """
+  # Just fix numerical instability
+  probs = np.exp(x - np.max(x, axis=1, keepdims=True))
+  # Get probabilities and normalize
+  probs /= np.sum(probs, axis=1, keepdims=True)
+
+  # N will be the batch size
+  N = x.shape[0]
+
+  # Calculate loss
+  loss = -np.sum(np.log(probs[np.arange(N), y])) / N
+
+  # Calculate dout gradient (How loss change with respect to x)
+  dout_x = probs.copy()
+  dout_x[np.arange(N), y] -= 1
+  # Scale gradient with relation to N
+  dout_x /= N
+
+  # Return loss and dout (Loss gradient with respect to x)
+  return loss, dout_x
+
 def relu_backward(dout, cache):
   """
   Computes the backard pass for ReLU

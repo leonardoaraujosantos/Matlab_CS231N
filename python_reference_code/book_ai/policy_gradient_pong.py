@@ -17,6 +17,7 @@ def display_W1(model,H):
         plt.imsave(neuronFileName, neuron, format='png')
         plt.show()
 
+# Save pre-processed input image
 def saveInput(I,conter):
     plt.imshow(I.reshape(80,80))
     imageFilename = 'inDiff_%d' % conter
@@ -67,6 +68,7 @@ grad_buffer = { k : np.zeros_like(v) for k,v in model.iteritems() }
 # rmsprop memory
 rmsprop_cache = { k : np.zeros_like(v) for k,v in model.iteritems() }
 
+# Used at the end of neural network to convert scores to probability
 def sigmoid(x):
     # sigmoid "squashing" function to interval [0,1]
     return 1.0 / (1.0 + np.exp(-x))
@@ -82,6 +84,7 @@ def prepro(I):
     # Convert to 1d(ravel) row-wise
     return I.astype(np.float).ravel()
 
+# Gives a preference to fast rewards, by discounting old rewards values
 def discount_rewards(r):
     """ take 1D float array of rewards and compute discounted reward """
     discounted_r = np.zeros_like(r)
@@ -131,7 +134,7 @@ observation = gameEnviroment.reset()
 
 # Initialize variables
 prev_x = None
-inputs_vector,hidden_vector,dlogps,reward_vector = [],[],[],[]
+inputs_vector,hidden_vector,error_vector,reward_vector = [],[],[],[]
 running_reward = None
 reward_sum = 0
 episode_number = 0
@@ -176,14 +179,16 @@ while True:
     # know yet if the action was good/bad
     y = 1 if action == 2 else 0 # a "fake label"
 
-    # grad that encourages the action that was taken to be
-    # taken see:
+    # Loss error used for regression problems
     # http://cs231n.github.io/neural-networks-2/#losses
-    # We don't know yet if this action was good... (We need to wait the reward)
-    dlogps.append(y - action_UP_prob)
+    # At this point we don't know if this error was good (positive reward) or
+    # bad(negative reward), we need to wait for the reward(-1,0,1) to modulate
+    # this error and force the action to be executed or not
+    error_vector.append(y - action_UP_prob)
 
-    # step the environment and get new measurements
+    # step the environment and get measurements (including rewards)
     # Reward will be +1 if ball passed oponent size, -1 if passed your side
+    # Reward and utility are the same thing
     observation, reward, done, info = gameEnviroment.step(action)
     reward_sum += reward
 
@@ -199,10 +204,10 @@ while True:
         # and rewards for this episode vertically (row-wise)
         batch_x = np.vstack(inputs_vector)
         batch_hidden_act = np.vstack(hidden_vector)
-        batch_prob_grad = np.vstack(dlogps)
+        batch_prob_grad = np.vstack(error_vector)
         batch_rewards = np.vstack(reward_vector)
         # reset arrays for next episodes
-        inputs_vector,hidden_vector,dlogps,reward_vector = [],[],[],[]
+        inputs_vector,hidden_vector,error_vector,reward_vector = [],[],[],[]
 
         # compute the discounted reward backwards through time, this is done
         # to have preference to faster rewards, with this long rewards has less
@@ -210,12 +215,10 @@ while True:
         discounted_batch_rewards = discount_rewards(batch_rewards)
 
         # standardize the rewards to be unit normal
-        # (helps control the gradient estimator variance)
         discounted_batch_rewards -= np.mean(discounted_batch_rewards)
         discounted_batch_rewards /= np.std(discounted_batch_rewards)
 
-        # Multiply the action gradient (1) by some possible reward (0,+1,-1),
-        # this will modulate the gradient and make the current choice more/less
+        # This will modulate the gradient and make the current choice more/less
         # likely to happen on the future
         batch_prob_grad *= discounted_batch_rewards
 
@@ -234,7 +237,7 @@ while True:
                 model[k] += learn_rate * g / (np.sqrt(rmsprop_cache[k]) + 1e-5)
                 grad_buffer[k] = np.zeros_like(v) # reset batch gradient buffer
 
-        # boring book-keeping
+        # Consider the "runnig_reward" as out utility that must be maximized
         running_reward = reward_sum if running_reward is None else \
             running_reward * 0.99 + reward_sum * 0.01
         print 'resetting game. episode reward total was %f. running mean: %f' \
@@ -251,7 +254,7 @@ while True:
         prev_x = None
         frameNumber = 0
 
-    # Pong has either +1 or -1 reward exactly when game ends.
+    # Game finished (not the episode...) Possible rewards at this point (+1,-1)
     if reward != 0:
         print ('ep %d: game finished, reward: %f' % (episode_number, reward)) \
             + ('' if reward == -1 else ' !!!!!!!!')

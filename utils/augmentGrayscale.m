@@ -51,7 +51,7 @@ while ischar(lineFile)
     [pathstr,name,ext] = fileparts(fileNameSample);
     name = [name '_gray'];
     fileNameSample_new = [pathstr filesep name ext];
-    imwrite(img, fileNameSample_new);
+    imwrite(img_grayed, fileNameSample_new);
     
     % Just display progress....
     contFiles = contFiles + 1;

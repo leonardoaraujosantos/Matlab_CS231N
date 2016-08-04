@@ -89,10 +89,12 @@ classdef Transforms < handle
             G = imageIn(:,:,2);
             B = imageIn(:,:,3);
             
+            % Get mean
             R_mean = mean2(R);
             G_mean = mean2(G);
             B_mean = mean2(B);
             
+            % Get standard deviation
             R_std = std2(R);
             G_std = std2(G);
             B_std = std2(B);
@@ -104,15 +106,34 @@ classdef Transforms < handle
             normalizedImg(:,:,3) = (double(B) - B_mean) / B_std;
         end
         
+        function [chImg] = changeLumination(obj, imageIn)
+            % The cie lab color space has better control for illumination
+            % than HSL/HSV (But slower to compute)
+            lab_image = rgb2lab(imageIn);
+            
+            channel = 1;
+            
+            meanValue = mean2(lab_image(:,:,channel));            
+            
+            % Change value for illumination            
+            lab_image(:,:,channel) = lab_image(:,:,channel) + randi([int32(-meanValue),int32(meanValue)]);
+            
+            chImg = lab2rgb(lab_image);
+        end
+        
         function [colorJitImg] = colorJittering(obj, imageIn)
-            % Channel to jitter (one at a time)
-            channel = randi([1 3]);
+            % Channel to jitter (one at a time, or all of them)
+            channel = randi([1 4]);
             
             % Use a random value bigger than 0.4 but less then 1
             randVal = 0.4 + rand();
             if randVal > 1
                 randVal = 1;
             end
+            
+            randVal_R = 0.4 + rand(); randVal_R(randVal_R>1)=1;
+            randVal_G = 0.4 + rand(); randVal_G(randVal_G>1)=1;
+            randVal_B = 0.4 + rand(); randVal_B(randVal_B>1)=1;
             switch channel
                 case 1
                     colorJitImg = imadjust(imageIn,[0 0 0; randVal 1 1],[]);
@@ -120,16 +141,13 @@ classdef Transforms < handle
                     colorJitImg = imadjust(imageIn,[0 0 0; 1 randVal 1],[]);
                 case 3
                     colorJitImg = imadjust(imageIn,[0 0 0; 1 1 randVal],[]);
+                case 4
+                    colorJitImg = imadjust(imageIn,[0 0 0; randVal_R randVal_G randVal_B],[]);
             end
         end
         
         function [rotImages] = addRotation(obj, imageIn)
-            % Get 10 random rotations from -8 .. 8
-            rotImages = zeros([size(imageIn),10]);
-            for idxImages=1:10
-                img = imrotate(imageIn,randi([-8 8]),'crop');
-                rotImages(:,:,:,idxImages) = img;
-            end
+            rotImages = imrotate(imageIn,randi([-8 8]),'crop');
         end
         
         function [noiseImg] = addPeperNoise(obj, imageIn)

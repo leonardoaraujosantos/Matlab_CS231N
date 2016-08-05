@@ -1,4 +1,4 @@
-classdef Transforms < handle
+classdef TransformBatch < handle
     %AUGMENTIMAGE Class used to create augmented images for trainning
     
     properties
@@ -158,17 +158,34 @@ classdef Transforms < handle
         % to implement the Alexnet Pca color augmentation.
         function [eigVec, eigVal] = getPcaBatch(obj, imgBatch)
             % Get a vector of each R,G,B channels from the batch
-            R_batch = imgBatch(:,:,1,:);
-            G_batch = imgBatch(:,:,2,:);
-            B_batch = imgBatch(:,:,3,:);
+            R_batch = single(imgBatch(:,:,1,:));
+            G_batch = single(imgBatch(:,:,2,:));
+            B_batch = single(imgBatch(:,:,3,:));
             
             % Transform each color batch into a 1d Vector
-            R_batch = R_batch(:);
-            G_batch = G_batch(:);
-            B_batch = B_batch(:);
+            R_batch = single(R_batch(:));
+            G_batch = single(G_batch(:));
+            B_batch = single(B_batch(:));
+            
+            % Normalize vectors
+%             R_batch = (R_batch - mean(R_batch)) / std(R_batch);
+%             G_batch = (G_batch - mean(G_batch)) / std(G_batch);
+%             B_batch = (B_batch - mean(B_batch)) / std(B_batch);
+             R_batch = R_batch / 255;
+             G_batch = G_batch / 255;
+             B_batch = B_batch / 255;
             
             % Create a (batchSize)x(3) matrix
-            RGB_matrix = single([R_batch, G_batch, B_batch]);
+            RGB_matrix = [R_batch, G_batch, B_batch];
+            
+            % Calculate the covariance matrix
+            m = size(RGB_matrix,1);
+            sigma = (1/m) * RGB_matrix' * RGB_matrix;
+            [U,S,V] = svd(sigma);
+            % Take the diagonals
+            eigVal = S(sub2ind(size(S),1:size(S,1),1:size(S,2)));
+            eigVal = eigVal';
+            eigVec = U;
             
             % Calculate the PCA of the formed RGB matrix, coeff is the
             % eigenvector of the covariance matrix and latent it's
@@ -180,7 +197,12 @@ classdef Transforms < handle
             eigVal = latent;                        
         end
         
-        function [newImg] = colorPcaAugmentation(obj, imageIn,eVec,eVal)
+        function [newImg] = colorPcaAugmentation(obj, imageIn,eVec,eVal)                        
+            % Normalize image
+            %imageIn = single(imageIn);
+            %imageIn = (imageIn - mean2(imageIn)) / std2(imageIn);
+            imageIn = im2single(imageIn);
+            
             alpha_1 =  randn;
             alpha_2 =  randn;
             alpha_3 =  randn;

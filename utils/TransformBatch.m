@@ -154,6 +154,45 @@ classdef Transforms < handle
             noiseImg = imnoise(imageIn,'gaussian', 0, 0.01 * rand());
         end
         
+        % Get the eigenVector and eigenValue of the covariance matrix
+        % to implement the Alexnet Pca color augmentation.
+        function [eigVec, eigVal] = getPcaBatch(obj, imgBatch)
+            % Get a vector of each R,G,B channels from the batch
+            R_batch = imgBatch(:,:,1,:);
+            G_batch = imgBatch(:,:,2,:);
+            B_batch = imgBatch(:,:,3,:);
+            
+            % Transform each color batch into a 1d Vector
+            R_batch = R_batch(:);
+            G_batch = G_batch(:);
+            B_batch = B_batch(:);
+            
+            % Create a (batchSize)x(3) matrix
+            RGB_matrix = single([R_batch, G_batch, B_batch]);
+            
+            % Calculate the PCA of the formed RGB matrix, coeff is the
+            % eigenvector of the covariance matrix and latent it's
+            % eigenvalues of the covariance matrix
+            % The PCA automatically preprocess the data...
+            [coeff,~,latent] = pca(RGB_matrix); 
+            
+            eigVec = coeff;
+            eigVal = latent;                        
+        end
+        
+        function [newImg] = colorPcaAugmentation(obj, imageIn,eVec,eVal)
+            alpha_1 =  randn;
+            alpha_2 =  randn;
+            alpha_3 =  randn;
+            
+            alpha_ = [eVal(1)*alpha_1;eVal(2)*alpha_2;eVal(3)*alpha_3]; 
+            pca_change = eVec*alpha_;
+            
+            newImg(:,:,1) = single(imageIn(:,:,1)) + pca_change(1);
+            newImg(:,:,2) = single(imageIn(:,:,2)) + pca_change(2);
+            newImg(:,:,3) = single(imageIn(:,:,3)) + pca_change(3);
+        end
+        
         function [barrelImg] = barrelDistortion(obj, imageIn)
             [nrows,ncols] = size(imageIn);
             [xi,yi] = meshgrid(1:ncols,1:nrows);

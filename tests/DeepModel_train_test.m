@@ -1,3 +1,4 @@
+%% NOT WORKING YET TRY TO SOLVE ON OTHER BRANCH
 %% Deep neural networks creation and training
 
 %% Test 2: Simple Multilayer layers XOR training (Relu)

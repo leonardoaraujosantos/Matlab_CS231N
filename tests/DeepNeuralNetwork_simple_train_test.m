@@ -325,7 +325,7 @@ layers <= struct('type',LayerType.Output,'numClasses',10,'ActivationType',Activa
 layers.showStructure();
 solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',0.05, 'numEpochs', 100, 'RegularizationL1',0.01));
 % Force a batch size
-solver.batch_size = 64;
+solver.batch_size = 10;
 % Get a loss function object to be used on the training
 lossFunction = SoftMaxLoss();
 nn = DeepNeuralNetwork(layers,solver,lossFunction);

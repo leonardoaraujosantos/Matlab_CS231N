@@ -16,12 +16,12 @@ rng(0,'v5uniform');
 
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
-layers <= struct('type',LayerType.FullyConnected,'numNeurons',20,'ActivationType',ActivationType.Sigmoid);
+layers <= struct('type',LayerType.FullyConnected,'numNeurons',3,'ActivationType',ActivationType.Sigmoid);
 layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',1, 'numEpochs', 2000, 'RegularizationL1',0.01));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',1, 'numEpochs', 1000, 'RegularizationL1',0.01));
 % Force a batch size
-solver.batch_size = 4;
+solver.batch_size = 1;
 % Get a loss function object to be used on the training
 lossFunction = CrossEntropy();
 nn = DeepNeuralNetwork(layers,solver,lossFunction);
@@ -87,7 +87,7 @@ rng(0,'v5uniform');
 
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
-layers <= struct('type',LayerType.FullyConnected,'numNeurons',3,'ActivationType',ActivationType.Relu);
+layers <= struct('type',LayerType.FullyConnected,'numNeurons',2,'ActivationType',ActivationType.Relu);
 layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();
 solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',2, 'numEpochs', 2000, 'RegularizationL1',0.01));

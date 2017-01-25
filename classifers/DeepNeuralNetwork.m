@@ -58,9 +58,8 @@ classdef (Sealed) DeepNeuralNetwork < BaseClassifer
                 % Calculate offset between expected output and the current
                 % output
                 if curLayer.getType == LayerType.Output
-                    % Calculate difference for output layer
-                    smallDelta{idxLayer} = (curLayer.getActivations - target);
-                    %smallDelta{idxLayer} = dL_dout;
+                    % Start with gradient of loss w.r.t correct class probability
+                    smallDelta{idxLayer} = dL_dout;
                 else
                     % Calculate difference for hidden layer
                     smallDelta{idxLayer} = (smallDelta{idxLayer+1} * (curLayer.weights)) .* curLayer.backPropagate();

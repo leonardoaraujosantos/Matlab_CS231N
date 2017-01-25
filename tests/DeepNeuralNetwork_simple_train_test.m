@@ -16,17 +16,20 @@ rng(0,'v5uniform');
 
 layers = LayerContainer;
 layers <= struct('type',LayerType.Input,'rows',2,'cols',1,'depth',1);
-layers <= struct('type',LayerType.FullyConnected,'numNeurons',3,'ActivationType',ActivationType.Sigmoid);
+layers <= struct('type',LayerType.FullyConnected,'numNeurons',2,'ActivationType',ActivationType.Sigmoid);
 layers <= struct('type',LayerType.Output,'numClasses',1,'ActivationType',ActivationType.Sigmoid);
 layers.showStructure();
-solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate',1, 'numEpochs', 1000, 'RegularizationL1',0.01));
+solver = SolverFactory.get(struct('type',SolverType.GradientDescent,'learningRate', 0.1, 'numEpochs', 1000, 'RegularizationL1',0.00));
 % Force a batch size
 solver.batch_size = 1;
 % Get a loss function object to be used on the training
 lossFunction = CrossEntropy();
 nn = DeepNeuralNetwork(layers,solver,lossFunction);
-%nn.layers.getLayer(1).weights = [-0.7690    0.6881   -0.2164; -0.0963    0.2379   -0.1385];
-%nn.layers.getLayer(2).weights = [-0.1433   -0.4840   -0.6903];
+
+% Fix a starting point (Initial weights) to compare different
+% implementation
+nn.layers.getLayer(1).weights = [0.7202    0.1709    0.6261; -0.4302   -0.0224    0.4194];
+nn.layers.getLayer(2).weights = [-0.0697   -0.7704    0.5143];
 
 fprintf('This neural network has %d parameters\n',nn.getNumParameters);
 
